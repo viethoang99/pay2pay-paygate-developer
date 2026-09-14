@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayGate - Cổng Thanh Toán Thông Minh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81' },
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- HEADER -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">Pay<span class="text-primary-600">Gate</span></span>
+                </div>
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <a href="#home" data-page="home" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">Trang chủ</a>
+                    <a href="#docs" data-page="docs" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">Tài liệu</a>
+                    <a href="#demo" data-page="demo" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">Demo</a>
+                </nav>
+                <!-- Cart icon -->
+                <div class="flex items-center space-x-4">
+                    <a href="#cart" data-page="cart" class="relative p-2 text-gray-600 hover:text-primary-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                        <span id="cart-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                    </a>
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile nav (hidden by default) -->
+        <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 bg-white">
+            <div class="px-4 py-3 space-y-1">
+                <a href="#home" data-page="home" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Trang chủ</a>
+                <a href="#docs" data-page="docs" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Tài liệu</a>
+                <a href="#demo" data-page="demo" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Demo</a>
+                <a href="#cart" data-page="cart" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Giỏ hàng</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== PAGE: HOME ==================== -->
+    <div id="page-home" class="page">
+        <!-- Hero -->
+        <section class="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white">
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23ffffff%22 fill-opacity=%220.4%22%3E%3Ccircle cx=%2230%22 cy=%2230%22 r=%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            </div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">Cổng Thanh Toán<br><span class="text-primary-200">Đơn Giản & Mạnh Mẽ</span></h1>
+                    <p class="text-lg md:text-xl text-primary-100 mb-10 max-w-2xl mx-auto">Tích hợp thanh toán trực tuyến chỉ với vài dòng code. Hỗ trợ đa phương thức: Thẻ ngân hàng, Ví điện tử, QR Code, Trả góp.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="#docs" class="nav-link-action inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 font-semibold rounded-xl hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl">Xem tài liệu</a>
+                        <a href="#demo" class="nav-link-action inline-flex items-center justify-center px-8 py-4 bg-primary-500 text-white font-semibold rounded-xl border-2 border-primary-400 hover:bg-primary-400 transition-all">Dùng thử Demo</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Tại sao chọn PayGate?</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Giải pháp thanh toán toàn diện, bảo mật cao, tích hợp nhanh chóng</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Tích hợp nhanh</h3>
+                    <p class="text-gray-600">Chỉ cần 1 API endpoint duy nhất. Hỗ trợ SDK cho Node.js, PHP, Python, Java. Tích hợp trong 30 phút.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Bảo mật cao</h3>
+                    <p class="text-gray-600">Tuân thủ PCI-DSS Level 1. Mã hóa SSL/TLS. Xác thực chữ ký HMAC-SHA256 cho mọi giao dịch.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Đa phương thức</h3>
+                    <p class="text-gray-600">Thẻ ATM/Visa/Master, Ví MoMo, ZaloPay, VNPay, QR Code, Chuyển khoản, Trả góp 0%.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="bg-white border-y border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Quy trình tích hợp</h2>
+                    <p class="text-gray-600">3 bước đơn giản để bắt đầu nhận thanh toán</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">1</div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Đăng ký tài khoản</h3>
+                        <p class="text-gray-600">Tạo tài khoản Merchant và nhận API Key từ Dashboard</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">2</div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Gọi API tạo Payment</h3>
+                        <p class="text-gray-600">Gửi request POST với thông tin đơn hàng để nhận Payment Link</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">3</div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Nhận kết quả qua Webhook</h3>
+                        <p class="text-gray-600">Hệ thống gửi callback tới server của bạn khi giao dịch hoàn tất</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-gray-400">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                        <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <span class="text-white font-semibold">PayGate</span>
+                    </div>
+                    <p class="text-sm">© 2026 PayGate. Demo website — Không phải dịch vụ thanh toán thật.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== PAGE: DOCS ==================== -->
+    <div id="page-docs" class="page hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Sidebar -->
+                <aside class="lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:sticky lg:top-24">
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">Tài liệu</h3>
+                        <nav class="space-y-1">
+                            <button data-tab="overview" class="doc-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-700 transition-all">Tổng quan</button>
+                            <button data-tab="quickstart" class="doc-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-700 transition-all">Bắt đầu nhanh</button>
+                            <button data-tab="api" class="doc-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-700 transition-all">API Reference</button>
+                            <button data-tab="webhook" class="doc-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-700 transition-all">Webhook / IPN</button>
+                            <button data-tab="sdk" class="doc-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-700 transition-all">SDK & Code mẫu</button>
+                            <button data-tab="faq" class="doc-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-700 transition-all">FAQ</button>
+                            <button data-tab="errors" class="doc-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-700 transition-all">Mã lỗi</button>
+                        </nav>
+                    </div>
+                </aside>
+                <!-- Content -->
+                <main class="flex-1 min-w-0">
+                    <div id="doc-content" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8 prose prose-indigo max-w-none">
+                        <!-- Docs content rendered here by docs.js -->
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: DEMO ==================== -->
+    <div id="page-demo" class="page hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-900">Demo Cửa Hàng</h1>
+                <p class="text-gray-600 mt-1">Chọn sản phẩm và thử quy trình thanh toán qua PayGate</p>
+            </div>
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Product cards rendered by products.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: CART ==================== -->
+    <div id="page-cart" class="page hidden">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 class="text-2xl font-bold text-gray-900 mb-8">Giỏ hàng</h1>
+            
+            <!-- Empty cart state -->
+            <div id="empty-cart" class="hidden text-center py-16">
+                <svg class="w-24 h-24 text-gray-300 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                <h2 class="text-xl font-semibold text-gray-500 mb-2">Giỏ hàng trống</h2>
+                <p class="text-gray-400 mb-6">Hãy thêm sản phẩm từ trang Demo</p>
+                <a href="#demo" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors">Xem sản phẩm</a>
+            </div>
+
+            <!-- Cart with items -->
+            <div id="cart-with-items" class="hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div id="cart-items" class="divide-y divide-gray-100">
+                        <!-- Cart items rendered by cart.js -->
+                    </div>
+                </div>
+                <!-- Cart summary -->
+                <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-lg font-semibold text-gray-900">Tổng cộng</span>
+                        <span id="cart-total-amount" class="text-2xl font-bold text-primary-600">0 ₫</span>
+                    </div>
+                    <button id="checkout-btn" class="w-full py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        <span>Thanh toán qua PayGate</span>
+                    </button>
+                    <p class="text-xs text-gray-400 text-center mt-3">Bạn sẽ được chuyển đến trang thanh toán của PayGate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: PAYMENT SUCCESS ==================== -->
+    <div id="page-payment-success" class="page hidden">
+        <div class="max-w-lg mx-auto px-4 py-20 text-center">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-3">Thanh toán thành công!</h1>
+            <p class="text-gray-600 mb-8">Cảm ơn bạn đã sử dụng PayGate. Đây là trang demo, không có giao dịch thật nào được thực hiện.</p>
+            <a href="#demo" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors">Tiếp tục mua hàng</a>
+        </div>
+    </div>
+
+    <!-- ==================== LOADING OVERLAY ==================== -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl text-center">
+            <div class="loading-spinner w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-700 font-medium">Đang tạo liên kết thanh toán...</p>
+            <p class="text-gray-400 text-sm mt-1">Vui lòng chờ trong giây lát</p>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/checkout.js"></script>
+    <script src="js/docs.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
