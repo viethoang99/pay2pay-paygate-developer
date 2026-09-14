@@ -31,9 +31,10 @@ window.App = (function() {
         switch(page) {
             case 'demo':
                 ProductsModule.render();
+                CartModule.render();
                 break;
             case 'cart':
-                CartModule.render();
+                navigate('demo');
                 break;
             case 'docs':
                 DocsModule.init();

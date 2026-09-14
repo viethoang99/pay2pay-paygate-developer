@@ -28,6 +28,7 @@ window.CartModule = (function() {
             items.push({ productId, quantity });
         }
         save();
+        render();
         showToast('Đã thêm vào giỏ hàng!', 'success');
     }
 
@@ -76,12 +77,20 @@ window.CartModule = (function() {
     function render() {
         const cartItems = document.getElementById('cart-items');
         const cartTotal = document.getElementById('cart-total-amount');
+        const cartSubtotal = document.getElementById('cart-subtotal');
+        const cartItemCount = document.getElementById('cart-item-count');
         const emptyCart = document.getElementById('empty-cart');
         const cartWithItems = document.getElementById('cart-with-items');
 
         if (!cartItems) return;
 
         const enrichedItems = getItems();
+        const total = getTotal();
+        const count = getCount();
+
+        if (cartItemCount) {
+            cartItemCount.textContent = `${count} món`;
+        }
 
         if (enrichedItems.length === 0) {
             emptyCart.classList.remove('hidden');
@@ -93,32 +102,33 @@ window.CartModule = (function() {
         cartWithItems.classList.remove('hidden');
 
         cartItems.innerHTML = enrichedItems.map(item => `
-            <div class="flex items-center p-4 sm:p-6 gap-4">
-                <div class="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span class="text-3xl">${item.product.image}</span>
+            <div class="p-3 sm:p-4 flex items-center gap-3">
+                <div class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0 text-2xl border border-gray-100">
+                    ${item.product.image}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-gray-900 truncate">${item.product.name}</h3>
-                    <p class="text-sm text-gray-500">${formatCurrency(item.product.price)}</p>
+                    <h4 class="font-medium text-gray-900 text-sm truncate" title="${item.product.name}">${item.product.name}</h4>
+                    <p class="text-xs text-gray-500">${formatCurrency(item.product.price)}</p>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-1 flex-shrink-0">
                     <button onclick="CartModule.updateQuantity('${item.productId}', ${item.quantity - 1})" 
-                            class="qty-btn">−</button>
-                    <span class="w-8 text-center font-medium text-gray-900">${item.quantity}</span>
+                            class="qty-btn" title="Giảm">−</button>
+                    <span class="w-6 text-center text-xs font-semibold text-gray-800">${item.quantity}</span>
                     <button onclick="CartModule.updateQuantity('${item.productId}', ${item.quantity + 1})" 
-                            class="qty-btn">+</button>
+                            class="qty-btn" title="Tăng">+</button>
                 </div>
-                <div class="text-right flex-shrink-0 w-28">
-                    <p class="font-semibold text-gray-900">${formatCurrency(item.product.price * item.quantity)}</p>
+                <div class="text-right flex-shrink-0 min-w-[70px]">
+                    <p class="text-xs font-bold text-gray-900">${formatCurrency(item.product.price * item.quantity)}</p>
                 </div>
                 <button onclick="CartModule.removeItem('${item.productId}')" 
-                        class="text-gray-400 hover:text-red-500 transition-colors p-1 flex-shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        class="text-gray-400 hover:text-red-500 transition-colors p-1 flex-shrink-0" title="Xóa">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </button>
             </div>
         `).join('');
 
-        cartTotal.textContent = formatCurrency(getTotal());
+        if (cartTotal) cartTotal.textContent = formatCurrency(total);
+        if (cartSubtotal) cartSubtotal.textContent = formatCurrency(total);
     }
 
     function updateBadge() {
