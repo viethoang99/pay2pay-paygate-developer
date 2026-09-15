@@ -138,7 +138,7 @@ export default async function handler(req, res) {
         
         // Theo tài liệu: Lọc và sắp xếp các tham số tiêu đề theo bảng chữ cái.
         // Dựa vào việc Login thành công, có vẻ Authorization KHÔNG được đưa vào chuỗi ký (chỉ các header p-)
-        const authHeader = `Bearer ${accessToken}`;
+        const authHeader = accessToken; // Thử bỏ chữ "Bearer " theo gợi ý
         const initPayloadToSign = `${initReqId}${initTime}${TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
