@@ -127,13 +127,13 @@ export default async function handler(req, res) {
         const initReqId = crypto.randomUUID();
         const initTime = getFormattedTime();
         const initBody = {
-            merchantId: MERCHANT_ID,
+            merchant_id: MERCHANT_ID,
             orderId: orderId,
             amount: Number(amount),
             currency: "VND",
             description: description || `Thanh toán đơn hàng ${orderId}`,
             lang: "vi",
-            returnUrl: returnUrl
+            return_url: returnUrl
         };
         
         // Theo tài liệu: Lọc và sắp xếp các tham số tiêu đề theo bảng chữ cái.
