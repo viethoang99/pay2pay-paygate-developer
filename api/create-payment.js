@@ -134,9 +134,9 @@ export default async function handler(req, res) {
         };
         
         // Theo tài liệu: Lọc và sắp xếp các tham số tiêu đề theo bảng chữ cái.
-        // Authorization (A) -> p-request-id -> p-request-time -> p-tenant
+        // Dựa vào việc Login thành công, có vẻ Authorization KHÔNG được đưa vào chuỗi ký (chỉ các header p-)
         const authHeader = `Bearer ${accessToken}`;
-        const initPayloadToSign = `${authHeader}${initReqId}${initTime}${TENANT}${JSON.stringify(initBody)}`;
+        const initPayloadToSign = `${initReqId}${initTime}${TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
         signInit.update(initPayloadToSign);
