@@ -62,11 +62,16 @@ export default async function handler(req, res) {
             return sign.sign(PRIVATE_KEY, 'base64');
         };
 
-        // Mã hóa Password theo chuẩn: base64(hex(sha256(password + username)))
+        // Mã hóa Password theo chuẩn: base64(hex(sha256(username + password)))
         const rawPassword = PASSWORD;
-        const inputString = rawPassword + USERNAME; // Hoặc thử USERNAME + rawPassword nếu sai
-        const sha256Hex = crypto.createHash('sha256').update(inputString).digest('hex');
-        const hashedPassword = Buffer.from(sha256Hex).toString('base64');
+        let hashedPassword = rawPassword;
+        
+        // Tránh mã hóa 2 lần nếu bạn đã tự mã hóa và điền vào Vercel (chuỗi 88 ký tự)
+        if (rawPassword.length !== 88) {
+            const inputString = USERNAME + rawPassword; // Thử đổi thứ tự: Username + Password
+            const sha256Hex = crypto.createHash('sha256').update(inputString).digest('hex');
+            hashedPassword = Buffer.from(sha256Hex).toString('base64');
+        }
 
         // ==========================================
         // BƯỚC 1: GỌI API LOGIN ĐỂ LẤY ACCESS TOKEN
@@ -74,6 +79,7 @@ export default async function handler(req, res) {
         const loginReqId = crypto.randomUUID();
         const loginTime = getFormattedTime();
         const loginBody = { username: USERNAME, password: hashedPassword };
+        const payloadToSign = `${loginReqId}${loginTime}${TENANT}${JSON.stringify(loginBody)}`;
         const loginSig = generateSignature(loginReqId, loginTime, TENANT, loginBody);
 
         const loginRes = await fetch(`${PAY2PAY_API_URL}/auth-service/api/v1.0/user/login`, {
@@ -97,15 +103,16 @@ export default async function handler(req, res) {
                 success: false, 
                 message: `Đăng nhập API thất bại (HTTP ${loginRes.status}): ` + (loginData.message || loginText || 'Empty response'),
                 debug: {
+                    note: "Gửi cục log này cho kỹ thuật Pay2Pay để họ đối soát lỗi 401:",
+                    payloadToSign: payloadToSign,
+                    generatedSignature: loginSig,
+                    hashedPasswordUsed: hashedPassword,
                     requestHeaders: {
                         'p-request-id': loginReqId,
                         'p-request-time': loginTime,
                         'p-tenant': TENANT,
                         'p-signature': loginSig
-                    },
-                    requestBody: loginBody,
-                    responseStatus: loginRes.status,
-                    responseBody: loginText
+                    }
                 }
             });
         }
