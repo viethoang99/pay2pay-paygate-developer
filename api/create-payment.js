@@ -124,8 +124,11 @@ export default async function handler(req, res) {
         // ==========================================
         // BƯỚC 2: GỌI API INIT PAYMENT (Hosted Checkout)
         // ==========================================
-        const initReqId = crypto.randomUUID();
-        const initTime = getFormattedTime();
+        // Dùng bypass theo yêu cầu của Pay2Pay Support
+        const initReqId = "d5b0e905-18a1-446c-bc41-c3667681594a";
+        const initTime = "123123";
+        const initSig = "123123";
+        const INIT_TENANT = 'PAYMENT-SITE'; 
         
         const initBody = {
             merchantId: MERCHANT_ID,
@@ -138,16 +141,6 @@ export default async function handler(req, res) {
             returnUrl: returnUrl,
             paymentFee: 0
         };
-        
-        const INIT_TENANT = 'PAYMENT-SITE'; 
-        
-        // Không có Authorization, chỉ ký p-request-id, p-request-time, p-tenant và body
-        const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
-        
-        const signInit = crypto.createSign('SHA256');
-        signInit.update(initPayloadToSign);
-        signInit.end();
-        const initSig = signInit.sign(PRIVATE_KEY, 'base64');
 
         const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
             method: 'POST',
@@ -170,7 +163,6 @@ export default async function handler(req, res) {
                 error: 'Init Payment Failed',
                 debugLogin: debugLogin,
                 debugInit: {
-                    payloadToSign: initPayloadToSign,
                     generatedSignature: initSig,
                     requestHeaders: {
                         'p-request-id': initReqId,
