@@ -138,8 +138,9 @@ export default async function handler(req, res) {
         
         // Theo tài liệu: Lọc và sắp xếp các tham số tiêu đề theo bảng chữ cái.
         // Dựa vào việc Login thành công, có vẻ Authorization KHÔNG được đưa vào chuỗi ký (chỉ các header p-)
-        const authHeader = accessToken; // Thử bỏ chữ "Bearer " theo gợi ý
-        const initPayloadToSign = `${initReqId}${initTime}${TENANT}${JSON.stringify(initBody)}`;
+        const INIT_TENANT = 'PAYMENT-SITE'; // Đổi p-tenant riêng cho bước 2 theo yêu cầu
+        const authHeader = `Bearer ${accessToken}`; // Khôi phục lại Bearer vì chuẩn chung là cần có
+        const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
         signInit.update(initPayloadToSign);
@@ -152,7 +153,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
                 'p-request-id': initReqId,
                 'p-request-time': initTime,
-                'p-tenant': TENANT,
+                'p-tenant': INIT_TENANT,
                 'Authorization': authHeader,
                 'p-signature': initSig
             },
@@ -180,7 +181,7 @@ export default async function handler(req, res) {
                         'Authorization': authHeader,
                         'p-request-id': initReqId,
                         'p-request-time': initTime,
-                        'p-tenant': TENANT,
+                        'p-tenant': INIT_TENANT,
                         'p-signature': initSig
                     },
                     requestBody: initBody,
