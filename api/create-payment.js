@@ -77,9 +77,15 @@ export default async function handler(req, res) {
             body: JSON.stringify(loginBody)
         });
 
-        const loginData = await loginRes.json();
+        const loginText = await loginRes.text();
+        let loginData = {};
+        try { loginData = loginText ? JSON.parse(loginText) : {}; } catch(e) {}
+        
         if (loginData.code !== 'SUCCESS') {
-            return res.status(400).json({ success: false, message: 'Đăng nhập API thất bại: ' + loginData.message });
+            return res.status(400).json({ 
+                success: false, 
+                message: `Đăng nhập API thất bại (HTTP ${loginRes.status}): ` + (loginData.message || loginText || 'Empty response') 
+            });
         }
         const accessToken = loginData.data.accessToken;
 
@@ -112,7 +118,10 @@ export default async function handler(req, res) {
             body: JSON.stringify(initBody)
         });
 
-        const initData = await initRes.json();
+        const initText = await initRes.text();
+        let initData = {};
+        try { initData = initText ? JSON.parse(initText) : {}; } catch(e) {}
+
         if (initData.code === 'SUCCESS') {
             // Trả link thanh toán thật về cho Frontend
             return res.status(200).json({ 
@@ -120,7 +129,10 @@ export default async function handler(req, res) {
                 paymentUrl: initData.data.paymentUrl || initData.data.payment_url 
             });
         } else {
-            return res.status(400).json({ success: false, message: initData.message });
+            return res.status(400).json({ 
+                success: false, 
+                message: `Tạo thanh toán thất bại (HTTP ${initRes.status}): ` + (initData.message || initText || 'Empty response') 
+            });
         }
 
     } catch (error) {
