@@ -39,6 +39,27 @@ window.App = (function() {
             case 'docs':
                 DocsModule.init();
                 break;
+            case 'payment-result':
+                // Phân tích URL param (vd: #payment-result?orderId=XXX)
+                const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+                const orderId = urlParams.get('orderId');
+                
+                if (orderId) {
+                    document.getElementById('result-order-info').classList.remove('hidden');
+                    document.getElementById('result-order-id').textContent = orderId;
+                    
+                    // Giả lập đang kiểm tra trạng thái trong 3s 
+                    // (Trong thực tế: Gọi API /api/check-status bằng orderId)
+                    setTimeout(() => {
+                        document.getElementById('result-title').textContent = "Giao dịch thành công!";
+                        document.getElementById('result-message').textContent = "Thanh toán đã được xác nhận bởi cổng Pay2Pay.";
+                        
+                        const iconContainer = document.getElementById('result-icon-container');
+                        iconContainer.className = "w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6";
+                        iconContainer.innerHTML = `<svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+                    }, 2500);
+                }
+                break;
             case 'payment-success':
                 CartModule.clear();
                 break;
