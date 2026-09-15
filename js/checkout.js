@@ -20,7 +20,7 @@ window.CheckoutModule = (function() {
         const result = await response.json();
         
         if (!response.ok || !result.success) {
-            throw new Error(result.message || `Lỗi kết nối Backend Vercel`);
+            throw new Error(result.error || result.message || `Lỗi API (HTTP ${response.status})`);
         }
 
         // Định dạng lại response để tương thích với luồng bên dưới
