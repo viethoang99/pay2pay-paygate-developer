@@ -38,13 +38,18 @@ export default async function handler(req, res) {
         // Sửa lỗi format Private Key (rất hay gặp khi paste vào Vercel bị mất xuống dòng)
         PRIVATE_KEY = PRIVATE_KEY.replace(/\\n/g, '\n');
         if (PRIVATE_KEY.split('\n').length <= 2) {
-            const header = '-----BEGIN PRIVATE KEY-----';
-            const footer = '-----END PRIVATE KEY-----';
-            let keyBody = PRIVATE_KEY.replace(header, '').replace(footer, '').replace(/\s+/g, '');
+            // Hỗ trợ cả chuẩn PKCS#8 (PRIVATE KEY) và PKCS#1 (RSA PRIVATE KEY)
+            let keyBody = PRIVATE_KEY.replace(/-----BEGIN (RSA )?PRIVATE KEY-----/, '')
+                                     .replace(/-----END (RSA )?PRIVATE KEY-----/, '')
+                                     .replace(/\s+/g, '');
             let formattedBody = '';
             for (let i = 0; i < keyBody.length; i += 64) {
                 formattedBody += keyBody.substring(i, i + 64) + '\n';
             }
+            // Khôi phục lại đúng header của người dùng
+            const isRSA = PRIVATE_KEY.includes('RSA');
+            const header = isRSA ? '-----BEGIN RSA PRIVATE KEY-----' : '-----BEGIN PRIVATE KEY-----';
+            const footer = isRSA ? '-----END RSA PRIVATE KEY-----' : '-----END PRIVATE KEY-----';
             PRIVATE_KEY = `${header}\n${formattedBody}${footer}`;
         }
 
