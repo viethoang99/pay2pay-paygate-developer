@@ -126,22 +126,22 @@ export default async function handler(req, res) {
         // ==========================================
         const initReqId = crypto.randomUUID();
         const initTime = getFormattedTime();
+        
+        // Cấu trúc và thứ tự key phải CHUẨN XÁC y hệt payload user cung cấp
         const initBody = {
             merchantId: MERCHANT_ID,
-            amount: String(amount),
             orderId: orderId,
+            amount: Number(amount),
             currency: "VND",
-            paymentMethod: "",
-            description: description || `Thanh toán đơn hàng ${orderId}`,
+            description: description || `Test Payment`, // Dùng đúng string test
             lang: "vi",
-            returnUrl: returnUrl,
-            paymentFee: "0"
+            returnUrl: returnUrl
         };
         
-        // Theo logic đã thành công ở API /initialize: Ký cả Authorization (A) đứng trước p-
+        // KHÔNG đưa Authorization vào chuỗi ký theo yêu cầu
         const INIT_TENANT = TENANT; 
         const authHeader = `Bearer ${accessToken}`; 
-        const initPayloadToSign = `${authHeader}${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
+        const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
         signInit.update(initPayloadToSign);
