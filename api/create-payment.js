@@ -136,7 +136,7 @@ export default async function handler(req, res) {
             orderId: orderId,
             currency: "VND",
             paymentMethod: "",
-            description: `Thanh toan cho don hang ${orderId}`,
+            description: `Thanh_toan_cho_don_hang_${orderId}`,
             lang: "vi",
             returnUrl: returnUrl,
             paymentFee: 0
