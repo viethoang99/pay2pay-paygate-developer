@@ -115,6 +115,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('Lỗi tích hợp Pay2Pay API:', error);
-        return res.status(500).json({ success: false, message: 'Lỗi máy chủ nội bộ (Vercel)' });
+        return res.status(500).json({ success: false, message: 'Lỗi máy chủ nội bộ (Vercel): ' + (error.message || error.toString()) });
     }
 }
