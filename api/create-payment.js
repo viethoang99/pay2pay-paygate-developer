@@ -139,10 +139,11 @@ export default async function handler(req, res) {
             }
         };
         
-        // Theo tài liệu & Support: Chỉ ký các giá trị bắt đầu bằng p- (KHÔNG ký Authorization)
-        const INIT_TENANT = TENANT; // Sử dụng đúng KING01
+        // Dùng TENANT KING01 của mình. 
+        // Đưa Authorization vào lại chuỗi ký vì tài liệu gốc (bảng chữ cái) Authorization (A) -> p-...
+        const INIT_TENANT = TENANT; 
         const authHeader = `Bearer ${accessToken}`; 
-        const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
+        const initPayloadToSign = `${authHeader}${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
         signInit.update(initPayloadToSign);
