@@ -138,11 +138,10 @@ export default async function handler(req, res) {
             paymentFee: "0"
         };
         
-        // Dùng TENANT KING01 của mình. 
-        // Đưa Authorization vào lại chuỗi ký vì tài liệu gốc (bảng chữ cái) Authorization (A) -> p-...
+        // Theo chỉ đạo: Không ký Authorization, chỉ ký p-
         const INIT_TENANT = TENANT; 
         const authHeader = `Bearer ${accessToken}`; 
-        const initPayloadToSign = `${authHeader}${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
+        const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
         signInit.update(initPayloadToSign);
