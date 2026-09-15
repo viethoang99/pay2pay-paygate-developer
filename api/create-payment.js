@@ -143,8 +143,8 @@ export default async function handler(req, res) {
         const INIT_TENANT = 'MERCHANT-WEB'; 
         const authHeader = `Bearer ${accessToken}`; 
         
-        // Chỉ ký các giá trị p- (Không đưa Authorization vào)
-        const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
+        // KÝ CẢ AUTHORIZATION VÀ DÙNG MERCHANT-WEB
+        const initPayloadToSign = `${authHeader}${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
         signInit.update(initPayloadToSign);
