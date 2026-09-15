@@ -127,20 +127,20 @@ export default async function handler(req, res) {
         const initReqId = crypto.randomUUID();
         const initTime = getFormattedTime();
         const initBody = {
-            merchantId: MERCHANT_ID,
-            amount: String(amount),
-            orderId: orderId,
             currency: "VND",
-            paymentMethod: "",
-            description: description || `Thanh toán đơn hàng ${orderId}`,
-            lang: "vi",
-            returnUrl: returnUrl,
-            paymentFee: 0
+            issuerId: "PAYGATE",
+            command: "PAY",
+            paymentMethod: "QRBANK",
+            merchantData: {
+                orderId: orderId,
+                orderDesc: description || `Thanh toán đơn hàng ${orderId}`,
+                amount: Number(amount),
+                returnUrl: returnUrl
+            }
         };
         
-        // Theo tài liệu: Lọc và sắp xếp các tham số tiêu đề theo bảng chữ cái.
-        // Xác nhận từ kỹ thuật Pay2Pay: KHÔNG đưa Authorization vào chuỗi ký
-        const INIT_TENANT = 'PAYMENT-SITE'; // Dùng chuẩn tenant từ mẫu curl
+        // Theo tài liệu & Support: Chỉ ký các giá trị bắt đầu bằng p- (KHÔNG ký Authorization)
+        const INIT_TENANT = TENANT; // Sử dụng đúng KING01
         const authHeader = `Bearer ${accessToken}`; 
         const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
@@ -149,14 +149,14 @@ export default async function handler(req, res) {
         signInit.end();
         const initSig = signInit.sign(PRIVATE_KEY, 'base64');
 
-        const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
+        const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/mch/api/v1.0/initialize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'p-request-id': initReqId,
                 'p-request-time': initTime,
                 'p-tenant': INIT_TENANT,
-                // 'Authorization': authHeader,
+                'Authorization': authHeader,
                 'p-signature': initSig
             },
             body: JSON.stringify(initBody)
@@ -169,7 +169,7 @@ export default async function handler(req, res) {
         if (initData.code === 'SUCCESS') {
             return res.status(200).json({ 
                 success: true, 
-                paymentUrl: initData.data.paymentUrl || initData.data.payment_url 
+                paymentUrl: initData.data.paymentUrl || initData.data.payment_url || initData.data.redirectUrl 
             });
         } else {
             return res.status(400).json({ 
@@ -180,7 +180,7 @@ export default async function handler(req, res) {
                     payloadToSign: initPayloadToSign,
                     generatedSignature: initSig,
                     requestHeaders: {
-                        // 'Authorization': authHeader,
+                        'Authorization': authHeader,
                         'p-request-id': initReqId,
                         'p-request-time': initTime,
                         'p-tenant': INIT_TENANT,
