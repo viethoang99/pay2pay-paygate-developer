@@ -128,7 +128,7 @@ export default async function handler(req, res) {
         const initTime = getFormattedTime();
         const initBody = {
             merchant_id: MERCHANT_ID,
-            orderId: orderId,
+            order_id: orderId,
             amount: Number(amount),
             currency: "VND",
             description: description || `Thanh toán đơn hàng ${orderId}`,
