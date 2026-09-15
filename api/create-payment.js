@@ -130,13 +130,14 @@ export default async function handler(req, res) {
         const initSig = "123123";
         const INIT_TENANT = 'PAYMENT-SITE'; 
         
+        const cleanOrderId = orderId.replace(/[^a-zA-Z0-9]/g, '');
         const initBody = {
             merchantId: MERCHANT_ID,
             amount: String(amount),
             orderId: orderId,
             currency: "VND",
             paymentMethod: "",
-            description: `Thanh_toan_cho_don_hang_${orderId}`,
+            description: `Thanhtoanchodonhang${cleanOrderId}`,
             lang: "vi",
             returnUrl: returnUrl,
             paymentFee: 0
