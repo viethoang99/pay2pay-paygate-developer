@@ -122,21 +122,20 @@ export default async function handler(req, res) {
         const accessToken = loginData.data.accessToken;
 
         // ==========================================
-        // BƯỚC 2: GỌI API INIT PAYMENT
+        // BƯỚC 2: GỌI API INIT PAYMENT (Hosted Checkout)
         // ==========================================
         const initReqId = crypto.randomUUID();
         const initTime = getFormattedTime();
         const initBody = {
+            merchantId: MERCHANT_ID,
+            amount: String(amount),
+            orderId: orderId,
             currency: "VND",
-            issuerId: "PAYGATE",
-            command: "PAY",
-            paymentMethod: "QRBANK",
-            merchantData: {
-                orderId: orderId,
-                orderDesc: description || `Thanh toán đơn hàng ${orderId}`,
-                amount: Number(amount),
-                returnUrl: returnUrl
-            }
+            paymentMethod: "",
+            description: description || `Thanh toán đơn hàng ${orderId}`,
+            lang: "vi",
+            returnUrl: returnUrl,
+            paymentFee: "0"
         };
         
         // Dùng TENANT KING01 của mình. 
@@ -150,7 +149,7 @@ export default async function handler(req, res) {
         signInit.end();
         const initSig = signInit.sign(PRIVATE_KEY, 'base64');
 
-        const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/mch/api/v1.0/initialize`, {
+        const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
