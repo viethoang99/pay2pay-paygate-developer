@@ -98,22 +98,25 @@ export default async function handler(req, res) {
         let loginData = {};
         try { loginData = loginText ? JSON.parse(loginText) : {}; } catch(e) {}
         
+        const debugLogin = {
+            payloadToSign: payloadToSign,
+            generatedSignature: loginSig,
+            requestHeaders: {
+                'p-request-id': loginReqId,
+                'p-request-time': loginTime,
+                'p-tenant': TENANT,
+                'p-signature': loginSig
+            },
+            requestBody: loginBody,
+            responseStatus: loginRes.status,
+            responseBody: loginText
+        };
+
         if (loginData.code !== 'SUCCESS') {
             return res.status(400).json({ 
                 success: false, 
                 message: `Đăng nhập API thất bại (HTTP ${loginRes.status}): ` + (loginData.message || loginText || 'Empty response'),
-                debug: {
-                    note: "Gửi cục log này cho kỹ thuật Pay2Pay để họ đối soát lỗi 401:",
-                    payloadToSign: payloadToSign,
-                    generatedSignature: loginSig,
-                    hashedPasswordUsed: hashedPassword,
-                    requestHeaders: {
-                        'p-request-id': loginReqId,
-                        'p-request-time': loginTime,
-                        'p-tenant': TENANT,
-                        'p-signature': loginSig
-                    }
-                }
+                debugLogin: debugLogin
             });
         }
         const accessToken = loginData.data.accessToken;
@@ -161,7 +164,6 @@ export default async function handler(req, res) {
         try { initData = initText ? JSON.parse(initText) : {}; } catch(e) {}
 
         if (initData.code === 'SUCCESS') {
-            // Trả link thanh toán thật về cho Frontend
             return res.status(200).json({ 
                 success: true, 
                 paymentUrl: initData.data.paymentUrl || initData.data.payment_url 
@@ -170,6 +172,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ 
                 success: false, 
                 message: `Tạo thanh toán thất bại (HTTP ${initRes.status}): ` + (initData.message || initText || 'Empty response'),
+                debugLogin: debugLogin,
                 debugInit: {
                     payloadToSign: initPayloadToSign,
                     generatedSignature: initSig,
@@ -179,7 +182,10 @@ export default async function handler(req, res) {
                         'p-request-time': initTime,
                         'p-tenant': TENANT,
                         'p-signature': initSig
-                    }
+                    },
+                    requestBody: initBody,
+                    responseStatus: initRes.status,
+                    responseBody: initText
                 }
             });
         }
