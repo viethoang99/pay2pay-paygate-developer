@@ -88,7 +88,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
                 'p-request-id': loginReqId,
                 'p-request-time': loginTime,
-                'p-tenant': TENANT,
+                'p-tenant': INIT_TENANT,
                 'p-signature': loginSig
             },
             body: JSON.stringify(loginBody)
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
             requestHeaders: {
                 'p-request-id': loginReqId,
                 'p-request-time': loginTime,
-                'p-tenant': TENANT,
+                'p-tenant': INIT_TENANT,
                 'p-signature': loginSig
             },
             requestBody: loginBody,
@@ -127,18 +127,20 @@ export default async function handler(req, res) {
         const initReqId = crypto.randomUUID();
         const initTime = getFormattedTime();
         const initBody = {
-            merchant_id: MERCHANT_ID,
-            order_id: orderId,
-            amount: Number(amount),
+            merchantId: MERCHANT_ID,
+            amount: String(amount),
+            orderId: orderId,
             currency: "VND",
+            paymentMethod: "",
             description: description || `Thanh toán đơn hàng ${orderId}`,
             lang: "vi",
-            return_url: returnUrl
+            returnUrl: returnUrl,
+            paymentFee: 0
         };
         
         // Theo tài liệu: Lọc và sắp xếp các tham số tiêu đề theo bảng chữ cái.
         // Xác nhận từ kỹ thuật Pay2Pay: KHÔNG đưa Authorization vào chuỗi ký
-        const INIT_TENANT = TENANT; // Thử lại với KING01 (cùng biến TENANT từ bước 1)
+        const INIT_TENANT = 'PAYMENT-SITE'; // Dùng chuẩn tenant từ mẫu curl
         const authHeader = `Bearer ${accessToken}`; 
         const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
@@ -154,7 +156,7 @@ export default async function handler(req, res) {
                 'p-request-id': initReqId,
                 'p-request-time': initTime,
                 'p-tenant': INIT_TENANT,
-                'Authorization': authHeader,
+                // 'Authorization': authHeader,
                 'p-signature': initSig
             },
             body: JSON.stringify(initBody)
@@ -178,7 +180,7 @@ export default async function handler(req, res) {
                     payloadToSign: initPayloadToSign,
                     generatedSignature: initSig,
                     requestHeaders: {
-                        'Authorization': authHeader,
+                        // 'Authorization': authHeader,
                         'p-request-id': initReqId,
                         'p-request-time': initTime,
                         'p-tenant': INIT_TENANT,
