@@ -57,12 +57,18 @@ export default async function handler(req, res) {
             return sign.sign(PRIVATE_KEY, 'base64');
         };
 
+        // Mã hóa Password theo chuẩn: base64(hex(sha256(password + username)))
+        const rawPassword = PASSWORD;
+        const inputString = rawPassword + USERNAME; // Hoặc thử USERNAME + rawPassword nếu sai
+        const sha256Hex = crypto.createHash('sha256').update(inputString).digest('hex');
+        const hashedPassword = Buffer.from(sha256Hex).toString('base64');
+
         // ==========================================
         // BƯỚC 1: GỌI API LOGIN ĐỂ LẤY ACCESS TOKEN
         // ==========================================
         const loginReqId = crypto.randomUUID();
         const loginTime = getFormattedTime();
-        const loginBody = { username: USERNAME, password: PASSWORD };
+        const loginBody = { username: USERNAME, password: hashedPassword };
         const loginSig = generateSignature(loginReqId, loginTime, TENANT, loginBody);
 
         const loginRes = await fetch(`${PAY2PAY_API_URL}/auth-service/api/v1.0/user/login`, {
@@ -84,7 +90,18 @@ export default async function handler(req, res) {
         if (loginData.code !== 'SUCCESS') {
             return res.status(400).json({ 
                 success: false, 
-                message: `Đăng nhập API thất bại (HTTP ${loginRes.status}): ` + (loginData.message || loginText || 'Empty response') 
+                message: `Đăng nhập API thất bại (HTTP ${loginRes.status}): ` + (loginData.message || loginText || 'Empty response'),
+                debug: {
+                    requestHeaders: {
+                        'p-request-id': loginReqId,
+                        'p-request-time': loginTime,
+                        'p-tenant': TENANT,
+                        'p-signature': loginSig
+                    },
+                    requestBody: loginBody,
+                    responseStatus: loginRes.status,
+                    responseBody: loginText
+                }
             });
         }
         const accessToken = loginData.data.accessToken;
