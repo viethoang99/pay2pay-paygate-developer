@@ -79,11 +79,13 @@ export default async function handler(req, res) {
         const initReqId = crypto.randomUUID();
         const initTime = getFormattedTime();
         const initBody = {
-            merchant_id: MERCHANT_ID,
+            merchantId: MERCHANT_ID,
             orderId: orderId,
             amount: Number(amount),
+            currency: "VND",
             description: description || `Thanh toán đơn hàng ${orderId}`,
-            return_url: returnUrl
+            lang: "vi",
+            returnUrl: returnUrl
         };
         const initSig = generateSignature(initReqId, initTime, TENANT, initBody);
 
