@@ -23,7 +23,6 @@ export default async function handler(req, res) {
         const TENANT = process.env.PAY2PAY_TENANT || 'MERCHANT-WEB';
         const MERCHANT_ID = process.env.PAY2PAY_MERCHANT_ID;
         
-        // Sửa lỗi xuống dòng của Private Key khi lưu trên Vercel
         let PRIVATE_KEY = process.env.PAY2PAY_PRIVATE_KEY;
         
         // Nếu bạn CHƯA cài đặt biến môi trường, hệ thống sẽ trả về link MOCK (Giả lập) để web không bị lỗi
@@ -36,7 +35,18 @@ export default async function handler(req, res) {
             });
         }
         
+        // Sửa lỗi format Private Key (rất hay gặp khi paste vào Vercel bị mất xuống dòng)
         PRIVATE_KEY = PRIVATE_KEY.replace(/\\n/g, '\n');
+        if (PRIVATE_KEY.split('\n').length <= 2) {
+            const header = '-----BEGIN PRIVATE KEY-----';
+            const footer = '-----END PRIVATE KEY-----';
+            let keyBody = PRIVATE_KEY.replace(header, '').replace(footer, '').replace(/\s+/g, '');
+            let formattedBody = '';
+            for (let i = 0; i < keyBody.length; i += 64) {
+                formattedBody += keyBody.substring(i, i + 64) + '\n';
+            }
+            PRIVATE_KEY = `${header}\n${formattedBody}${footer}`;
+        }
 
         // Hàm tạo chữ ký RSA-2048
         const generateSignature = (rId, rTime, tenant, bodyObj) => {
