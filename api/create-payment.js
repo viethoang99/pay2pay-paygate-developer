@@ -1,0 +1,118 @@
+const crypto = require('crypto');
+
+// Hàm format thời gian theo chuẩn Pay2Pay (YYYYMMDDHHMMSS - Múi giờ UTC+7)
+function getFormattedTime() {
+    const date = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}`;
+}
+
+export default async function handler(req, res) {
+    // Chỉ chấp nhận method POST từ Frontend
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method Not Allowed' });
+    }
+
+    try {
+        const { orderId, amount, description, returnUrl } = req.body;
+
+        // 1. LẤY THÔNG TIN TỪ KÉT SẮT CỦA VERCEL (Environment Variables)
+        const PAY2PAY_API_URL = process.env.PAY2PAY_API_URL || 'https://uat-api.pay2pay.vn';
+        const USERNAME = process.env.PAY2PAY_USERNAME;
+        const PASSWORD = process.env.PAY2PAY_PASSWORD; 
+        const TENANT = process.env.PAY2PAY_TENANT || 'MERCHANT-WEB';
+        const MERCHANT_ID = process.env.PAY2PAY_MERCHANT_ID;
+        
+        // Sửa lỗi xuống dòng của Private Key khi lưu trên Vercel
+        let PRIVATE_KEY = process.env.PAY2PAY_PRIVATE_KEY;
+        
+        // Nếu bạn CHƯA cài đặt biến môi trường, hệ thống sẽ trả về link MOCK (Giả lập) để web không bị lỗi
+        if (!PRIVATE_KEY || !USERNAME || !PASSWORD) {
+            return res.status(200).json({ 
+                success: true, 
+                isMock: true,
+                paymentUrl: `https://sandbox.paygate.vn/checkout/${orderId}`,
+                message: "Đang chạy chế độ MOCK do chưa cấu hình Environment Variables trên Vercel."
+            });
+        }
+        
+        PRIVATE_KEY = PRIVATE_KEY.replace(/\\n/g, '\n');
+
+        // Hàm tạo chữ ký RSA-2048
+        const generateSignature = (rId, rTime, tenant, bodyObj) => {
+            const payloadToSign = `${rId}${rTime}${tenant}${JSON.stringify(bodyObj)}`;
+            const sign = crypto.createSign('SHA256');
+            sign.update(payloadToSign);
+            sign.end();
+            return sign.sign(PRIVATE_KEY, 'base64');
+        };
+
+        // ==========================================
+        // BƯỚC 1: GỌI API LOGIN ĐỂ LẤY ACCESS TOKEN
+        // ==========================================
+        const loginReqId = crypto.randomUUID();
+        const loginTime = getFormattedTime();
+        const loginBody = { username: USERNAME, password: PASSWORD };
+        const loginSig = generateSignature(loginReqId, loginTime, TENANT, loginBody);
+
+        const loginRes = await fetch(`${PAY2PAY_API_URL}/auth-service/api/v1.0/user/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'p-request-id': loginReqId,
+                'p-request-time': loginTime,
+                'p-tenant': TENANT,
+                'p-signature': loginSig
+            },
+            body: JSON.stringify(loginBody)
+        });
+
+        const loginData = await loginRes.json();
+        if (loginData.code !== 'SUCCESS') {
+            return res.status(400).json({ success: false, message: 'Đăng nhập API thất bại: ' + loginData.message });
+        }
+        const accessToken = loginData.data.accessToken;
+
+        // ==========================================
+        // BƯỚC 2: GỌI API INIT PAYMENT
+        // ==========================================
+        const initReqId = crypto.randomUUID();
+        const initTime = getFormattedTime();
+        const initBody = {
+            merchant_id: MERCHANT_ID,
+            orderId: orderId,
+            amount: Number(amount),
+            description: description || `Thanh toán đơn hàng ${orderId}`,
+            return_url: returnUrl
+        };
+        const initSig = generateSignature(initReqId, initTime, TENANT, initBody);
+
+        const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'p-request-id': initReqId,
+                'p-request-time': initTime,
+                'p-tenant': TENANT,
+                'Authorization': `Bearer ${accessToken}`,
+                'p-signature': initSig
+            },
+            body: JSON.stringify(initBody)
+        });
+
+        const initData = await initRes.json();
+        if (initData.code === 'SUCCESS') {
+            // Trả link thanh toán thật về cho Frontend
+            return res.status(200).json({ 
+                success: true, 
+                paymentUrl: initData.data.paymentUrl || initData.data.payment_url 
+            });
+        } else {
+            return res.status(400).json({ success: false, message: initData.message });
+        }
+
+    } catch (error) {
+        console.error('Lỗi tích hợp Pay2Pay API:', error);
+        return res.status(500).json({ success: false, message: 'Lỗi máy chủ nội bộ (Vercel)' });
+    }
+}

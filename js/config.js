@@ -19,8 +19,8 @@ window.AppConfig = {
     // Tiền tệ
     CURRENCY: 'VND',
 
-    // Chế độ Mock - đặt false khi kết nối API thật
-    MOCK_MODE: true,
+    // Chế độ Mock
+    MOCK_MODE: false,
 
     // Thời gian delay giả lập (ms) - chỉ dùng khi MOCK_MODE = true  
     MOCK_DELAY: 1500,

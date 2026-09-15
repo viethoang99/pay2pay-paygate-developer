@@ -5,27 +5,33 @@
 window.CheckoutModule = (function() {
 
     /**
-     * Gọi API thật để tạo payment link
+     * Gọi API nội bộ trên Vercel (Serverless Function) 
+     * để ẩn Private Key và lấy payment link thật
      */
     async function callPaymentAPI(orderData) {
-        const url = AppConfig.API_URL + AppConfig.CREATE_PAYMENT_ENDPOINT;
-
-        const response = await fetch(url, {
+        const response = await fetch('/api/create-payment', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${AppConfig.API_KEY}`,
-                'X-Merchant-ID': AppConfig.MERCHANT_ID,
             },
             body: JSON.stringify(orderData),
         });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `HTTP Error ${response.status}`);
+        const result = await response.json();
+        
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || `Lỗi kết nối Backend Vercel`);
         }
 
-        return response.json();
+        // Định dạng lại response để tương thích với luồng bên dưới
+        return {
+            success: true,
+            data: {
+                paymentLink: result.paymentUrl,
+                orderId: orderData.orderId
+            },
+            message: result.message
+        };
     }
 
     /**
