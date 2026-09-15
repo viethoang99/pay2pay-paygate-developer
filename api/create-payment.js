@@ -138,10 +138,10 @@ export default async function handler(req, res) {
             paymentFee: "0"
         };
         
-        // Theo chỉ đạo: Không ký Authorization, chỉ ký p-
+        // Theo logic đã thành công ở API /initialize: Ký cả Authorization (A) đứng trước p-
         const INIT_TENANT = TENANT; 
         const authHeader = `Bearer ${accessToken}`; 
-        const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
+        const initPayloadToSign = `${authHeader}${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
         signInit.update(initPayloadToSign);
