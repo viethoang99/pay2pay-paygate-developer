@@ -133,18 +133,16 @@ export default async function handler(req, res) {
             orderId: orderId,
             currency: "VND",
             paymentMethod: "",
-            description: description || "Test Payment",
+            description: `Thanh toan cho don hang ${orderId}`,
             lang: "vi",
             returnUrl: returnUrl,
-            paymentFee: "0"
+            paymentFee: 0
         };
         
-        // Dựa trên curl mới: p-tenant là MERCHANT-WEB
-        const INIT_TENANT = 'MERCHANT-WEB'; 
-        const authHeader = `Bearer ${accessToken}`; 
+        const INIT_TENANT = 'PAYMENT-SITE'; 
         
-        // KÝ CẢ AUTHORIZATION VÀ DÙNG MERCHANT-WEB
-        const initPayloadToSign = `${authHeader}${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
+        // Không có Authorization, chỉ ký p-request-id, p-request-time, p-tenant và body
+        const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
         const signInit = crypto.createSign('SHA256');
         signInit.update(initPayloadToSign);
@@ -154,12 +152,11 @@ export default async function handler(req, res) {
         const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'p-request-id': initReqId,
                 'p-request-time': initTime,
                 'p-tenant': INIT_TENANT,
-                'Authorization': authHeader,
-                'p-signature': initSig
+                'p-signature': initSig,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(initBody)
         });
@@ -167,23 +164,15 @@ export default async function handler(req, res) {
         const initText = await initRes.text();
         let initData = {};
         try { initData = initText ? JSON.parse(initText) : {}; } catch(e) {}
-
-        if (initData.code === 'SUCCESS') {
-            return res.status(200).json({ 
-                success: true, 
-                paymentUrl: initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl,
-                rawData: initData
-            });
-        } else {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Tạo thanh toán thất bại (HTTP ${initRes.status}): ` + (initData.message || initText || 'Empty response'),
+        
+        if (initRes.status !== 200 || initData.code !== 'SUCCESS') {
+            return res.status(initRes.status).json({
+                error: 'Init Payment Failed',
                 debugLogin: debugLogin,
                 debugInit: {
                     payloadToSign: initPayloadToSign,
                     generatedSignature: initSig,
                     requestHeaders: {
-                        'Authorization': authHeader,
                         'p-request-id': initReqId,
                         'p-request-time': initTime,
                         'p-tenant': INIT_TENANT,
@@ -195,6 +184,12 @@ export default async function handler(req, res) {
                 }
             });
         }
+
+        return res.status(200).json({ 
+            success: true, 
+            paymentUrl: initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl,
+            rawData: initData
+        });
 
     } catch (error) {
         console.error('Lỗi tích hợp Pay2Pay API:', error);
