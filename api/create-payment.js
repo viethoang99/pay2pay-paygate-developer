@@ -137,8 +137,8 @@ export default async function handler(req, res) {
         };
         
         // Theo tài liệu: Lọc và sắp xếp các tham số tiêu đề theo bảng chữ cái.
-        // Xác nhận từ kỹ thuật Pay2Pay: KHÔNG đưa Authorization vào chuỗi ký, và tenant = PAYMENT-SITE
-        const INIT_TENANT = 'PAYMENT-SITE';
+        // Xác nhận từ kỹ thuật Pay2Pay: KHÔNG đưa Authorization vào chuỗi ký
+        const INIT_TENANT = TENANT; // Thử lại với KING01 (cùng biến TENANT từ bước 1)
         const authHeader = `Bearer ${accessToken}`; 
         const initPayloadToSign = `${initReqId}${initTime}${INIT_TENANT}${JSON.stringify(initBody)}`;
         
