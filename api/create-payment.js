@@ -132,7 +132,16 @@ export default async function handler(req, res) {
             lang: "vi",
             returnUrl: returnUrl
         };
-        const initSig = generateSignature(initReqId, initTime, TENANT, initBody);
+        
+        // Theo tài liệu: Lọc và sắp xếp các tham số tiêu đề theo bảng chữ cái.
+        // Authorization (A) -> p-request-id -> p-request-time -> p-tenant
+        const authHeader = `Bearer ${accessToken}`;
+        const initPayloadToSign = `${authHeader}${initReqId}${initTime}${TENANT}${JSON.stringify(initBody)}`;
+        
+        const signInit = crypto.createSign('SHA256');
+        signInit.update(initPayloadToSign);
+        signInit.end();
+        const initSig = signInit.sign(PRIVATE_KEY, 'base64');
 
         const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
             method: 'POST',
@@ -141,7 +150,7 @@ export default async function handler(req, res) {
                 'p-request-id': initReqId,
                 'p-request-time': initTime,
                 'p-tenant': TENANT,
-                'Authorization': `Bearer ${accessToken}`,
+                'Authorization': authHeader,
                 'p-signature': initSig
             },
             body: JSON.stringify(initBody)
@@ -160,7 +169,18 @@ export default async function handler(req, res) {
         } else {
             return res.status(400).json({ 
                 success: false, 
-                message: `Tạo thanh toán thất bại (HTTP ${initRes.status}): ` + (initData.message || initText || 'Empty response') 
+                message: `Tạo thanh toán thất bại (HTTP ${initRes.status}): ` + (initData.message || initText || 'Empty response'),
+                debugInit: {
+                    payloadToSign: initPayloadToSign,
+                    generatedSignature: initSig,
+                    requestHeaders: {
+                        'Authorization': authHeader,
+                        'p-request-id': initReqId,
+                        'p-request-time': initTime,
+                        'p-tenant': TENANT,
+                        'p-signature': initSig
+                    }
+                }
             });
         }
 
