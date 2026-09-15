@@ -88,7 +88,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
                 'p-request-id': loginReqId,
                 'p-request-time': loginTime,
-                'p-tenant': INIT_TENANT,
+                'p-tenant': TENANT,
                 'p-signature': loginSig
             },
             body: JSON.stringify(loginBody)
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
             requestHeaders: {
                 'p-request-id': loginReqId,
                 'p-request-time': loginTime,
-                'p-tenant': INIT_TENANT,
+                'p-tenant': TENANT,
                 'p-signature': loginSig
             },
             requestBody: loginBody,
