@@ -170,7 +170,8 @@ export default async function handler(req, res) {
         if (initData.code === 'SUCCESS') {
             return res.status(200).json({ 
                 success: true, 
-                paymentUrl: initData.data.paymentUrl || initData.data.payment_url || initData.data.redirectUrl 
+                paymentUrl: initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl,
+                rawData: initData
             });
         } else {
             return res.status(400).json({ 
