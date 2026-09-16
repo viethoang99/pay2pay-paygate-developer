@@ -18,6 +18,21 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Fix blurry text in PrismJS themes */
+        pre[class*="language-"], code[class*="language-"] {
+            text-shadow: none !important;
+            font-size: 0.9rem !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.025em;
+        }
+        /* Make example boxes stand out more */
+        pre[class*="language-"] {
+            border: 1px solid #2d2d44;
+            border-radius: 0.5rem !important;
+            padding: 1.25rem !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
