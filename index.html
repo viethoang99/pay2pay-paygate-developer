@@ -273,18 +273,36 @@
     <!-- ==================== PAGE: PAYMENT RESULT ==================== -->
     <div id="page-payment-result" class="page hidden">
         <div class="max-w-lg mx-auto px-4 py-20 text-center">
-            <!-- Icon trạng thái (sẽ được JS cập nhật) -->
-            <div id="result-icon-container" class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg id="result-icon" class="w-10 h-10 text-gray-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <!-- Icon trạng thái -->
+            <div id="result-icon-container" class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-gray-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             </div>
             
-            <h1 id="result-title" class="text-2xl font-bold text-gray-900 mb-3">Đang kiểm tra kết quả...</h1>
-            <p id="result-message" class="text-gray-600 mb-8">Vui lòng chờ trong lúc chúng tôi đồng bộ với cổng thanh toán.</p>
+            <h1 id="result-title" class="text-2xl font-bold text-gray-900 mb-2">Đang kiểm tra kết quả...</h1>
+            <p id="result-message" class="text-gray-600 mb-6">Vui lòng chờ trong lúc chúng tôi đồng bộ với cổng thanh toán.</p>
             
-            <!-- Hiển thị OrderID để tra cứu -->
-            <div id="result-order-info" class="hidden mb-8 p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <!-- Thông tin đơn hàng -->
+            <div id="result-order-info" class="hidden mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <p class="text-sm text-gray-500">Mã đơn hàng</p>
                 <p id="result-order-id" class="text-lg font-mono font-semibold text-gray-800">---</p>
+            </div>
+
+            <!-- Chi tiết giao dịch -->
+            <div id="result-txn-details" class="hidden mb-8">
+                <div class="bg-gray-50 rounded-xl border border-gray-100 divide-y divide-gray-100">
+                    <div class="flex justify-between items-center px-4 py-3">
+                        <span class="text-sm text-gray-500">Mã giao dịch</span>
+                        <span id="result-txn-id" class="text-sm font-mono font-medium text-gray-800">---</span>
+                    </div>
+                    <div class="flex justify-between items-center px-4 py-3">
+                        <span class="text-sm text-gray-500">Số tiền</span>
+                        <span id="result-amount" class="text-sm font-semibold text-gray-800">---</span>
+                    </div>
+                    <div class="flex justify-between items-center px-4 py-3">
+                        <span class="text-sm text-gray-500">Ngày giao dịch</span>
+                        <span id="result-txn-date" class="text-sm font-medium text-gray-800">---</span>
+                    </div>
+                </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 justify-center">

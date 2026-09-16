@@ -7,15 +7,6 @@ window.App = (function() {
     let currentPage = 'home';
 
     function navigate(page) {
-        // Map các status Pay2Pay trả về sang trang payment-result
-        const paymentStatuses = ['payment-success', 'payment-failed', 'payment-pending', 'payment-cancel', 'payment-error'];
-        let paymentStatus = null;
-        
-        if (paymentStatuses.includes(page) || page.startsWith('payment-')) {
-            paymentStatus = page;
-            page = 'payment-result';
-        }
-
         if (!pages.includes(page)) page = 'home';
         currentPage = page;
 
@@ -48,9 +39,6 @@ window.App = (function() {
             case 'docs':
                 DocsModule.init();
                 break;
-            case 'payment-result':
-                renderPaymentResult(paymentStatus);
-                break;
         }
 
         // Scroll to top
@@ -63,62 +51,111 @@ window.App = (function() {
 
     function handleHashChange() {
         const fullHash = window.location.hash.slice(1) || 'home';
-        const page = fullHash.split('?')[0]; // Strip query params
+        const page = fullHash.split('?')[0];
         navigate(page);
     }
 
-    function renderPaymentResult(status) {
+    /**
+     * Kiểm tra URL query params từ Pay2Pay callback
+     * URL dạng: https://{domain}?status=SUCCESS&orderId=XXX&txnId=YYY&amount=100000&message=...
+     * Status: SUCCESS | PROCESSING | FAIL
+     */
+    function checkPaymentCallback() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+
+        if (!status) return false;
+
+        // Lấy toàn bộ thông tin giao dịch từ query params
+        const txnInfo = {
+            status: status,
+            merchantId: urlParams.get('merchantId') || '',
+            orderId: urlParams.get('orderId') || '',
+            txnId: urlParams.get('txnId') || '',
+            amount: urlParams.get('amount') || '',
+            code: urlParams.get('code') || '',
+            message: urlParams.get('message') || '',
+            txnDate: urlParams.get('txnDate') || '',
+        };
+
+        // Xóa query params khỏi URL để reload không hiện lại
+        window.history.replaceState({}, document.title, window.location.pathname + '#payment-result');
+
+        // Hiện trang payment-result
+        navigate('payment-result');
+        renderPaymentResult(txnInfo);
+
+        return true;
+    }
+
+    /**
+     * Render giao diện kết quả thanh toán dựa trên status từ Pay2Pay
+     */
+    function renderPaymentResult(txnInfo) {
         const iconContainer = document.getElementById('result-icon-container');
         const title = document.getElementById('result-title');
         const message = document.getElementById('result-message');
         const orderInfo = document.getElementById('result-order-info');
+        const txnDetails = document.getElementById('result-txn-details');
 
-        // Parse query params từ hash (vd: #payment-success?orderId=XXX&txnId=YYY)
-        const hashParts = window.location.hash.split('?');
-        const urlParams = new URLSearchParams(hashParts[1] || '');
-        const orderId = urlParams.get('orderId') || urlParams.get('order_id') || '';
-        const txnId = urlParams.get('txnId') || urlParams.get('txn_id') || '';
-
-        // Hiện thông tin đơn hàng nếu có
-        if (orderId || txnId) {
+        // Hiện thông tin đơn hàng
+        if (txnInfo.orderId) {
             orderInfo.classList.remove('hidden');
-            document.getElementById('result-order-id').textContent = orderId || txnId;
+            document.getElementById('result-order-id').textContent = txnInfo.orderId;
         }
 
-        if (!status || status === 'payment-result') {
-            status = 'payment-success'; // default
+        // Hiện chi tiết giao dịch
+        if (txnDetails) {
+            if (txnInfo.txnId) {
+                document.getElementById('result-txn-id').textContent = txnInfo.txnId;
+            }
+            if (txnInfo.amount) {
+                document.getElementById('result-amount').textContent = formatCurrency(parseInt(txnInfo.amount));
+            }
+            if (txnInfo.txnDate) {
+                const d = txnInfo.txnDate;
+                document.getElementById('result-txn-date').textContent = d.length === 8 
+                    ? d.slice(6,8) + '/' + d.slice(4,6) + '/' + d.slice(0,4)
+                    : d;
+            }
+            if (txnInfo.txnId || txnInfo.amount || txnInfo.txnDate) {
+                txnDetails.classList.remove('hidden');
+            }
         }
 
-        switch(status) {
-            case 'payment-success':
+        switch(txnInfo.status) {
+            case 'SUCCESS':
                 CartModule.clear();
                 CartModule.render();
-                iconContainer.className = 'w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6';
-                iconContainer.innerHTML = '<svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                iconContainer.className = 'w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6';
+                iconContainer.innerHTML = '<svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
                 title.textContent = 'Thanh toán thành công!';
-                title.className = 'text-2xl font-bold text-green-600 mb-3';
-                message.textContent = 'Giao dịch của bạn đã được xử lý thành công. Cảm ơn bạn đã mua hàng!';
+                title.className = 'text-2xl font-bold text-green-600 mb-2';
+                message.textContent = txnInfo.message || 'Giao dịch đã được xử lý thành công. Cảm ơn bạn đã mua hàng!';
                 break;
 
-            case 'payment-failed':
-            case 'payment-error':
-            case 'payment-cancel':
-                iconContainer.className = 'w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6';
-                iconContainer.innerHTML = '<svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
-                title.textContent = status === 'payment-cancel' ? 'Giao dịch đã bị hủy' : 'Thanh toán thất bại';
-                title.className = 'text-2xl font-bold text-red-600 mb-3';
-                message.textContent = status === 'payment-cancel' 
-                    ? 'Bạn đã hủy giao dịch thanh toán. Đơn hàng chưa được thanh toán.'
-                    : 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại hoặc chọn phương thức khác.';
+            case 'FAIL':
+                iconContainer.className = 'w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6';
+                iconContainer.innerHTML = '<svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+                title.textContent = 'Thanh toán thất bại';
+                title.className = 'text-2xl font-bold text-red-600 mb-2';
+                message.textContent = txnInfo.message || 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại.';
                 break;
 
-            case 'payment-pending':
+            case 'PROCESSING':
+                iconContainer.className = 'w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6';
+                iconContainer.innerHTML = '<svg class="w-12 h-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                title.textContent = 'Đang xử lý thanh toán';
+                title.className = 'text-2xl font-bold text-yellow-600 mb-2';
+                message.textContent = txnInfo.message || 'Giao dịch đang được xử lý. Vui lòng chờ trong giây lát.';
+                break;
+
             default:
-                iconContainer.className = 'w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6';
-                iconContainer.innerHTML = '<svg class="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-                title.textContent = 'Đang chờ xử lý';
-                title.className = 'text-2xl font-bold text-yellow-600 mb-3';
-                message.textContent = 'Giao dịch đang được xử lý. Vui lòng chờ trong giây lát hoặc kiểm tra lại sau.';
+                iconContainer.className = 'w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6';
+                iconContainer.innerHTML = '<svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                title.textContent = 'Không xác định trạng thái';
+                title.className = 'text-2xl font-bold text-gray-600 mb-2';
+                message.textContent = 'Không thể xác định trạng thái giao dịch. Vui lòng liên hệ hỗ trợ.';
                 break;
         }
     }
@@ -127,11 +164,16 @@ window.App = (function() {
         // Initialize cart
         CartModule.init();
 
+        // ƯU TIÊN: Kiểm tra callback từ Pay2Pay (có ?status= trong URL không)
+        const isCallback = checkPaymentCallback();
+
+        if (!isCallback) {
+            // Nếu không phải callback, dùng hash routing bình thường
+            handleHashChange();
+        }
+
         // Set up hash routing
         window.addEventListener('hashchange', handleHashChange);
-
-        // Handle initial hash
-        handleHashChange();
 
         // Mobile menu toggle
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -159,11 +201,7 @@ window.App = (function() {
             });
         });
 
-        console.log(`%c${AppConfig.GATEWAY_NAME} Demo Website Loaded`, 'color: #4f46e5; font-size: 16px; font-weight: bold;');
-        console.log('%cMock Mode: ' + (AppConfig.MOCK_MODE ? 'ON' : 'OFF'), 'color: #6b7280;');
-        if (AppConfig.MOCK_MODE) {
-            console.log('%c→ Chỉnh AppConfig.MOCK_MODE = false và cập nhật API_URL để kết nối BE thật', 'color: #f59e0b;');
-        }
+        console.log('%c' + AppConfig.GATEWAY_NAME + ' Demo Website Loaded', 'color: #4f46e5; font-size: 16px; font-weight: bold;');
     }
 
     return {

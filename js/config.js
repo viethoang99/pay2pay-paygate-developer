@@ -13,7 +13,7 @@ window.AppConfig = {
     CREATE_PAYMENT_ENDPOINT: '/create-payment',
 
     // URL callback sau khi thanh toán
-    RETURN_URL: window.location.href.split('#')[0] + '#payment-success',
+    RETURN_URL: window.location.origin + window.location.pathname,
     CANCEL_URL: window.location.href.split('#')[0] + '#cart',
 
     // Tiền tệ
