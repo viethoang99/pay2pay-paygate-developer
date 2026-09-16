@@ -110,9 +110,9 @@ window.CheckoutModule = (function() {
             }
 
             if (result.success && result.data && result.data.paymentLink) {
-                // Mở payment link trong tab mới
-                window.open(result.data.paymentLink, '_blank');
-                showToast('Đã mở trang thanh toán!', 'success');
+                // Redirect trực tiếp trên trang hiện tại
+                window.location.href = result.data.paymentLink;
+                return; // Dừng lại vì đang chuyển trang
 
                 // Clear cart sau khi tạo payment link thành công
                 CartModule.clear();
