@@ -484,15 +484,24 @@ sequenceDiagram
                         </div>
 
                         <h4 class="font-bold text-gray-700 mb-2">III.2. CHỮ KÝ ĐIỆN TỬ (RSA-2048)</h4>
-                        <ul class="list-disc pl-5 text-gray-700 space-y-2 mb-6">
+                        <ul class="list-disc pl-5 text-gray-700 space-y-2 mb-4">
                             <li>Người bán tạo cặp khóa RSA-2048 (khóa riêng tư và khóa công khai).</li>
                             <li>Khóa riêng tư dành cho người bán để tạo chữ ký. Khóa công khai gửi cho Pay2Pay để xác minh.</li>
                             <li><strong>Cách tạo chữ ký:</strong><br>
                                 Bước 1: Lọc và sắp xếp các tham số header (bắt đầu bằng <code>p-</code>) theo bảng chữ cái và nối lại.<br>
                                 Bước 2: Kết hợp với phần thân (body) yêu cầu.<br>
-                                Bước 3: Chữ ký = <code>SHA256withRSA(Chuỗi cần ký)</code>
+                                Bước 3: Chữ ký = <code>SHA256withRSA(Chuỗi cần ký ở Bước 2)</code>
                             </li>
                         </ul>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mb-8 text-sm text-gray-700 break-all">
+                            <h5 class="font-bold text-gray-800 uppercase mb-2 text-base">VÍ DỤ:</h5>
+                            <p class="mb-4">SHA256withRSA(RSA private key, "5d599b0b-c728-4c18-9748-17f38b4cc9a620240521115518MERCHANT-WEB{\"username\":\"0982569888\",\"password\":\"YTEyYWQxYjc3MGM0MTg4ZWQ5ZDQ3MTZlODNjYTJhZWRmOTFiMjliNjJhNzY0YjI4MzI3NWY5OGUyZWE2NWMwOA==\"}")</p>
+                            
+                            <h5 class="font-bold text-gray-800 uppercase mb-2 text-base">KẾT QUẢ TẠO CHỮ KÝ:</h5>
+                            <p class="mb-4">UNJDNul1ErQrci6RrNXfWFDnJUAXKSAokZAejFDYCzqnm8jqZt5cns21S0C1MVCbr1gm9mz5+OiJWJJPlxxsd5hn9G0izWhgvZ4MbLpYzzHFRmarLvqwsfSsJSAk5iaPlMMHHUy4hu5dr1XURRQjy42xJR6h/5vkyPLxzkjMEpeW<br>YCd/d9nQKfBi7vcp+zApwH+7vNzyT/37tqmT5sl/KYvoLPS47nOkJHuhOct8LmjQJmQBPGUiwr5U048/ZiqQmAb9Ki62/Dy8Vh3CWPybTKKLSfIXivOglwNHhU0y7imLE6nVO5puBigLVg2BjX9M9MQzIr/42cD9x4nNMSs8Kw==</p>
+                            
+                            <p class="font-medium"><span class="text-blue-600 font-bold">Vui lòng tham khảo liên kết sau để kiểm tra:</span> <a href="https://static.pay2pay.vn/tools/RSA2048_Tools" target="_blank" class="text-blue-500 hover:underline">https://static.pay2pay.vn/tools/RSA2048_Tools</a></p>
+                        </div>
 
                         <!-- IV. THÔNG TIN HỆ THỐNG -->
                         <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2 text-primary-700">IV. THÔNG TIN HỆ THỐNG</h2>
