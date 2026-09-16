@@ -251,101 +251,129 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                                 <!-- Step 1 -->
                                 <div class="flex flex-col items-center text-center">
-                                    <div class="w-48 h-64 bg-white border-2 border-blue-100 rounded-2xl shadow-sm mb-6 flex flex-col overflow-hidden relative">
-                                        <div class="h-6 bg-gray-100 flex items-center px-2 border-b border-gray-200">
-                                            <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-red-400"></div><div class="w-2 h-2 rounded-full bg-yellow-400"></div><div class="w-2 h-2 rounded-full bg-green-400"></div></div>
+                                    <div class="w-56 h-64 relative mb-6">
+                                        <!-- PC Mockup -->
+                                        <div class="absolute top-2 left-0 w-44 h-40 bg-white border-2 border-blue-100 rounded-lg shadow-sm flex flex-col overflow-hidden">
+                                            <div class="h-5 bg-gray-100 flex items-center px-1.5 border-b border-gray-200">
+                                                <div class="flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-red-400"></div><div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div><div class="w-1.5 h-1.5 rounded-full bg-green-400"></div></div>
+                                            </div>
+                                            <div class="p-2.5 flex-1 flex flex-col gap-2 bg-gray-50">
+                                                <div class="h-2 w-20 bg-gray-300 rounded mb-1"></div>
+                                                <div class="flex items-center gap-2 bg-white p-1.5 rounded border border-gray-200">
+                                                    <div class="w-2.5 h-2.5 rounded-full border border-gray-300"></div><div class="h-1.5 w-16 bg-gray-300 rounded"></div>
+                                                </div>
+                                                <!-- Pay2Pay Option -->
+                                                <div class="flex items-center gap-2 bg-primary-50 p-1.5 rounded border border-primary-500">
+                                                    <div class="w-2.5 h-2.5 rounded-full border-[3px] border-primary-500 flex items-center justify-center"></div>
+                                                    <span class="text-[8px] font-bold text-gray-800 leading-none">Pay<span class="text-primary-600">2Pay</span></span>
+                                                </div>
+                                                <div class="mt-auto h-6 bg-primary-600 rounded flex items-center justify-center"><div class="h-1.5 w-12 bg-white/90 rounded"></div></div>
+                                            </div>
                                         </div>
-                                        <div class="p-3 flex-1 flex flex-col gap-2">
-                                            <!-- Header -->
-                                            <div class="h-2 w-16 bg-gray-300 rounded mx-auto mb-2"></div>
-                                            <!-- Product 1 -->
-                                            <div class="flex gap-2 items-center bg-gray-50 p-2 rounded">
-                                                <div class="w-8 h-8 bg-gray-200 rounded"></div>
-                                                <div class="flex-1 flex flex-col gap-1 items-start">
-                                                    <div class="h-1.5 w-12 bg-gray-300 rounded"></div>
-                                                    <div class="h-1.5 w-8 bg-gray-200 rounded"></div>
+                                        <!-- Mobile Mockup -->
+                                        <div class="absolute bottom-2 right-2 w-24 h-44 bg-white border-2 border-gray-300 rounded-xl shadow-lg flex flex-col overflow-hidden z-10">
+                                            <div class="h-4 bg-gray-100 flex justify-center items-center border-b border-gray-200"><div class="w-6 h-0.5 bg-gray-300 rounded-full"></div></div>
+                                            <div class="p-2 flex-1 flex flex-col gap-1.5 bg-white">
+                                                <div class="h-2 w-12 bg-gray-300 rounded mb-1"></div>
+                                                <div class="flex items-center gap-1.5 bg-gray-50 p-1 rounded border border-gray-100">
+                                                    <div class="w-2 h-2 rounded-full border border-gray-300"></div><div class="h-1 w-10 bg-gray-300 rounded"></div>
                                                 </div>
-                                                <div class="h-2 w-8 bg-gray-300 rounded"></div>
-                                            </div>
-                                            <!-- Product 2 -->
-                                            <div class="flex gap-2 items-center bg-gray-50 p-2 rounded">
-                                                <div class="w-8 h-8 bg-gray-200 rounded"></div>
-                                                <div class="flex-1 flex flex-col gap-1 items-start">
-                                                    <div class="h-1.5 w-14 bg-gray-300 rounded"></div>
-                                                    <div class="h-1.5 w-6 bg-gray-200 rounded"></div>
+                                                <!-- Pay2Pay Option -->
+                                                <div class="flex items-center gap-1.5 bg-primary-50 p-1 rounded border border-primary-500">
+                                                    <div class="w-2 h-2 rounded-full border-[2px] border-primary-500"></div>
+                                                    <span class="text-[6px] font-bold text-gray-800 leading-none">Pay<span class="text-primary-600">2Pay</span></span>
                                                 </div>
-                                                <div class="h-2 w-8 bg-gray-300 rounded"></div>
-                                            </div>
-                                            <!-- Total -->
-                                            <div class="flex justify-between items-center pt-2 border-t border-gray-100 mt-auto">
-                                                <div class="h-2 w-10 bg-gray-400 rounded"></div>
-                                                <div class="h-2.5 w-12 bg-blue-600 rounded"></div>
-                                            </div>
-                                            <!-- Checkout button -->
-                                            <div class="h-8 bg-primary-600 rounded flex items-center justify-center mt-2 shadow-sm">
-                                                <div class="h-1.5 w-16 bg-white/90 rounded"></div>
+                                                <div class="mt-auto h-6 bg-primary-600 rounded-md flex items-center justify-center"><div class="h-1 w-8 bg-white/90 rounded"></div></div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow mb-4 relative z-10"></div>
-                                    <p class="text-sm text-gray-600">Khách hàng đặt hàng &<br>chọn Thanh toán trên Web</p>
+                                    <p class="text-sm text-gray-600">Khách hàng chọn thanh toán<br>qua Pay2Pay trên PC/Mobile</p>
                                 </div>
 
                                 <!-- Step 2 -->
                                 <div class="flex flex-col items-center text-center">
-                                    <div class="w-64 h-48 bg-white border-2 border-blue-100 rounded-lg shadow-sm mb-6 flex flex-col overflow-hidden relative mt-8">
+                                    <div class="w-64 h-64 bg-white border-2 border-blue-100 rounded-lg shadow-sm mb-6 flex flex-col overflow-hidden relative">
                                         <div class="h-6 bg-gray-100 flex items-center px-2 border-b border-gray-200">
                                             <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-red-400"></div><div class="w-2 h-2 rounded-full bg-yellow-400"></div><div class="w-2 h-2 rounded-full bg-green-400"></div></div>
                                         </div>
-                                        <div class="p-4 flex-1 flex flex-col">
+                                        <div class="p-4 flex-1 flex flex-col bg-gray-50/50">
                                             <!-- Header with Logo -->
-                                            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                                            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-3">
                                                 <div class="flex items-center gap-1.5">
                                                     <div class="w-5 h-5 bg-gradient-to-br from-primary-500 to-primary-700 rounded flex items-center justify-center">
                                                         <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                                     </div>
                                                     <span class="text-[12px] font-bold text-gray-900 tracking-tight">Pay<span class="text-primary-600">2Pay</span></span>
                                                 </div>
-                                                <div class="h-5 px-2 bg-blue-50 border border-blue-100 rounded text-[10px] text-blue-800 font-bold flex items-center justify-center">450.000đ</div>
+                                                <div class="text-[11px] text-blue-800 font-bold bg-blue-100 px-2 py-0.5 rounded">450.000đ</div>
                                             </div>
-                                            <!-- Payment Options Grid -->
-                                            <div class="grid grid-cols-2 gap-2">
-                                                <div class="h-8 border border-gray-200 rounded flex items-center justify-center"><div class="h-1.5 w-10 bg-gray-300 rounded"></div></div>
-                                                <div class="h-8 border-2 border-primary-500 bg-primary-50 rounded flex items-center justify-center relative">
-                                                    <div class="h-1.5 w-12 bg-primary-600 rounded"></div>
-                                                    <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary-500 rounded-full flex items-center justify-center shadow-sm">
-                                                        <svg class="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                                                    </div>
+                                            <!-- Payment Options List -->
+                                            <div class="flex flex-col gap-2">
+                                                <!-- Method 1 (Active) -->
+                                                <div class="flex items-center gap-3 p-2 border-2 border-primary-500 bg-white rounded-lg shadow-sm">
+                                                    <div class="w-3.5 h-3.5 rounded-full border-[3px] border-primary-500"></div>
+                                                    <div class="w-8 h-5 bg-blue-50 border border-blue-100 rounded flex items-center justify-center"><svg class="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg></div>
+                                                    <div class="h-1.5 w-20 bg-primary-700 rounded"></div>
                                                 </div>
-                                                <div class="h-8 border border-gray-200 rounded flex items-center justify-center"><div class="h-1.5 w-8 bg-gray-300 rounded"></div></div>
-                                                <div class="h-8 border border-gray-200 rounded flex items-center justify-center"><div class="h-1.5 w-12 bg-gray-300 rounded"></div></div>
+                                                <!-- Method 2 -->
+                                                <div class="flex items-center gap-3 p-2 border border-gray-200 bg-white rounded-lg">
+                                                    <div class="w-3.5 h-3.5 rounded-full border-2 border-gray-300"></div>
+                                                    <div class="w-8 h-5 bg-gray-50 border border-gray-200 rounded flex items-center justify-center"><svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                                                    <div class="h-1.5 w-16 bg-gray-400 rounded"></div>
+                                                </div>
+                                                <!-- Method 3 -->
+                                                <div class="flex items-center gap-3 p-2 border border-gray-200 bg-white rounded-lg">
+                                                    <div class="w-3.5 h-3.5 rounded-full border-2 border-gray-300"></div>
+                                                    <div class="w-8 h-5 bg-gray-50 border border-gray-200 rounded flex items-center justify-center"><svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg></div>
+                                                    <div class="h-1.5 w-24 bg-gray-400 rounded"></div>
+                                                </div>
                                             </div>
                                             <!-- Pay Button -->
-                                            <div class="mt-auto h-8 bg-primary-600 rounded flex items-center justify-center shadow-sm">
-                                                <div class="h-1.5 w-16 bg-white/90 rounded"></div>
+                                            <div class="mt-auto h-9 bg-primary-600 rounded-lg flex items-center justify-center shadow-sm">
+                                                <span class="text-[11px] text-white font-medium">Thanh toán ngay</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow mb-4 relative z-10"></div>
-                                    <p class="text-sm text-gray-600">Thực hiện thanh toán<br>trên cổng Pay2Pay</p>
+                                    <p class="text-sm text-gray-600">Chọn PTTT & thanh toán<br>trên cổng Pay2Pay</p>
                                 </div>
 
                                 <!-- Step 3 -->
                                 <div class="flex flex-col items-center text-center">
-                                    <div class="w-40 h-64 bg-white border-2 border-blue-100 rounded-2xl shadow-sm mb-6 flex flex-col overflow-hidden relative">
+                                    <div class="w-48 h-64 bg-white border-2 border-blue-100 rounded-2xl shadow-sm mb-6 flex flex-col overflow-hidden relative">
                                          <div class="h-6 bg-gray-100 flex items-center px-2 border-b border-gray-200">
                                             <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-red-400"></div><div class="w-2 h-2 rounded-full bg-yellow-400"></div><div class="w-2 h-2 rounded-full bg-green-400"></div></div>
                                         </div>
-                                        <div class="p-4 flex-1 flex flex-col items-center justify-center">
-                                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <div class="p-5 flex-1 flex flex-col items-center">
+                                            <div class="mt-2 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                             </div>
-                                            <div class="h-2 w-16 bg-gray-200 rounded mb-2"></div>
-                                            <div class="h-2 w-24 bg-gray-200 rounded"></div>
+                                            <div class="h-2 w-20 bg-green-600 rounded mb-5"></div>
+                                            
+                                            <!-- Receipt details -->
+                                            <div class="w-full border-t border-dashed border-gray-300 pt-4 flex flex-col gap-2.5">
+                                                <div class="flex justify-between w-full">
+                                                    <div class="h-1.5 w-12 bg-gray-400 rounded"></div>
+                                                    <div class="h-1.5 w-16 bg-gray-600 rounded"></div>
+                                                </div>
+                                                <div class="flex justify-between w-full">
+                                                    <div class="h-1.5 w-14 bg-gray-400 rounded"></div>
+                                                    <div class="h-1.5 w-20 bg-gray-600 rounded"></div>
+                                                </div>
+                                                <div class="flex justify-between w-full mt-1">
+                                                    <div class="h-2 w-10 bg-gray-500 rounded"></div>
+                                                    <div class="h-2.5 w-16 bg-blue-600 rounded"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-auto h-8 w-full border border-gray-300 rounded-lg flex items-center justify-center text-[10px] text-gray-500 font-medium">
+                                                Về trang chủ
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow mb-4 relative z-10"></div>
-                                    <p class="text-sm text-gray-600">Thanh toán thành công,<br>Merchant web (PC/Mobile)<br>hiển thị kết quả giao dịch</p>
+                                    <p class="text-sm text-gray-600">Thanh toán thành công,<br>trả kết quả về Merchant</p>
                                 </div>
                             </div>
                             
