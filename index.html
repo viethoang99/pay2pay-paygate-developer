@@ -16,25 +16,46 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        /* Fix blurry text in PrismJS themes */
+        /* Custom syntax highlight style to match design */
         pre[class*="language-"], code[class*="language-"] {
             text-shadow: none !important;
-            font-size: 0.9rem !important;
-            font-weight: 500 !important;
-            letter-spacing: 0.025em;
-            background-color: #1e1e2f !important;
-            color: #f8f8f2 !important;
+            font-size: 0.875rem !important;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+            background-color: transparent !important;
+            color: #334155 !important;
         }
-        /* Make example boxes stand out more */
-        pre[class*="language-"] {
-            border: 1px solid #33334d !important;
-            border-radius: 0.5rem !important;
-            padding: 1.25rem !important;
+        .code-window {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+        .code-window-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        .code-window-body {
             overflow-x: auto;
         }
+        .code-window-body pre {
+            margin: 0 !important;
+            padding: 1.25rem !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        /* Color overrides */
+        .token.property { color: #2563eb !important; }
+        .token.string { color: #059669 !important; }
+        .token.number, .token.boolean { color: #ea580c !important; }
+        .token.punctuation, .token.operator { color: #94a3b8 !important; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -526,9 +547,16 @@
 
                             <h4 class="font-bold text-gray-800 mt-6 mb-2">4. Ví dụ (Example)</h4>
                             <div class="space-y-4">
-                                <div>
-                                    <p class="font-medium text-gray-700 text-sm mb-1">Request:</p>
-                                    <pre><code class="language-bash">curl --location 'https://{DOMAIN}/auth-service/api/v1.0/user/login' \
+                                <div class="code-window">
+                                    <div class="code-window-header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-blue-500 font-mono text-base font-bold">{}</span>
+                                            <span class="tracking-widest uppercase font-semibold text-gray-600">REQUEST</span>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                                    </div>
+                                    <div class="code-window-body">
+                                        <pre><code class="language-bash">curl --location 'https://{DOMAIN}/auth-service/api/v1.0/user/login' \
 --header 'p-request-id: e3d072af-adf6-4d98-9188-5ba696fe7381' \
 --header 'p-request-time: 20240520093724' \
 --header 'p-tenant: MERCHANT-WEB' \
@@ -538,10 +566,18 @@
     "username": "0982569888",
     "password": "YTEyYWQxYjc3MGM0MTg4ZWQ5ZDQ3MTZlODNjYTJhZWRmOTFiMjliNjJhNzY0YjI4MzI3NWY5OGUyZWE2NWMwOA=="
 }'</code></pre>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-medium text-gray-700 text-sm mb-1">Response:</p>
-                                    <pre><code class="language-json">{
+                                <div class="code-window">
+                                    <div class="code-window-header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-indigo-500 font-mono text-base font-bold">{}</span>
+                                            <span class="tracking-widest uppercase font-semibold text-gray-600">RESPONSE</span>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                                    </div>
+                                    <div class="code-window-body">
+                                        <pre><code class="language-json">{
     "code": "SUCCESS",
     "message": "Thành công.",
     "data": {
@@ -552,6 +588,7 @@
         "profile": null
     }
 }</code></pre>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -605,17 +642,32 @@
 
                             <h4 class="font-bold text-gray-800 mt-6 mb-2">4. Ví dụ (Example)</h4>
                             <div class="space-y-4">
-                                <div>
-                                    <p class="font-medium text-gray-700 text-sm mb-1">Request:</p>
-                                    <pre><code class="language-bash">curl --location 'https://{DOMAIN}/auth-service/api/v1.0/user/refresh' \
+                                <div class="code-window">
+                                    <div class="code-window-header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-blue-500 font-mono text-base font-bold">{}</span>
+                                            <span class="tracking-widest uppercase font-semibold text-gray-600">REQUEST</span>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                                    </div>
+                                    <div class="code-window-body">
+                                        <pre><code class="language-bash">curl --location 'https://{DOMAIN}/auth-service/api/v1.0/user/refresh' \
 --header 'p-request-id: 237b185a-42ae-4951-9032-493f6b8e30e5' \
 --header 'p-request-time: 20240521090414' \
 --header 'p-tenant: MERCHANT-WEB' \
 --header 'Authorization: Bearer eyJhbGciOiJSUzI1...'</code></pre>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-medium text-gray-700 text-sm mb-1">Response:</p>
-                                    <pre><code class="language-json">{
+                                <div class="code-window">
+                                    <div class="code-window-header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-indigo-500 font-mono text-base font-bold">{}</span>
+                                            <span class="tracking-widest uppercase font-semibold text-gray-600">RESPONSE</span>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                                    </div>
+                                    <div class="code-window-body">
+                                        <pre><code class="language-json">{
     "code": "SUCCESS",
     "message": "Thành công.",
     "data": {
@@ -625,6 +677,7 @@
         "refreshExpiresIn": "1800"
     }
 }</code></pre>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -687,9 +740,16 @@
 
                             <h4 class="font-bold text-gray-800 mt-6 mb-2">4. Ví dụ (Example)</h4>
                             <div class="space-y-4">
-                                <div>
-                                    <p class="font-medium text-gray-700 text-sm mb-1">Request:</p>
-                                    <pre><code class="language-bash">curl --location 'https://uat-api.pay2pay.vn/pgw-transaction-service/paymentpage/api/v1.0/init' \
+                                <div class="code-window">
+                                    <div class="code-window-header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-blue-500 font-mono text-base font-bold">{}</span>
+                                            <span class="tracking-widest uppercase font-semibold text-gray-600">REQUEST</span>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                                    </div>
+                                    <div class="code-window-body">
+                                        <pre><code class="language-bash">curl --location 'https://uat-api.pay2pay.vn/pgw-transaction-service/paymentpage/api/v1.0/init' \
 --header 'p-tenant: PAYMENT-SITE' \
 --header 'p-request-id: d5b0e905-18a1-446c-bc41-c3667681594a' \
 --header 'p-request-time: 123123' \
@@ -706,10 +766,18 @@
     "returnUrl": "https://24h.com.vn",
     "paymentFee": 0
 }'</code></pre>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-medium text-gray-700 text-sm mb-1">Response:</p>
-                                    <pre><code class="language-json">{
+                                <div class="code-window">
+                                    <div class="code-window-header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-indigo-500 font-mono text-base font-bold">{}</span>
+                                            <span class="tracking-widest uppercase font-semibold text-gray-600">RESPONSE</span>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                                    </div>
+                                    <div class="code-window-body">
+                                        <pre><code class="language-json">{
     "code": "SUCCESS",
     "message": "Thành công.",
     "data": {
@@ -720,6 +788,7 @@
         "paymentUrl": "https://uat-checkout.pay2pay.vn/v2/202608240413768"
     }
 }</code></pre>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -891,14 +960,29 @@
 
                             <h4 class="font-bold text-gray-800 mt-6 mb-2">3. Ví dụ (Example Mẫu dữ liệu)</h4>
                             <div class="space-y-4">
-                                <div>
-                                    <p class="font-medium text-gray-700 text-sm mb-1">Header:</p>
-                                    <pre><code class="language-bash">P-API-KEY: 123456
+                                <div class="code-window">
+                                    <div class="code-window-header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-purple-500 font-mono text-base font-bold">{}</span>
+                                            <span class="tracking-widest uppercase font-semibold text-gray-600">HEADER</span>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                                    </div>
+                                    <div class="code-window-body">
+                                        <pre><code class="language-bash">P-API-KEY: 123456
 P-SIGNATURE: qi2bkXcxhiDnZMVFXn6z64wCSagpD9ujquDGRSzemg0=</code></pre>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-medium text-gray-700 text-sm mb-1">Body:</p>
-                                    <pre><code class="language-json">{
+                                <div class="code-window">
+                                    <div class="code-window-header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-emerald-500 font-mono text-base font-bold">{}</span>
+                                            <span class="tracking-widest uppercase font-semibold text-gray-600">BODY</span>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                                    </div>
+                                    <div class="code-window-body">
+                                        <pre><code class="language-json">{
     "merchantId": "PP0000042",
     "orderId": "be4e93a4f8af8661cf758604",
     "txnId": "202511070395223",
@@ -917,6 +1001,7 @@ P-SIGNATURE: qi2bkXcxhiDnZMVFXn6z64wCSagpD9ujquDGRSzemg0=</code></pre>
     "receiverBankRefNumber": "MBB55971988262877",
     "Trạng thái": "THÀNH CÔNG"
 }</code></pre>
+                                    </div>
                                 </div>
                             </div>
                         </div>
