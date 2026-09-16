@@ -465,6 +465,46 @@
                                 <span class="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">POST</span>
                                 <span>https://{DOMAIN}/auth-service/api/v1.0/user/login</span>
                             </div>
+                            
+                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Header</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-id</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã duy nhất tương ứng với yêu cầu</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-time</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Thời gian yêu cầu API (Định dạng YYYYMMDDHHMMSS)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-tenant</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">&lt;THÔNG TIN NGƯỜI THUÊ NHÀ&gt;</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-signature</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Chữ ký được tạo ra bởi thuật toán RSA-2048</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Body</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">username</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Tên tài khoản đăng nhập</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">password</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mật khẩu đã được mã hóa bằng thuật toán SHA256 (bao gồm cả username)</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Response</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">code</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã kết quả</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">message</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Tin nhắn kết quả</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">accessToken</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã để truy cập các API khác</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">refreshToken</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Sử dụng để lấy accessToken mới khi hết hạn</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">expireIn</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2">Thời gian hết hạn của accessToken (giây)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">refreshExpiresIn</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2">Thời gian hết hạn của refreshToken (giây)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">Profile</td><td class="px-3 py-2 border-r">Object</td><td class="px-3 py-2">Hồ sơ người dùng (nếu có)</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- V.2 API REFRESH TOKEN -->
@@ -474,6 +514,44 @@
                             <div class="bg-gray-900 text-gray-100 p-3 rounded-lg font-mono text-sm shadow-inner flex items-center gap-3 mb-4">
                                 <span class="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">POST</span>
                                 <span>https://{DOMAIN}/auth-service/api/v1.0/user/refresh</span>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Header</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-id</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã duy nhất tương ứng với yêu cầu</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-time</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Thời gian yêu cầu API (Định dạng YYYYMMDDHHMMSS)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-tenant</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">&lt;THÔNG TIN NGƯỜI THUÊ NHÀ&gt;</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-signature</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Chữ ký được tạo ra bởi thuật toán RSA-2048</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Body</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">refreshToken</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Được sử dụng để lấy mã truy cập (accessToken) mới</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Response</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">code</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã kết quả</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">message</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Tin nhắn</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">accessToken</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Được sử dụng để truy cập các API khác</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">refreshToken</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Được sử dụng để lấy mã truy cập mới</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">expireIn</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2">Thời gian hết hạn của accessToken (giây)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">refreshExpiresIn</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2">Đã hết thời gian của RefreshToken (tính theo giây)</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
