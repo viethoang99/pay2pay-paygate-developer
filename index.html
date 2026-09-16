@@ -185,40 +185,40 @@
                             <h2 class="text-xl font-bold text-gray-900 mb-2">Mô hình tích hợp</h2>
                             <p class="text-sm text-gray-500">Chọn mô hình tích hợp Pay2Pay phù hợp</p>
                         </div>
-                        <nav class="space-y-1 border-r border-gray-200 pr-4">
+                        <nav class="space-y-1 border-r border-gray-200 pr-4" id="docs-sidebar">
                             <!-- Accordion Item 1 (Active) -->
-                            <div class="border-b border-gray-100 py-2">
-                                <button class="w-full flex items-center justify-between text-left py-2 text-sm font-bold text-primary-600">
+                            <div class="border-b border-gray-100 py-2 accordion-item active">
+                                <button class="w-full flex items-center justify-between text-left py-2 text-sm font-bold text-primary-600 accordion-btn">
                                     Dịch vụ thanh toán Redirectlink
-                                    <svg class="w-4 h-4 text-primary-600 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg class="w-4 h-4 text-primary-600 transform rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-primary-100 pl-4">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-primary-600">Giới thiệu</a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900">API tích hợp</a>
+                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-primary-100 pl-4 accordion-content">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-primary-600 doc-link active" data-target="intro">Giới thiệu</a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">API tích hợp</a>
                                 </div>
                             </div>
 
                             <!-- Accordion Item 2 -->
-                            <div class="border-b border-gray-100 py-2">
-                                <button class="w-full flex items-center justify-between text-left py-2 text-sm font-medium text-gray-700 hover:text-primary-600">
+                            <div class="border-b border-gray-100 py-2 accordion-item">
+                                <button class="w-full flex items-center justify-between text-left py-2 text-sm font-medium text-gray-700 hover:text-primary-600 accordion-btn">
                                     Dịch vụ Thu hộ
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-gray-100 pl-4 hidden">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900">Giới thiệu</a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900">API tích hợp</a>
+                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-gray-100 pl-4 hidden accordion-content">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">Giới thiệu</a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">API tích hợp</a>
                                 </div>
                             </div>
                             
                             <!-- Accordion Item 3 -->
-                            <div class="border-b border-gray-100 py-2">
-                                <button class="w-full flex items-center justify-between text-left py-2 text-sm font-medium text-gray-700 hover:text-primary-600">
+                            <div class="border-b border-gray-100 py-2 accordion-item">
+                                <button class="w-full flex items-center justify-between text-left py-2 text-sm font-medium text-gray-700 hover:text-primary-600 accordion-btn">
                                     Dịch vụ Chi hộ
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-gray-100 pl-4 hidden">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900">Giới thiệu</a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900">API tích hợp</a>
+                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-gray-100 pl-4 hidden accordion-content">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">Giới thiệu</a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">API tích hợp</a>
                                 </div>
                             </div>
                         </nav>
@@ -226,11 +226,11 @@
                 </aside>
                 
                 <!-- Content -->
-                <main class="flex-1 min-w-0">
+                <main class="flex-1 min-w-0" id="docs-main-content">
 
 
-                    <!-- Content Body -->
-                    <div class="prose max-w-none">
+                    <!-- Content Body (Intro) -->
+                    <div id="doc-intro" class="doc-section prose max-w-none">
                         <h1 class="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                             GIỚI THIỆU 
                             <span class="text-gray-300 font-normal">#</span>
@@ -323,9 +323,85 @@
                             <p class="text-center text-gray-400 italic text-sm mt-8">Mô hình tích hợp</p>
                         </div>
                     </div>
+
+                    <!-- Content Body (Coming soon) -->
+                    <div id="doc-coming-soon" class="doc-section hidden flex-col items-center justify-center py-32 text-center">
+                        <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <h2 class="text-2xl font-bold text-gray-400 mb-2">Đang cập nhật</h2>
+                        <p class="text-gray-500">Nội dung này đang được xây dựng, vui lòng quay lại sau.</p>
+                    </div>
                 </main>
             </div>
         </div>
+
+        <!-- Inline script for docs sidebar -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const sidebar = document.getElementById('docs-sidebar');
+                if (!sidebar) return;
+
+                // Accordion toggle logic
+                const accordionItems = sidebar.querySelectorAll('.accordion-item');
+                accordionItems.forEach(item => {
+                    const btn = item.querySelector('.accordion-btn');
+                    btn.addEventListener('click', () => {
+                        // Toggle this item
+                        const isActive = item.classList.contains('active');
+                        
+                        // Close all items
+                        accordionItems.forEach(i => {
+                            i.classList.remove('active');
+                            i.querySelector('.accordion-content').classList.add('hidden');
+                            i.querySelector('.accordion-btn svg').classList.remove('rotate-180');
+                            i.querySelector('.accordion-btn').classList.replace('text-primary-600', 'text-gray-700');
+                            i.querySelector('.accordion-btn').classList.replace('font-bold', 'font-medium');
+                        });
+
+                        // Open if it wasn't active
+                        if (!isActive) {
+                            item.classList.add('active');
+                            item.querySelector('.accordion-content').classList.remove('hidden');
+                            item.querySelector('.accordion-btn svg').classList.add('rotate-180');
+                            item.querySelector('.accordion-btn').classList.replace('text-gray-700', 'text-primary-600');
+                            item.querySelector('.accordion-btn').classList.replace('font-medium', 'font-bold');
+                        }
+                    });
+                });
+
+                // Link click logic (switch content)
+                const docLinks = sidebar.querySelectorAll('.doc-link');
+                const docSections = document.querySelectorAll('.doc-section');
+                
+                docLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        // Highlight active link
+                        docLinks.forEach(l => {
+                            l.classList.remove('text-primary-600', 'active');
+                            l.classList.add('text-gray-500');
+                        });
+                        e.target.classList.remove('text-gray-500');
+                        e.target.classList.add('text-primary-600', 'active');
+
+                        // Switch content
+                        const targetId = e.target.getAttribute('data-target');
+                        docSections.forEach(sec => sec.classList.add('hidden', 'flex-col'));
+                        docSections.forEach(sec => sec.classList.remove('flex'));
+                        
+                        const targetSec = document.getElementById('doc-' + targetId);
+                        if (targetSec) {
+                            if (targetId === 'coming-soon') {
+                                targetSec.classList.remove('hidden');
+                                targetSec.classList.add('flex');
+                            } else {
+                                targetSec.classList.remove('hidden');
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
     </div>
 
     <!-- ==================== PAGE: DEMO ==================== -->
