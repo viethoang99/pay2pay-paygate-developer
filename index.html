@@ -465,8 +465,8 @@
                                 <span class="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">POST</span>
                                 <span>https://{DOMAIN}/auth-service/api/v1.0/user/login</span>
                             </div>
-                            
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Header</h4>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">1. Request Header</h4>
                             <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
                                     <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
@@ -479,7 +479,7 @@
                                 </table>
                             </div>
                             
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Body</h4>
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">2. Request Body</h4>
                             <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
                                     <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
@@ -490,8 +490,8 @@
                                 </table>
                             </div>
 
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Response</h4>
-                            <div class="overflow-x-auto rounded border border-gray-200 bg-white">
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">3. Response</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-6">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
                                     <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2">Mô tả</th></tr></thead>
                                     <tbody class="divide-y divide-gray-100">
@@ -501,9 +501,40 @@
                                         <tr><td class="px-3 py-2 border-r font-mono text-primary-600">refreshToken</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Sử dụng để lấy accessToken mới khi hết hạn</td></tr>
                                         <tr><td class="px-3 py-2 border-r font-mono text-primary-600">expireIn</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2">Thời gian hết hạn của accessToken (giây)</td></tr>
                                         <tr><td class="px-3 py-2 border-r font-mono text-primary-600">refreshExpiresIn</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2">Thời gian hết hạn của refreshToken (giây)</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">Profile</td><td class="px-3 py-2 border-r">Object</td><td class="px-3 py-2">Hồ sơ người dùng (nếu có)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">Profile</td><td class="px-3 py-2 border-r">Object</td><td class="px-3 py-2">Đăng nhập vào hồ sơ nếu có</td></tr>
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">4. Ví dụ (Example)</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="font-medium text-gray-700 text-sm mb-1">Request:</p>
+                                    <pre><code class="language-bash">curl --location 'https://{DOMAIN}/auth-service/api/v1.0/user/login' \
+--header 'p-request-id: e3d072af-adf6-4d98-9188-5ba696fe7381' \
+--header 'p-request-time: 20240520093724' \
+--header 'p-tenant: MERCHANT-WEB' \
+--header 'p-signature: HLA0/lgWUpDVw+aG...' \
+--header 'Content-Type: application/json' \
+--data '{
+    "username": "0982569888",
+    "password": "YTEyYWQxYjc3MGM0MTg4ZWQ5ZDQ3MTZlODNjYTJhZWRmOTFiMjliNjJhNzY0YjI4MzI3NWY5OGUyZWE2NWMwOA=="
+}'</code></pre>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-700 text-sm mb-1">Response:</p>
+                                    <pre><code class="language-json">{
+    "code": "SUCCESS",
+    "message": "Thành công.",
+    "data": {
+        "accessToken": "eyJhbGciOiJSUzI1NiIs...",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+        "expireIn": "600",
+        "refreshExpiresIn": "1800",
+        "profile": null
+    }
+}</code></pre>
+                                </div>
                             </div>
                         </div>
 
@@ -516,7 +547,7 @@
                                 <span>https://{DOMAIN}/auth-service/api/v1.0/user/refresh</span>
                             </div>
 
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Header</h4>
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">1. Request Header</h4>
                             <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
                                     <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
@@ -529,7 +560,7 @@
                                 </table>
                             </div>
                             
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Body</h4>
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">2. Request Body</h4>
                             <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
                                     <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
@@ -539,8 +570,8 @@
                                 </table>
                             </div>
 
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Response</h4>
-                            <div class="overflow-x-auto rounded border border-gray-200 bg-white">
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">3. Response</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-6">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
                                     <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2">Mô tả</th></tr></thead>
                                     <tbody class="divide-y divide-gray-100">
@@ -553,6 +584,31 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">4. Ví dụ (Example)</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="font-medium text-gray-700 text-sm mb-1">Request:</p>
+                                    <pre><code class="language-bash">curl --location 'https://{DOMAIN}/auth-service/api/v1.0/user/refresh' \
+--header 'p-request-id: 237b185a-42ae-4951-9032-493f6b8e30e5' \
+--header 'p-request-time: 20240521090414' \
+--header 'p-tenant: MERCHANT-WEB' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1...'</code></pre>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-700 text-sm mb-1">Response:</p>
+                                    <pre><code class="language-json">{
+    "code": "SUCCESS",
+    "message": "Thành công.",
+    "data": {
+        "accessToken": "eyJhbGciOiJSUzI1NiIs...",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+        "expireIn": "600",
+        "refreshExpiresIn": "1800"
+    }
+}</code></pre>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- V.3 API TẠO YÊU CẦU THANH TOÁN -->
@@ -564,8 +620,22 @@
                                 <span>https://{DOMAIN}/pgw-transaction-service/paymentpage/api/v1.0/init</span>
                             </div>
                             
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Body Request</h4>
-                            <div class="overflow-x-auto rounded border border-gray-200 bg-white">
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">1. Request Header</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-id</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã duy nhất tương ứng với yêu cầu</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-time</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Thời gian yêu cầu API (Giờ Unix từ 1970). Định dạng YYYYMMDDHHMMSS (Nên chuyển đổi sang UTC +7)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-tenant</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">&lt;TENANT INFO&gt; Thông tin này được gửi kèm theo tên người dùng và mật khẩu</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">Authorization</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Accesstoken</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-signature</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Chữ ký được tạo ra bởi thuật toán RSA-2048</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">2. Request Body</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
                                     <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
                                     <tbody class="divide-y divide-gray-100">
@@ -580,6 +650,60 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">3. Response</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-6">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">code</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Result code</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">message</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Message</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã yêu cầu của MC gọi yêu cầu thanh toán</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">txnId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã giao dịch tạo bởi Pay2Pay</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">amount</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2">Số tiền thanh toán</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">currency</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">VND</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">payment_url</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">URL điều hướng thanh toán tới giao diện của Pay2Pay</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">4. Ví dụ (Example)</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="font-medium text-gray-700 text-sm mb-1">Request:</p>
+                                    <pre><code class="language-bash">curl --location 'https://uat-api.pay2pay.vn/pgw-transaction-service/paymentpage/api/v1.0/init' \
+--header 'p-tenant: PAYMENT-SITE' \
+--header 'p-request-id: d5b0e905-18a1-446c-bc41-c3667681594a' \
+--header 'p-request-time: 123123' \
+--header 'p-signature: 123123' \
+--header 'Content-Type: application/json' \
+--data '{
+    "merchantId" : "PP0000141001",
+    "amount": "66668",
+    "orderId": "King000000024",
+    "currency": "VND",
+    "paymentMethod": "",
+    "description": "bbbbbbbb",
+    "lang": "vi",
+    "returnUrl": "https://24h.com.vn",
+    "paymentFee": 0
+}'</code></pre>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-700 text-sm mb-1">Response:</p>
+                                    <pre><code class="language-json">{
+    "code": "SUCCESS",
+    "message": "Thành công.",
+    "data": {
+        "orderId": "King000000024",
+        "txnId": "202608240413768",
+        "amount": 66668,
+        "currency": "VND",
+        "paymentUrl": "https://uat-checkout.pay2pay.vn/v2/202608240413768"
+    }
+}</code></pre>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- V.4 API HOÀN TIỀN -->
@@ -591,18 +715,49 @@
                                 <span>https://{DOMAIN}/pgw-transaction-service/mch/api/v1.0/init_refund</span>
                             </div>
                             
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Body Request</h4>
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">1. Request Header</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-id</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã duy nhất tương ứng với yêu cầu</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-time</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Thời gian yêu cầu API (Giờ Unix từ 1970). Định dạng YYYYMMDDHHMMSS</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-tenant</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">&lt;TENANT INFO&gt;. Thông tin này được gửi kèm theo tên người dùng và mật khẩu</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">Authorization</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Accesstoken</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-signature</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Chữ ký được tạo ra bởi thuật toán RSA-2048</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">2. Request Body</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã yêu cầu hoàn tiền của MC (unique)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">txnId</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã giao dịch thanh toán Pay2Pay</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">amount</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Số tiền cần hoàn</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">currency</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">VND</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">description</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mô tả thông tin đơn hàng</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">bankId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Mã ngân hàng của P2P</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">account_no</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Số tài khoản ngân hàng nhận</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">account_name</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Tên tài khoản ngân hàng nhận</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">3. Response</h4>
                             <div class="overflow-x-auto rounded border border-gray-200 bg-white">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
-                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
                                     <tbody class="divide-y divide-gray-100">
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã yêu cầu hoàn tiền của MC</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">txnId</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã giao dịch thanh toán Pay2Pay</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">amount</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Số tiền cần hoàn</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">description</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mô tả thông tin đơn hàng</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">bankId</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Mã ngân hàng của P2P</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">account_no</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Số tài khoản ngân hàng nhận</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">account_name</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Tên tài khoản ngân hàng nhận</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">code</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Result code</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">message</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Message</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã MC gọi yêu cầu hoàn tiền</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">refund_txnId</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã giao dịch hoàn tiền sinh ra trên hệ thống Pay2Pay</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">amount</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Số tiền hoàn</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">currency</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">VND</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">status</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Trạng thái của giao dịch: PROCESSING, SUCCESS, FAIL</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -616,11 +771,50 @@
                                 <span class="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">POST</span>
                                 <span>https://{DOMAIN}/pgw-transaction-service/mch/api/v2.0/inquiry</span>
                             </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">1. Request Header</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-id</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã duy nhất tương ứng với yêu cầu</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-request-time</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Thời gian yêu cầu API (Giờ Unix từ 1970). Định dạng YYYYMMDDHHMMSS</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-tenant</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">&lt;TENANT INFO&gt;. Thông tin này được gửi kèm theo tên người dùng và mật khẩu</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">Authorization</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Accesstoken</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">p-signature</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Chữ ký được tạo ra bởi thuật toán RSA-2048</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">2. Request Body</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã yêu cầu mà MC muốn kiểm tra</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">3. Response</h4>
                             <div class="overflow-x-auto rounded border border-gray-200 bg-white">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
-                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2 border-r">Bắt buộc</th><th class="px-3 py-2">Mô tả</th></tr></thead>
                                     <tbody class="divide-y divide-gray-100">
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã yêu cầu mà MC muốn kiểm tra</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">code</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Result code</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">message</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Message</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">txnId</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã giao dịch Pay2Pay</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã yêu cầu của MC</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">merchantId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mã Merchant ở P2P</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">status</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Trạng thái: INITIAL, PROCESSING, SUCCESS, FAIL, CANCEL</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">amount</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Số tiền giao dịch</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">currency</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">VND</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">content</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Mô tả thông tin đơn hàng</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">method</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Phương thức thanh toán của GD thanh toán</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">type</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-green-600">Yes</td><td class="px-3 py-2">Loại giao dịch: PAYMENT (Thanh toán), REFUND (Hoàn tiền)</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">secretSenderBankRefNumber</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Chuỗi mã hóa Base64 của số tài khoản ngân hàng người gửi</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">senderBankRefName</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Tên tài khoản ngân hàng của người gửi</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">senderBankId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2 border-r text-gray-400">No</td><td class="px-3 py-2">Mã ngân hàng người gửi</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -629,27 +823,83 @@
                         <!-- V.6 IPN -->
                         <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
                             <h3 class="text-xl font-bold text-primary-700 mb-2">V.6. THÔNG BÁO KẾT QUẢ THANH TOÁN (IPN)</h3>
-                            <p class="text-gray-600 mb-4 text-sm">Merchant sẽ nhận được kết quả từ Pay2Pay về quy trình giao dịch thông qua IPN (phương thức POST).</p>
+                            <p class="text-gray-600 mb-4 text-sm">Merchant sẽ nhận được kết quả từ Pay2Pay về quy trình giao dịch thông qua IPN (phương thức POST). Kết quả này được ghi lại trong requestBody.</p>
                             <div class="bg-gray-900 text-gray-100 p-3 rounded-lg font-mono text-sm shadow-inner flex items-center gap-3 mb-4">
                                 <span class="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">POST</span>
                                 <span>{MERCHANT_IPN_URL}</span>
                             </div>
                             
-                            <h4 class="font-bold text-gray-800 mt-4 mb-2">Request Body (Pay2Pay gửi sang)</h4>
-                            <div class="overflow-x-auto rounded border border-gray-200 bg-white">
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">1. Request Header</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-4">
                                 <table class="w-full text-sm text-left text-gray-600 m-0">
-                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2">Mô tả</th></tr></thead>
                                     <tbody class="divide-y divide-gray-100">
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">merchantId</td><td class="px-3 py-2">Merchant ID</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2">Mã yêu cầu của MC</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">txnId</td><td class="px-3 py-2">Mã giao dịch của Pay2pay</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">amount</td><td class="px-3 py-2">Số tiền giao dịch</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">status</td><td class="px-3 py-2">SUCCESS, FAIL, CANCEL</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">code</td><td class="px-3 py-2">Mã lỗi giao dịch</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">message</td><td class="px-3 py-2">Mô tả mã lỗi</td></tr>
-                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">txnDate</td><td class="px-3 py-2">Thời gian giao dịch</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">P-API-KEY</td><td class="px-3 py-2 border-r">Chuỗi</td><td class="px-3 py-2">API KEY của Merchant</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">P-SIGNATURE</td><td class="px-3 py-2 border-r">Chuỗi</td><td class="px-3 py-2">Chữ ký được tạo từ toàn bộ nội dung yêu cầu và khóa bí mật.</td></tr>
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">2. Request Body (Pay2Pay gửi sang)</h4>
+                            <div class="overflow-x-auto rounded border border-gray-200 bg-white mb-6">
+                                <table class="w-full text-sm text-left text-gray-600 m-0">
+                                    <thead class="bg-gray-50 border-b"><tr><th class="px-3 py-2 border-r">Thông số</th><th class="px-3 py-2 border-r">Kiểu dữ liệu</th><th class="px-3 py-2">Mô tả</th></tr></thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">merchantId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Merchant ID</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">orderId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã yêu cầu của MC</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">txnId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã giao dịch của Pay2pay</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">amount</td><td class="px-3 py-2 border-r">Number</td><td class="px-3 py-2">Số tiền giao dịch</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">status</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">SUCCESS, FAIL, CANCEL</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">code</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã lỗi giao dịch</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">message</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mô tả mã lỗi</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">txnDate</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Thời gian giao dịch</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">secretSenderBankRefNumber</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Chuỗi ký tự được mã hóa Base64 của số tài khoản ngân hàng người gửi.</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">senderBankRefName</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Tên tài khoản ngân hàng của người gửi</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">senderBankId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã số tài khoản ngân hàng của người gửi</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">senderBankName</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Tên ngân hàng của người gửi</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">senderBinCode</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã BIN ngân hàng của người gửi</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">receiverBankId</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã số tài khoản ngân hàng của người nhận</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">receiverBankRefName</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Tên ngân hàng của người nhận</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">receiverBankRefNumber</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Mã BIN của ngân hàng người nhận</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">content</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Nội dung giao dịch</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">method</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Phương thức thanh toán: QRBANK / INTERNATIONAL</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">type</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Loại giao dịch</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">schemas</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Thương hiệu thẻ quốc tế</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">createAt</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Thời gian khởi tạo giao dịch</td></tr>
+                                        <tr><td class="px-3 py-2 border-r font-mono text-primary-600">modifiedAt</td><td class="px-3 py-2 border-r">String</td><td class="px-3 py-2">Thời gian cập nhật trạng thái giao dịch</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 mt-6 mb-2">3. Ví dụ (Example Mẫu dữ liệu)</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="font-medium text-gray-700 text-sm mb-1">Header:</p>
+                                    <pre><code class="language-bash">P-API-KEY: 123456
+P-SIGNATURE: qi2bkXcxhiDnZMVFXn6z64wCSagpD9ujquDGRSzemg0=</code></pre>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-700 text-sm mb-1">Body:</p>
+                                    <pre><code class="language-json">{
+    "merchantId": "PP0000042",
+    "orderId": "be4e93a4f8af8661cf758604",
+    "txnId": "202511070395223",
+    "số tiền": 400000,
+    "code": "Success",
+    "Thông báo": "Giao dịch thành công.",
+    "txnDate": "20251107163546",
+    "secretSenderBankRefNumber": "MDc3ODc2MTE0OA==",
+    "senderBankRefName": "KIỂM TRA TỰ ĐỘNG YZL",
+    "senderBankId": "MB",
+    "senderBankName": "MBBank",
+    "SenderBinCode": "970422",
+    "nội dung": "thử nghiệm",
+    "receiverBankId": "MB",
+    "receiverBankRefName": "NGUYỄN VĂN AB",
+    "receiverBankRefNumber": "MBB55971988262877",
+    "Trạng thái": "THÀNH CÔNG"
+}</code></pre>
+                                </div>
                             </div>
                         </div>
 
