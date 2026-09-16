@@ -338,9 +338,12 @@
 
         <!-- Inline script for docs sidebar -->
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            (function() {
                 const sidebar = document.getElementById('docs-sidebar');
-                if (!sidebar) return;
+                if (!sidebar) {
+                    console.error("Docs sidebar not found!");
+                    return;
+                }
 
                 // Accordion toggle logic
                 const accordionItems = sidebar.querySelectorAll('.accordion-item');
@@ -376,6 +379,8 @@
                 
                 docLinks.forEach(link => {
                     link.addEventListener('click', (e) => {
+                        e.preventDefault(); // In case of href="#"
+
                         // Highlight active link
                         docLinks.forEach(l => {
                             l.classList.remove('text-primary-600', 'active');
@@ -386,21 +391,19 @@
 
                         // Switch content
                         const targetId = e.target.getAttribute('data-target');
-                        docSections.forEach(sec => sec.classList.add('hidden', 'flex-col'));
+                        docSections.forEach(sec => sec.classList.add('hidden'));
                         docSections.forEach(sec => sec.classList.remove('flex'));
                         
                         const targetSec = document.getElementById('doc-' + targetId);
                         if (targetSec) {
+                            targetSec.classList.remove('hidden');
                             if (targetId === 'coming-soon') {
-                                targetSec.classList.remove('hidden');
                                 targetSec.classList.add('flex');
-                            } else {
-                                targetSec.classList.remove('hidden');
                             }
                         }
                     });
                 });
-            });
+            })();
         </script>
     </div>
 
