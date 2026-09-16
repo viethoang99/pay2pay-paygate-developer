@@ -127,32 +127,32 @@ window.App = (function() {
             case 'SUCCESS':
                 CartModule.clear();
                 CartModule.render();
-                iconContainer.className = 'w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6';
-                iconContainer.innerHTML = '<svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                iconContainer.className = 'w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
+                iconContainer.innerHTML = '<svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
                 title.textContent = 'Thanh toán thành công!';
                 title.className = 'text-2xl font-bold text-green-600 mb-2';
                 message.textContent = txnInfo.message || 'Giao dịch đã được xử lý thành công. Cảm ơn bạn đã mua hàng!';
                 break;
 
             case 'FAIL':
-                iconContainer.className = 'w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6';
-                iconContainer.innerHTML = '<svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+                iconContainer.className = 'w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
+                iconContainer.innerHTML = '<svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>';
                 title.textContent = 'Thanh toán thất bại';
                 title.className = 'text-2xl font-bold text-red-600 mb-2';
                 message.textContent = txnInfo.message || 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại.';
                 break;
 
             case 'PROCESSING':
-                iconContainer.className = 'w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6';
-                iconContainer.innerHTML = '<svg class="w-12 h-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                iconContainer.className = 'w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
+                iconContainer.innerHTML = '<svg class="w-10 h-10 text-amber-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
                 title.textContent = 'Đang xử lý thanh toán';
-                title.className = 'text-2xl font-bold text-yellow-600 mb-2';
+                title.className = 'text-2xl font-bold text-amber-600 mb-2';
                 message.textContent = txnInfo.message || 'Giao dịch đang được xử lý. Vui lòng chờ trong giây lát.';
                 break;
 
             default:
-                iconContainer.className = 'w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6';
-                iconContainer.innerHTML = '<svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                iconContainer.className = 'w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
+                iconContainer.innerHTML = '<svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
                 title.textContent = 'Không xác định trạng thái';
                 title.className = 'text-2xl font-bold text-gray-600 mb-2';
                 message.textContent = 'Không thể xác định trạng thái giao dịch. Vui lòng liên hệ hỗ trợ.';
