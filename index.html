@@ -192,7 +192,7 @@
                                     Dịch vụ thanh toán Redirectlink
                                     <svg class="w-4 h-4 text-primary-600 transform rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-primary-100 pl-4 accordion-content">
+                                <div class="space-y-1 ml-4 border-l-2 border-primary-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-40 opacity-100 mt-2">
                                     <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-primary-600 doc-link active" data-target="intro">Giới thiệu</a>
                                     <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">API tích hợp</a>
                                 </div>
@@ -204,7 +204,7 @@
                                     Dịch vụ Thu hộ
                                     <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-gray-100 pl-4 hidden accordion-content">
+                                <div class="space-y-1 ml-4 border-l-2 border-gray-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 mt-0">
                                     <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">Giới thiệu</a>
                                     <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">API tích hợp</a>
                                 </div>
@@ -216,7 +216,7 @@
                                     Dịch vụ Chi hộ
                                     <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="mt-2 space-y-1 ml-4 border-l-2 border-gray-100 pl-4 hidden accordion-content">
+                                <div class="space-y-1 ml-4 border-l-2 border-gray-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 mt-0">
                                     <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">Giới thiệu</a>
                                     <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">API tích hợp</a>
                                 </div>
@@ -356,7 +356,8 @@
                         // Close all items
                         accordionItems.forEach(i => {
                             i.classList.remove('active');
-                            i.querySelector('.accordion-content').classList.add('hidden');
+                            i.querySelector('.accordion-content').classList.remove('max-h-40', 'opacity-100', 'mt-2');
+                            i.querySelector('.accordion-content').classList.add('max-h-0', 'opacity-0', 'mt-0');
                             i.querySelector('.accordion-btn svg').classList.remove('rotate-180');
                             i.querySelector('.accordion-btn').classList.replace('text-primary-600', 'text-gray-700');
                             i.querySelector('.accordion-btn').classList.replace('font-bold', 'font-medium');
@@ -365,7 +366,8 @@
                         // Open if it wasn't active
                         if (!isActive) {
                             item.classList.add('active');
-                            item.querySelector('.accordion-content').classList.remove('hidden');
+                            item.querySelector('.accordion-content').classList.remove('max-h-0', 'opacity-0', 'mt-0');
+                            item.querySelector('.accordion-content').classList.add('max-h-40', 'opacity-100', 'mt-2');
                             item.querySelector('.accordion-btn svg').classList.add('rotate-180');
                             item.querySelector('.accordion-btn').classList.replace('text-gray-700', 'text-primary-600');
                             item.querySelector('.accordion-btn').classList.replace('font-medium', 'font-bold');
