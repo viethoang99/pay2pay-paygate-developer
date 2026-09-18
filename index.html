@@ -56,6 +56,10 @@
         .token.string { color: #059669 !important; }
         .token.number, .token.boolean { color: #ea580c !important; }
         .token.punctuation, .token.operator { color: #94a3b8 !important; }
+
+        /* i18n Global Rules */
+        html[lang="vi"] .lang-en { display: none !important; }
+        html[lang="en"] .lang-vi { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -70,12 +74,24 @@
                 </a>
                 <!-- Navigation -->
                 <nav class="hidden md:flex items-center space-x-1">
-                    <a href="#home" data-page="home" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">Trang chủ</a>
-                    <a href="#docs" data-page="docs" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">Tài liệu</a>
-                    <a href="#demo" data-page="demo" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">Demo</a>
+                    <a href="#home" data-page="home" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">
+                        <span class="lang-vi">Trang chủ</span><span class="lang-en">Home</span>
+                    </a>
+                    <a href="#docs" data-page="docs" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">
+                        <span class="lang-vi">Tài liệu</span><span class="lang-en">Docs</span>
+                    </a>
+                    <a href="#demo" data-page="demo" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">
+                        <span class="lang-vi">Demo</span><span class="lang-en">Demo</span>
+                    </a>
                 </nav>
-                <!-- Cart icon -->
-                <div class="flex items-center space-x-4">
+                <!-- Actions -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- Language Switcher -->
+                    <button id="lang-toggle" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm bg-white">
+                        <span class="lang-vi flex items-center gap-1.5"><img src="https://flagcdn.com/w20/vn.png" width="16" alt="VN"> VI</span>
+                        <span class="lang-en flex items-center gap-1.5"><img src="https://flagcdn.com/w20/gb.png" width="16" alt="EN"> EN</span>
+                    </button>
+                    <!-- Cart icon -->
                     <a href="#demo" data-page="demo" class="relative p-2 text-gray-600 hover:text-primary-600 transition-colors" title="Giỏ hàng">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
                         <span id="cart-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
@@ -90,9 +106,18 @@
         <!-- Mobile nav (hidden by default) -->
         <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 bg-white">
             <div class="px-4 py-3 space-y-1">
-                <a href="#home" data-page="home" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Trang chủ</a>
-                <a href="#docs" data-page="docs" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Tài liệu</a>
-                <a href="#demo" data-page="demo" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Demo & Giỏ hàng</a>
+                <a href="#home" data-page="home" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
+                    <span class="lang-vi">Trang chủ</span><span class="lang-en">Home</span>
+                </a>
+                <a href="#docs" data-page="docs" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
+                    <span class="lang-vi">Tài liệu</span><span class="lang-en">Docs</span>
+                </a>
+                <a href="#demo" data-page="demo" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
+                    <span class="lang-vi">Demo</span><span class="lang-en">Demo</span>
+                </a>
+                <a href="#cart" data-page="cart" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
+                    <span class="lang-vi">Giỏ hàng</span><span class="lang-en">Cart</span>
+                </a>
             </div>
         </div>
     </header>
@@ -106,11 +131,21 @@
             </div>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative">
                 <div class="text-center max-w-3xl mx-auto">
-                    <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">Cổng Thanh Toán<br><span class="text-primary-200">Pay2Pay</span></h1>
-                    <p class="text-base md:text-lg text-primary-100/90 mb-10 max-w-xl mx-auto leading-relaxed">Kết nối mọi phương thức thanh toán — chuyển khoản, QRpay, thẻ quốc tế — chỉ với một lần tích hợp. Pay2Pay đảm nhận toàn bộ luồng xử lý từ khởi tạo đơn hàng đến xác nhận giao dịch.</p>
+                    <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+                        <span class="lang-vi">Cổng Thanh Toán<br><span class="text-primary-200">Pay2Pay</span></span>
+                        <span class="lang-en">Payment Gateway<br><span class="text-primary-200">Pay2Pay</span></span>
+                    </h1>
+                    <p class="text-base md:text-lg text-primary-100/90 mb-10 max-w-xl mx-auto leading-relaxed">
+                        <span class="lang-vi">Kết nối mọi phương thức thanh toán – chuyển khoản, QRpay, thẻ quốc tế – chỉ với một lần tích hợp. Pay2Pay đảm nhận toàn bộ luồng xử lý từ khởi tạo đơn hàng đến xác nhận giao dịch.</span>
+                        <span class="lang-en">Connect all payment methods – bank transfer, QRpay, international cards – with just one integration. Pay2Pay handles the entire payment flow from order creation to transaction confirmation.</span>
+                    </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="#docs" class="nav-link-action inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 font-semibold rounded-xl hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl">Xem tài liệu</a>
-                        <a href="#demo" class="nav-link-action inline-flex items-center justify-center px-8 py-4 bg-primary-500 text-white font-semibold rounded-xl border-2 border-primary-400 hover:bg-primary-400 transition-all">Dùng thử Demo</a>
+                        <a href="#docs" class="nav-link-action inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 font-semibold rounded-xl hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl">
+                            <span class="lang-vi">Xem tài liệu</span><span class="lang-en">View Docs</span>
+                        </a>
+                        <a href="#demo" class="nav-link-action inline-flex items-center justify-center px-8 py-4 bg-primary-500 text-white font-semibold rounded-xl border-2 border-primary-400 hover:bg-primary-400 transition-all">
+                            <span class="lang-vi">Dùng thử Demo</span><span class="lang-en">Try Demo</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -119,30 +154,50 @@
         <!-- Features -->
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Tại sao chọn Pay2Pay?</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Giải pháp thanh toán toàn diện, bảo mật cao, tích hợp nhanh chóng</p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    <span class="lang-vi">Tại sao chọn Pay2Pay?</span><span class="lang-en">Why choose Pay2Pay?</span>
+                </h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    <span class="lang-vi">Giải pháp thanh toán toàn diện, bảo mật cao, tích hợp nhanh chóng</span>
+                    <span class="lang-en">Comprehensive, highly secure, and fast-integrating payment solution</span>
+                </p>
             </div>
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                     <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Tích hợp nhanh</h3>
-                    <p class="text-gray-600">Tích hợp đơn giản, nhanh chóng với bộ API đầy đủ: khởi tạo thanh toán, kiểm tra trạng thái giao dịch và hoàn tiền.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                        <span class="lang-vi">Tích hợp nhanh</span><span class="lang-en">Fast Integration</span>
+                    </h3>
+                    <p class="text-gray-600">
+                        <span class="lang-vi">Chỉ cần 1 API endpoint duy nhất. Hỗ trợ SDK cho Node.js, PHP, Python, Java. Tích hợp trong 30 phút.</span>
+                        <span class="lang-en">Only 1 API endpoint required. SDK support for Node.js, PHP, Python, Java. Integrate in 30 minutes.</span>
+                    </p>
                 </div>
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                     <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Bảo mật cao</h3>
-                    <p class="text-gray-600">Tuân thủ tiêu chuẩn PCI-DSS. Mã hóa SSL/TLS. Xác thực chữ ký RSA-SHA256 cho mọi giao dịch.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                        <span class="lang-vi">Bảo mật cao</span><span class="lang-en">High Security</span>
+                    </h3>
+                    <p class="text-gray-600">
+                        <span class="lang-vi">Tuân thủ PCI-DSS Level 1. Mã hóa SSL/TLS. Xác thực chữ ký HMAC-SHA256 cho mọi giao dịch.</span>
+                        <span class="lang-en">PCI-DSS Level 1 compliant. SSL/TLS encryption. HMAC-SHA256 signature verification for all transactions.</span>
+                    </p>
                 </div>
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                     <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Đa phương thức</h3>
-                    <p class="text-gray-600">Hỗ trợ đầy đủ: thẻ nội địa (ATM/Napas), thẻ quốc tế (Visa, Mastercard, JCB), chuyển khoản ngân hàng, QR Pay và trả góp — tất cả trong một cổng duy nhất.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                        <span class="lang-vi">Đa phương thức</span><span class="lang-en">Multi-methods</span>
+                    </h3>
+                    <p class="text-gray-600">
+                        <span class="lang-vi">Thẻ ATM/Visa/Master, Ví MoMo, ZaloPay, VNPay, QR Code, Chuyển khoản, Trả góp 0%.</span>
+                        <span class="lang-en">ATM/Visa/Mastercard, MoMo, ZaloPay, VNPay, QR Code, Bank Transfer, 0% Installment.</span>
+                    </p>
                 </div>
             </div>
         </section>
@@ -221,43 +276,59 @@
                 <aside class="lg:w-72 flex-shrink-0">
                     <div class="lg:sticky lg:top-24">
                         <div class="mb-6">
-                            <h2 class="text-xl font-bold text-gray-900 mb-2">Mô hình tích hợp</h2>
-                            <p class="text-sm text-gray-500">Chọn mô hình tích hợp Pay2Pay phù hợp</p>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">
+                                <span class="lang-vi">Mô hình tích hợp</span><span class="lang-en">Integration Model</span>
+                            </h2>
+                            <p class="text-sm text-gray-500">
+                                <span class="lang-vi">Chọn mô hình tích hợp Pay2Pay phù hợp</span><span class="lang-en">Choose suitable Pay2Pay integration</span>
+                            </p>
                         </div>
                         <nav class="space-y-1 border-r border-gray-200 pr-4" id="docs-sidebar">
                             <!-- Accordion Item 1 (Active) -->
                             <div class="border-b border-gray-100 py-2 accordion-item active">
                                 <button class="w-full flex items-center justify-between text-left py-2 text-sm font-bold text-primary-600 accordion-btn">
-                                    Dịch vụ thanh toán Redirectlink
+                                    <span class="lang-vi">Dịch vụ thanh toán Redirectlink</span><span class="lang-en">Redirectlink Payment</span>
                                     <svg class="w-4 h-4 text-primary-600 transform rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
                                 <div class="space-y-1 ml-4 border-l-2 border-primary-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-40 opacity-100 mt-2">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-primary-600 doc-link active" data-target="intro">Giới thiệu</a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="api-redirect">API tích hợp</a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-primary-600 doc-link active" data-target="intro">
+                                        <span class="lang-vi">Giới thiệu</span><span class="lang-en">Introduction</span>
+                                    </a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="api-redirect">
+                                        <span class="lang-vi">API tích hợp</span><span class="lang-en">Integration API</span>
+                                    </a>
                                 </div>
                             </div>
 
                             <!-- Accordion Item 2 -->
                             <div class="border-b border-gray-100 py-2 accordion-item">
                                 <button class="w-full flex items-center justify-between text-left py-2 text-sm font-medium text-gray-700 hover:text-primary-600 accordion-btn">
-                                    Dịch vụ Thu hộ
+                                    <span class="lang-vi">Dịch vụ Thu hộ</span><span class="lang-en">Collection Service</span>
                                     <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
                                 <div class="space-y-1 ml-4 border-l-2 border-gray-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 mt-0">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">Giới thiệu</a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">API tích hợp</a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">
+                                        <span class="lang-vi">Giới thiệu</span><span class="lang-en">Introduction</span>
+                                    </a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">
+                                        <span class="lang-vi">API tích hợp</span><span class="lang-en">Integration API</span>
+                                    </a>
                                 </div>
                             </div>
                             
                             <!-- Accordion Item 3 -->
                             <div class="border-b border-gray-100 py-2 accordion-item">
                                 <button class="w-full flex items-center justify-between text-left py-2 text-sm font-medium text-gray-700 hover:text-primary-600 accordion-btn">
-                                    Dịch vụ Chi hộ
+                                    <span class="lang-vi">Dịch vụ Chi hộ</span><span class="lang-en">Payout Service</span>
                                     <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
                                 <div class="space-y-1 ml-4 border-l-2 border-gray-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 mt-0">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">Giới thiệu</a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">API tích hợp</a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">
+                                        <span class="lang-vi">Giới thiệu</span><span class="lang-en">Introduction</span>
+                                    </a>
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">
+                                        <span class="lang-vi">API tích hợp</span><span class="lang-en">Integration API</span>
+                                    </a>
                                 </div>
                             </div>
                         </nav>
@@ -422,39 +493,74 @@
                                         <!-- Content Body (API Redirect) -->
                     <div id="doc-api-redirect" class="doc-section hidden prose max-w-none">
                         <h1 class="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            TÀI LIỆU TÍCH HỢP DỊCH VỤ THANH TOÁN REDIRECT (API)
+                            <span class="lang-vi">TÀI LIỆU TÍCH HỢP DỊCH VỤ THANH TOÁN REDIRECT (API)</span>
+                            <span class="lang-en">REDIRECT PAYMENT SERVICE INTEGRATION DOCUMENT (API)</span>
                             <span class="text-gray-300 font-normal">#</span>
                         </h1>
-                        <p class="text-gray-500 mb-8 font-medium">Phiên bản: V2.0 – 2026</p>
+                        <p class="text-gray-500 mb-8 font-medium">
+                            <span class="lang-vi">Phiên bản: V2.0 – 2026</span><span class="lang-en">Version: V2.0 – 2026</span>
+                        </p>
 
                         <!-- I. TỔNG QUAN -->
-                        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2 text-primary-700">I. TỔNG QUAN</h2>
+                        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2 text-primary-700">
+                            <span class="lang-vi">I. TỔNG QUAN</span><span class="lang-en">I. OVERVIEW</span>
+                        </h2>
                         
-                        <h3 class="text-lg font-bold text-gray-800 mt-6 mb-2">I.1. THÔNG TIN PHIÊN BẢN</h3>
-                        <p class="text-gray-700 mb-4">Phiên bản V2.0 (08/2026) - Cập nhật thanh toán paymentpage v2.0</p>
+                        <h3 class="text-lg font-bold text-gray-800 mt-6 mb-2">
+                            <span class="lang-vi">I.1. THÔNG TIN PHIÊN BẢN</span><span class="lang-en">I.1. VERSION INFO</span>
+                        </h3>
+                        <p class="text-gray-700 mb-4">
+                            <span class="lang-vi">Phiên bản V2.0 (08/2026) - Cập nhật thanh toán paymentpage v2.0</span>
+                            <span class="lang-en">Version V2.0 (08/2026) - Update paymentpage v2.0</span>
+                        </p>
 
-                        <h3 class="text-lg font-bold text-gray-800 mt-6 mb-2">I.2. ĐỊNH NGHĨA</h3>
+                        <h3 class="text-lg font-bold text-gray-800 mt-6 mb-2">
+                            <span class="lang-vi">I.2. ĐỊNH NGHĨA</span><span class="lang-en">I.2. DEFINITIONS</span>
+                        </h3>
                         <div class="overflow-x-auto rounded-lg border border-gray-200 mb-6">
                             <table class="w-full text-sm text-left text-gray-600 m-0">
-                                <thead class="bg-gray-50 border-b"><tr><th class="px-4 py-2 border-r">Điều khoản</th><th class="px-4 py-2">Sự miêu tả</th></tr></thead>
+                                <thead class="bg-gray-50 border-b"><tr>
+                                    <th class="px-4 py-2 border-r"><span class="lang-vi">Điều khoản</span><span class="lang-en">Term</span></th>
+                                    <th class="px-4 py-2"><span class="lang-vi">Mô tả</span><span class="lang-en">Description</span></th>
+                                </tr></thead>
                                 <tbody class="divide-y divide-gray-100 bg-white">
-                                    <tr><td class="px-4 py-2 border-r font-semibold">Pay2Pay</td><td class="px-4 py-2">Cổng thanh toán Pay2Pay</td></tr>
-                                    <tr><td class="px-4 py-2 border-r font-semibold">Merchant</td><td class="px-4 py-2">Các đối tác sử dụng dịch vụ của Pay2Pay</td></tr>
-                                    <tr><td class="px-4 py-2 border-r font-semibold">Ngân hàng</td><td class="px-4 py-2">Ngân hàng nơi khách hàng của đối tác muốn nhận tiền.</td></tr>
-                                    <tr><td class="px-4 py-2 border-r font-semibold">HTTPS</td><td class="px-4 py-2">Giao thức truyền tải siêu văn bản an toàn</td></tr>
-                                    <tr><td class="px-4 py-2 border-r font-semibold">TLS</td><td class="px-4 py-2">Bảo mật lớp chuyển giao</td></tr>
-                                    <tr><td class="px-4 py-2 border-r font-semibold">Chữ ký</td><td class="px-4 py-2">Để đảm bảo việc truyền dữ liệu giữa Người bán và Pay2Pay được an toàn và chính xác, tất cả dữ liệu được truyền giữa hai bên sẽ được mã hóa và ký điện tử để đảm bảo tính bảo mật của dữ liệu.</td></tr>
+                                    <tr>
+                                        <td class="px-4 py-2 border-r font-semibold">Pay2Pay</td>
+                                        <td class="px-4 py-2"><span class="lang-vi">Cổng thanh toán Pay2Pay</span><span class="lang-en">Pay2Pay Payment Gateway</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 border-r font-semibold">Merchant</td>
+                                        <td class="px-4 py-2"><span class="lang-vi">Các đối tác sử dụng dịch vụ của Pay2Pay</span><span class="lang-en">Partners using Pay2Pay services</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 border-r font-semibold">Ngân hàng / Bank</td>
+                                        <td class="px-4 py-2"><span class="lang-vi">Ngân hàng nơi khách hàng của đối tác muốn nhận tiền.</span><span class="lang-en">The bank where the customer wants to receive/send money.</span></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
 
                         <!-- II. MÔ HÌNH TRUYỀN THÔNG -->
-                        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2 text-primary-700">II. MÔ HÌNH TRUYỀN THÔNG</h2>
+                        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2 text-primary-700">
+                            <span class="lang-vi">II. MÔ HÌNH TRUYỀN THÔNG</span><span class="lang-en">II. COMMUNICATION MODEL</span>
+                        </h2>
                         <ul class="list-disc pl-5 text-gray-700 space-y-2 mb-6">
-                            <li>Pay2Pay sử dụng tiêu chuẩn kết nối HTTPS/TLS1.2.</li>
-                            <li>Mọi yêu cầu được gửi từ phía người bán đều phải được xác thực bằng giải pháp JSON Web Token.</li>
-                            <li>Pay2Pay cung cấp API theo tiêu chuẩn Restful Webservice, truyền và nhận dữ liệu ở định dạng JSON.</li>
-                            <li>Để đảm bảo việc truyền và nhận dữ liệu giữa hai bên được an toàn và xác thực, tất cả dữ liệu sẽ được mã hóa và ký điện tử.</li>
+                            <li>
+                                <span class="lang-vi">Pay2Pay sử dụng tiêu chuẩn kết nối HTTPS/TLS1.2.</span>
+                                <span class="lang-en">Pay2Pay uses HTTPS/TLS1.2 connection standard.</span>
+                            </li>
+                            <li>
+                                <span class="lang-vi">Mọi yêu cầu được gửi từ phía người bán đều phải được xác thực bằng giải pháp JSON Web Token.</span>
+                                <span class="lang-en">All requests sent from the merchant must be authenticated using JSON Web Token.</span>
+                            </li>
+                            <li>
+                                <span class="lang-vi">Pay2Pay cung cấp API theo tiêu chuẩn Restful Webservice, truyền và nhận dữ liệu ở định dạng JSON.</span>
+                                <span class="lang-en">Pay2Pay provides APIs according to the Restful Webservice standard, transmitting and receiving data in JSON format.</span>
+                            </li>
+                            <li>
+                                <span class="lang-vi">Để đảm bảo việc truyền và nhận dữ liệu giữa hai bên được an toàn và xác thực, tất cả dữ liệu sẽ được mã hóa và ký điện tử.</span>
+                                <span class="lang-en">To ensure that data transmission and reception between the two parties are secure and authenticated, all data will be encrypted and digitally signed.</span>
+                            </li>
                         </ul>
 
                         <!-- III. XÁC THỰC -->

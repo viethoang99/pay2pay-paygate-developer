@@ -160,7 +160,25 @@ window.App = (function() {
         }
     }
 
+    function initLanguage() {
+        const savedLang = localStorage.getItem('pay2pay_lang') || 'vi';
+        document.documentElement.lang = savedLang;
+
+        const langToggleBtn = document.getElementById('lang-toggle');
+        if (langToggleBtn) {
+            langToggleBtn.addEventListener('click', () => {
+                const currentLang = document.documentElement.lang;
+                const newLang = currentLang === 'vi' ? 'en' : 'vi';
+                document.documentElement.lang = newLang;
+                localStorage.setItem('pay2pay_lang', newLang);
+            });
+        }
+    }
+
     function init() {
+        // Initialize i18n
+        initLanguage();
+        
         // Initialize cart
         CartModule.init();
 
