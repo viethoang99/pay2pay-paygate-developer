@@ -60,6 +60,10 @@
         /* i18n Global Rules */
         html[lang="vi"] .lang-en { display: none !important; }
         html[lang="en"] .lang-vi { display: none !important; }
+
+        /* Language Toggle Thumb animation */
+        html[lang="vi"] #lang-toggle .thumb { transform: translateX(2px); }
+        html[lang="en"] #lang-toggle .thumb { transform: translateX(32px); }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -86,10 +90,14 @@
                 </nav>
                 <!-- Actions -->
                 <div class="flex items-center space-x-2 md:space-x-4">
-                    <!-- Language Switcher -->
-                    <button id="lang-toggle" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm bg-white">
-                        <span class="lang-vi flex items-center gap-1.5"><img src="https://flagcdn.com/w20/vn.png" width="16" alt="VN"> VI</span>
-                        <span class="lang-en flex items-center gap-1.5"><img src="https://flagcdn.com/w20/gb.png" width="16" alt="EN"> EN</span>
+                    <!-- Language Switcher (Toggle style) -->
+                    <button id="lang-toggle" class="relative inline-flex items-center h-7 w-14 rounded-full bg-primary-100 hover:bg-primary-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-inner overflow-hidden border border-primary-200">
+                        <span class="absolute left-1.5 text-[10px] font-bold text-primary-700 select-none pointer-events-none">VI</span>
+                        <span class="absolute right-1.5 text-[10px] font-bold text-primary-700 select-none pointer-events-none">EN</span>
+                        <span class="thumb absolute w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-300 ease-in-out flex items-center justify-center border border-gray-100 overflow-hidden">
+                            <img class="lang-vi w-full h-full object-cover" src="https://flagcdn.com/w20/vn.png" alt="VN">
+                            <img class="lang-en w-full h-full object-cover" src="https://flagcdn.com/w20/gb.png" alt="EN">
+                        </span>
                     </button>
                     <!-- Cart icon -->
                     <a href="#demo" data-page="demo" class="relative p-2 text-gray-600 hover:text-primary-600 transition-colors" title="Giỏ hàng">
@@ -237,17 +245,32 @@
                     <div class="md:col-span-2">
                         <div class="flex items-center space-x-3 mb-5">
                             <img src="assets/images/pay2pay-logo.png" alt="Pay2Pay" class="h-8 w-auto">
-                            <h3 class="text-white text-lg font-bold">Công ty Cổ phần PayPay</h3>
+                            <h3 class="text-white text-lg font-bold">
+                                <span class="lang-vi">Công ty Cổ phần PayPay</span>
+                                <span class="lang-en">PayPay Joint Stock Company</span>
+                            </h3>
                         </div>
                         <div class="space-y-2 text-sm leading-relaxed">
-                            <p>Giấy phép cung ứng dịch vụ TGTT: Số 65/GP-NHNN</p>
-                            <p>ĐKKD số: 0110442628 do Sở Kế hoạch Đầu tư Hà Nội cấp ngày 08.08.2023</p>
-                            <p>Địa chỉ: 39 Ngô Thì Nhậm, Hai Bà Trưng, Hà Nội, Việt Nam</p>
+                            <p>
+                                <span class="lang-vi">Giấy phép cung ứng dịch vụ TGTT: Số 65/GP-NHNN</span>
+                                <span class="lang-en">Intermediary Payment Service License: No. 65/GP-NHNN</span>
+                            </p>
+                            <p>
+                                <span class="lang-vi">ĐKKD số: 0110442628 do Sở Kế hoạch Đầu tư Hà Nội cấp ngày 08.08.2023</span>
+                                <span class="lang-en">Business Registration: 0110442628 issued by Hanoi DPI on Aug 8, 2023</span>
+                            </p>
+                            <p>
+                                <span class="lang-vi">Địa chỉ: 39 Ngô Thì Nhậm, Hai Bà Trưng, Hà Nội, Việt Nam</span>
+                                <span class="lang-en">Address: 39 Ngo Thi Nham, Hai Ba Trung, Hanoi, Vietnam</span>
+                            </p>
                         </div>
                     </div>
                     <!-- Hỗ trợ -->
                     <div>
-                        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider mb-5">Hỗ trợ</h3>
+                        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider mb-5">
+                            <span class="lang-vi">Hỗ trợ</span>
+                            <span class="lang-en">Support</span>
+                        </h3>
                         <div class="space-y-4">
                             <div class="flex items-center space-x-2">
                                 <span class="text-white font-semibold text-sm">Hotline:</span>
@@ -564,10 +587,19 @@
                         </ul>
 
                         <!-- III. XÁC THỰC -->
-                        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2 text-primary-700">III. QUY TRÌNH THANH TOÁN VÀ XÁC THỰC MÃ</h2>
-                        <p class="text-gray-700 mb-6">Tất cả các yêu cầu từ người bán gửi đến hệ thống Pay2Pay đều cần được ủy quyền để đảm bảo an ninh. Dưới đây là luồng xử lý giao dịch cơ bản.</p>
+                        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2 text-primary-700">
+                            <span class="lang-vi">III. QUY TRÌNH THANH TOÁN VÀ XÁC THỰC MÃ</span>
+                            <span class="lang-en">III. PAYMENT PROCESS & AUTHENTICATION</span>
+                        </h2>
+                        <p class="text-gray-700 mb-6">
+                            <span class="lang-vi">Tất cả các yêu cầu từ người bán gửi đến hệ thống Pay2Pay đều cần được ủy quyền để đảm bảo an ninh. Dưới đây là luồng xử lý giao dịch cơ bản.</span>
+                            <span class="lang-en">All requests from the merchant to the Pay2Pay system must be authorized to ensure security. Below is the basic transaction flow.</span>
+                        </p>
                         
-                        <h4 class="font-bold text-gray-700 mb-4">III.1. SƠ ĐỒ QUY TRÌNH THANH TOÁN (REDIRECTLINK)</h4>
+                        <h4 class="font-bold text-gray-700 mb-4">
+                            <span class="lang-vi">III.1. SƠ ĐỒ QUY TRÌNH THANH TOÁN (REDIRECTLINK)</span>
+                            <span class="lang-en">III.1. PAYMENT PROCESS DIAGRAM (REDIRECTLINK)</span>
+                        </h4>
                         <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 overflow-x-auto shadow-sm w-full">
                             <div class="mermaid min-w-[800px] text-lg">
 sequenceDiagram
@@ -576,37 +608,59 @@ sequenceDiagram
     participant P as Pay2Pay
     participant B as Ngân hàng (Bank)
 
-    U->>M: 1. Đặt hàng & Chọn Pay2Pay
-    M->>P: 2. Gọi API INIT (S2S)
-    P-->>M: 3. Trả về PaymentUrl
-    M->>U: 4. Chuyển hướng tới PaymentUrl
-    U->>P: 5. Nhập thẻ/quét mã QR
-    P->>B: 6. Xử lý giao dịch với Ngân hàng
-    B-->>P: 7. Kết quả giao dịch
-    P-->>M: 8. Gọi API IPN thông báo (S2S)
-    P->>U: 9. Chuyển hướng về ReturnUrl
-    U->>M: 10. Xem hóa đơn / Kết quả
+    U->>M: 1. Đặt hàng & Chọn Pay2Pay / Order & Choose Pay2Pay
+    M->>P: 2. Gọi API INIT (S2S) / Call INIT API
+    P-->>M: 3. Trả về PaymentUrl / Return PaymentUrl
+    M->>U: 4. Chuyển hướng tới PaymentUrl / Redirect to PaymentUrl
+    U->>P: 5. Nhập thẻ/quét mã QR / Enter card/QR code
+    P->>B: 6. Xử lý giao dịch với Ngân hàng / Process with Bank
+    B-->>P: 7. Kết quả giao dịch / Transaction Result
+    P-->>M: 8. Gọi API IPN thông báo (S2S) / IPN Notification S2S
+    P->>U: 9. Chuyển hướng về ReturnUrl / Redirect to ReturnUrl
+    U->>M: 10. Xem hóa đơn / Kết quả / View invoice/result
                             </div>
                         </div>
 
-                        <h4 class="font-bold text-gray-700 mb-2">III.2. CHỮ KÝ ĐIỆN TỬ (RSA-2048)</h4>
+                        <h4 class="font-bold text-gray-700 mb-2">
+                            <span class="lang-vi">III.2. CHỮ KÝ ĐIỆN TỬ (RSA-2048)</span>
+                            <span class="lang-en">III.2. DIGITAL SIGNATURE (RSA-2048)</span>
+                        </h4>
                         <ul class="list-disc pl-5 text-gray-700 space-y-2 mb-4">
-                            <li>Người bán tạo cặp khóa RSA-2048 (khóa riêng tư và khóa công khai).</li>
-                            <li>Khóa riêng tư dành cho người bán để tạo chữ ký. Khóa công khai gửi cho Pay2Pay để xác minh.</li>
-                            <li><strong>Cách tạo chữ ký:</strong><br>
+                            <li>
+                                <span class="lang-vi">Người bán tạo cặp khóa RSA-2048 (khóa riêng tư và khóa công khai).</span>
+                                <span class="lang-en">The merchant creates an RSA-2048 key pair (private key and public key).</span>
+                            </li>
+                            <li>
+                                <span class="lang-vi">Khóa riêng tư dành cho người bán để tạo chữ ký. Khóa công khai gửi cho Pay2Pay để xác minh.</span>
+                                <span class="lang-en">The private key is for the merchant to create a signature. The public key is sent to Pay2Pay for verification.</span>
+                            </li>
+                            <li>
+                                <span class="lang-vi"><strong>Cách tạo chữ ký:</strong><br>
                                 Bước 1: Lọc và sắp xếp các tham số header (bắt đầu bằng <code>p-</code>) theo bảng chữ cái và nối lại.<br>
                                 Bước 2: Kết hợp với phần thân (body) yêu cầu.<br>
-                                Bước 3: Chữ ký = <code>SHA256withRSA(Chuỗi cần ký ở Bước 2)</code>
+                                Bước 3: Chữ ký = <code>SHA256withRSA(Chuỗi cần ký ở Bước 2)</code></span>
+                                <span class="lang-en"><strong>How to create a signature:</strong><br>
+                                Step 1: Filter and sort header parameters (starting with <code>p-</code>) alphabetically and concatenate them.<br>
+                                Step 2: Combine with the request body.<br>
+                                Step 3: Signature = <code>SHA256withRSA(String to sign from Step 2)</code></span>
                             </li>
                         </ul>
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mb-8 text-sm text-gray-700 break-all">
-                            <h5 class="font-bold text-gray-800 uppercase mb-2 text-base">VÍ DỤ:</h5>
+                            <h5 class="font-bold text-gray-800 uppercase mb-2 text-base">
+                                <span class="lang-vi">VÍ DỤ:</span><span class="lang-en">EXAMPLE:</span>
+                            </h5>
                             <p class="mb-4">SHA256withRSA(RSA private key, "5d599b0b-c728-4c18-9748-17f38b4cc9a620240521115518MERCHANT-WEB{\"username\":\"0982569888\",\"password\":\"YTEyYWQxYjc3MGM0MTg4ZWQ5ZDQ3MTZlODNjYTJhZWRmOTFiMjliNjJhNzY0YjI4MzI3NWY5OGUyZWE2NWMwOA==\"}")</p>
                             
-                            <h5 class="font-bold text-gray-800 uppercase mb-2 text-base">KẾT QUẢ TẠO CHỮ KÝ:</h5>
+                            <h5 class="font-bold text-gray-800 uppercase mb-2 text-base">
+                                <span class="lang-vi">KẾT QUẢ TẠO CHỮ KÝ:</span><span class="lang-en">SIGNATURE RESULT:</span>
+                            </h5>
                             <p class="mb-4">UNJDNul1ErQrci6RrNXfWFDnJUAXKSAokZAejFDYCzqnm8jqZt5cns21S0C1MVCbr1gm9mz5+OiJWJJPlxxsd5hn9G0izWhgvZ4MbLpYzzHFRmarLvqwsfSsJSAk5iaPlMMHHUy4hu5dr1XURRQjy42xJR6h/5vkyPLxzkjMEpeW<br>YCd/d9nQKfBi7vcp+zApwH+7vNzyT/37tqmT5sl/KYvoLPS47nOkJHuhOct8LmjQJmQBPGUiwr5U048/ZiqQmAb9Ki62/Dy8Vh3CWPybTKKLSfIXivOglwNHhU0y7imLE6nVO5puBigLVg2BjX9M9MQzIr/42cD9x4nNMSs8Kw==</p>
                             
-                            <p class="font-medium"><span class="text-blue-600 font-bold">Vui lòng tham khảo liên kết sau để kiểm tra:</span> <a href="https://static.pay2pay.vn/tools/RSA2048_Tools" target="_blank" class="text-blue-500 hover:underline">https://static.pay2pay.vn/tools/RSA2048_Tools</a></p>
+                            <p class="font-medium">
+                                <span class="text-blue-600 font-bold lang-vi">Vui lòng tham khảo liên kết sau để kiểm tra:</span>
+                                <span class="text-blue-600 font-bold lang-en">Please refer to the following link to check:</span>
+                                <a href="https://static.pay2pay.vn/tools/RSA2048_Tools" target="_blank" class="text-blue-500 hover:underline">https://static.pay2pay.vn/tools/RSA2048_Tools</a>
+                            </p>
                         </div>
 
                         <!-- IV. THÔNG TIN HỆ THỐNG -->
@@ -625,13 +679,44 @@ sequenceDiagram
                         <h3 class="text-lg font-bold text-gray-800 mt-6 mb-2">IV.3. THÔNG TIN MÀ MERCHANT CẦN CUNG CẤP</h3>
                         <ul class="list-disc pl-5 text-gray-700 space-y-2 mb-6">
                             <li><strong>Địa chỉ IP:</strong> Danh sách IP để gửi yêu cầu đến Pay2Pay.</li>
-                            <li><strong>ipn_url:</strong> URL nhận kết quả giao dịch (bắt buộc).</li>
-                            <li><strong>redirect_url:</strong> URL chuyển hướng khách hàng sau thanh toán (không bắt buộc).</li>
-                            <li><strong>Public Key:</strong> Để Pay2Pay xác minh chữ ký của người bán (bắt buộc).</li>
-                        </ul>
+                        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6 border-b pb-2 text-primary-700">
+                            <span class="lang-vi">IV. THÔNG TIN HỆ THỐNG</span>
+                            <span class="lang-en">IV. SYSTEM INFORMATION</span>
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-6 mb-10">
+                            <!-- Sandbox -->
+                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-sm">
+                                <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                                    <span class="lang-vi">Môi trường kiểm thử (Sandbox)</span>
+                                    <span class="lang-en">Testing Environment (Sandbox)</span>
+                                </h4>
+                                <ul class="space-y-3 text-sm text-gray-700 break-all">
+                                    <li><strong>API Domain:</strong> <code>https://sandbox.pay2pay.vn</code></li>
+                                    <li><strong>Redirect Domain:</strong> <code>https://sandbox-payment.pay2pay.vn</code></li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Production -->
+                            <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 shadow-sm">
+                                <h4 class="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <span class="lang-vi">Môi trường thật (Production)</span>
+                                    <span class="lang-en">Production Environment</span>
+                                </h4>
+                                <ul class="space-y-3 text-sm text-gray-700 break-all">
+                                    <li><strong>API Domain:</strong> <code>https://api.pay2pay.vn</code></li>
+                                    <li><strong>Redirect Domain:</strong> <code>https://payment.pay2pay.vn</code></li>
+                                </ul>
+                            </div>
+                        </div>
 
                         <!-- V. DANH SÁCH API -->
-                        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6 border-b pb-2 text-primary-700">V. DANH SÁCH API</h2>
+                        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6 border-b pb-2 text-primary-700">
+                            <span class="lang-vi">V. DANH SÁCH API</span>
+                            <span class="lang-en">V. LIST OF API</span>
+                        </h2>
 
                         <!-- V.1 API LOGIN -->
                         <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
