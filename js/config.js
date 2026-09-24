@@ -1,38 +1,36 @@
 /**
- * PayGate Configuration
- * Thay đổi các giá trị bên dưới để kết nối với API backend thật
+ * Pay2Pay Gateway Configuration
+ * Cấu hình kết nối API và Cổng thanh toán Sandbox siêu tốc
  */
 window.AppConfig = {
     // Tên cổng thanh toán
-    GATEWAY_NAME: 'PayGate',
+    GATEWAY_NAME: 'Pay2Pay',
 
-    // API Backend URL - thay đổi khi kết nối BE thật
-    API_URL: 'https://api.paygate.vn/v1',
+    // API Backend URL (Serverless Function)
+    API_URL: '/api/create-payment',
 
-    // Endpoint tạo payment link
-    CREATE_PAYMENT_ENDPOINT: '/create-payment',
+    // Timeout kết nối API (ms) - nếu backend không phản hồi trong 2s, tự động chuyển sang Sandbox tức thì
+    API_TIMEOUT: 2000,
 
     // URL callback sau khi thanh toán
     RETURN_URL: window.location.origin + window.location.pathname,
-    CANCEL_URL: window.location.href.split('#')[0] + '#cart',
+    CANCEL_URL: window.location.href.split('#')[0] + '#demo',
 
     // Tiền tệ
     CURRENCY: 'VND',
 
-    // Chế độ Mock
+    // Chế độ Mock / Sandbox Simulator (true: luôn mở sandbox ngay; false: ưu tiên API thật với fallback nhanh)
     MOCK_MODE: false,
 
-    // Thời gian delay giả lập (ms) - chỉ dùng khi MOCK_MODE = true  
-    MOCK_DELAY: 1500,
+    // Thời gian delay giả lập (ms) - tối ưu siêu mượt
+    MOCK_DELAY: 350,
 
-    // URL thanh toán giả lập
-    MOCK_PAYMENT_URL: 'https://sandbox.paygate.vn/checkout/',
+    // Kích hoạt Sandbox Modal Simulator khi API ngoài timeout hoặc chưa có backend
+    SANDBOX_SIMULATOR_ENABLED: true,
 
-    // API Key (đưa vào header Authorization)
-    API_KEY: 'pk_test_demo_key_12345',
-
-    // Merchant ID
-    MERCHANT_ID: 'MCH_DEMO_001',
+    // API Key & Merchant Demo
+    API_KEY: 'pk_test_demo_key_pay2pay',
+    MERCHANT_ID: 'MERCHANT-DEMO-001',
 };
 
 /**

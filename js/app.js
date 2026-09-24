@@ -51,7 +51,28 @@ window.App = (function() {
 
     function handleHashChange() {
         const fullHash = window.location.hash.slice(1) || 'home';
-        const page = fullHash.split('?')[0];
+        const [page, queryString] = fullHash.split('?');
+        
+        if (page === 'payment-result' && queryString) {
+            const hashParams = new URLSearchParams(queryString);
+            const status = hashParams.get('status');
+            if (status) {
+                const txnInfo = {
+                    status: status,
+                    merchantId: hashParams.get('merchantId') || '',
+                    orderId: hashParams.get('orderId') || '',
+                    txnId: hashParams.get('txnId') || '',
+                    amount: hashParams.get('amount') || '',
+                    code: hashParams.get('code') || '',
+                    message: hashParams.get('message') || '',
+                    txnDate: hashParams.get('txnDate') || '',
+                };
+                navigate('payment-result');
+                renderPaymentResult(txnInfo);
+                return;
+            }
+        }
+        
         navigate(page);
     }
 
@@ -61,8 +82,14 @@ window.App = (function() {
      * Status: SUCCESS | PROCESSING | FAIL
      */
     function checkPaymentCallback() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const status = urlParams.get('status');
+        let urlParams = new URLSearchParams(window.location.search);
+        let status = urlParams.get('status');
+
+        if (!status && window.location.hash.includes('?')) {
+            const hashQuery = window.location.hash.split('?')[1];
+            urlParams = new URLSearchParams(hashQuery);
+            status = urlParams.get('status');
+        }
 
         if (!status) return false;
 
@@ -229,7 +256,11 @@ window.App = (function() {
 
     return {
         init,
-        navigate
+        navigate,
+        showPaymentResult: function(txnInfo) {
+            navigate('payment-result');
+            renderPaymentResult(txnInfo);
+        }
     };
 })();
 
