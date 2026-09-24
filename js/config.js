@@ -1,16 +1,16 @@
 /**
  * Pay2Pay Gateway Configuration
- * Cấu hình kết nối API và Cổng thanh toán Sandbox siêu tốc
+ * Cấu hình kết nối API và thông số tích hợp
  */
 window.AppConfig = {
     // Tên cổng thanh toán
     GATEWAY_NAME: 'Pay2Pay',
 
-    // API Backend URL (Serverless Function)
+    // API Backend URL (Serverless Function hoặc BE Server)
     API_URL: '/api/create-payment',
 
-    // Timeout kết nối API (ms) - nếu backend không phản hồi trong 2s, tự động chuyển sang Sandbox tức thì
-    API_TIMEOUT: 2000,
+    // Timeout kết nối API (ms)
+    API_TIMEOUT: 15000,
 
     // URL callback sau khi thanh toán
     RETURN_URL: window.location.origin + window.location.pathname,
@@ -19,18 +19,15 @@ window.AppConfig = {
     // Tiền tệ
     CURRENCY: 'VND',
 
-    // Chế độ Mock / Sandbox Simulator (true: luôn mở sandbox ngay; false: ưu tiên API thật với fallback nhanh)
+    // Chế độ Mock (false: gọi API BE thật; true: giả lập chuyển hướng thành công)
     MOCK_MODE: false,
 
-    // Thời gian delay giả lập (ms) - tối ưu siêu mượt
-    MOCK_DELAY: 350,
-
-    // Kích hoạt Sandbox Modal Simulator khi API ngoài timeout hoặc chưa có backend
-    SANDBOX_SIMULATOR_ENABLED: true,
+    // Thời gian delay giả lập khi bật Mock (ms)
+    MOCK_DELAY: 300,
 
     // API Key & Merchant Demo
     API_KEY: 'pk_test_demo_key_pay2pay',
-    MERCHANT_ID: 'MERCHANT-DEMO-001',
+    MERCHANT_ID: 'PP0000141001',
 };
 
 /**

@@ -7,6 +7,9 @@ function getFormattedTime() {
     return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}`;
 }
 
+let cachedAccessToken = null;
+let tokenExpiresAt = 0;
+
 export default async function handler(req, res) {
     // Chỉ chấp nhận method POST từ Frontend
     if (req.method !== 'POST') {
@@ -21,25 +24,25 @@ export default async function handler(req, res) {
         const USERNAME = process.env.PAY2PAY_USERNAME;
         const PASSWORD = process.env.PAY2PAY_PASSWORD; 
         const TENANT = process.env.PAY2PAY_TENANT || 'MERCHANT-WEB';
-        const MERCHANT_ID = process.env.PAY2PAY_MERCHANT_ID;
+        const MERCHANT_ID = process.env.PAY2PAY_MERCHANT_ID || 'PP0000141001';
         
         let PRIVATE_KEY = process.env.PAY2PAY_PRIVATE_KEY;
         
-        // Nếu bạn CHƯA cài đặt biến môi trường, hệ thống sẽ trả về link MOCK (Giả lập) để web không bị lỗi
+        // Nếu chưa cài đặt biến môi trường, trả về link callback mô phỏng thành công trên trang hiện tại
         if (!PRIVATE_KEY || !USERNAME || !PASSWORD) {
+            const fallbackReturn = returnUrl || 'https://viethoang99.github.io/pay2pay-paygate-developer/';
+            const separator = fallbackReturn.includes('?') ? '&' : '?';
             return res.status(200).json({ 
                 success: true, 
                 isMock: true,
-                orderId: orderId,
-                amount: amount,
-                message: "Đang chạy chế độ Sandbox Demo do chưa cấu hình Environment Variables trên Vercel."
+                paymentUrl: `${fallbackReturn}${separator}status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`,
+                message: "Đang chạy chế độ demo do chưa cấu hình Environment Variables trên Vercel."
             });
         }
         
         // Sửa lỗi format Private Key (rất hay gặp khi paste vào Vercel bị mất xuống dòng)
         PRIVATE_KEY = PRIVATE_KEY.replace(/\\n/g, '\n');
         if (PRIVATE_KEY.split('\n').length <= 2) {
-            // Hỗ trợ cả chuẩn PKCS#8 (PRIVATE KEY) và PKCS#1 (RSA PRIVATE KEY)
             let keyBody = PRIVATE_KEY.replace(/-----BEGIN (RSA )?PRIVATE KEY-----/, '')
                                      .replace(/-----END (RSA )?PRIVATE KEY-----/, '')
                                      .replace(/\s+/g, '');
@@ -47,7 +50,6 @@ export default async function handler(req, res) {
             for (let i = 0; i < keyBody.length; i += 64) {
                 formattedBody += keyBody.substring(i, i + 64) + '\n';
             }
-            // Khôi phục lại đúng header của người dùng
             const isRSA = PRIVATE_KEY.includes('RSA');
             const header = isRSA ? '-----BEGIN RSA PRIVATE KEY-----' : '-----BEGIN PRIVATE KEY-----';
             const footer = isRSA ? '-----END RSA PRIVATE KEY-----' : '-----END PRIVATE KEY-----';
@@ -66,28 +68,25 @@ export default async function handler(req, res) {
         // Mã hóa Password theo chuẩn: base64(hex(sha256(username + password)))
         const rawPassword = PASSWORD;
         let hashedPassword = rawPassword;
-        
-        // Tránh mã hóa 2 lần nếu bạn đã tự mã hóa và điền vào Vercel (chuỗi 88 ký tự)
         if (rawPassword.length !== 88) {
-            const inputString = USERNAME + rawPassword; // Thử đổi thứ tự: Username + Password
+            const inputString = USERNAME + rawPassword;
             const sha256Hex = crypto.createHash('sha256').update(inputString).digest('hex');
             hashedPassword = Buffer.from(sha256Hex).toString('base64');
         }
 
         // ==========================================
-        // BƯỚC 1: GỌI API LOGIN ĐỂ LẤY ACCESS TOKEN
+        // BƯỚC 1: LẤY HOẶC TÁI SỬ DỤNG ACCESS TOKEN
         // ==========================================
-        const loginReqId = crypto.randomUUID();
-        const loginTime = getFormattedTime();
-        const loginBody = { username: USERNAME, password: hashedPassword };
-        const payloadToSign = `${loginReqId}${loginTime}${TENANT}${JSON.stringify(loginBody)}`;
-        const loginSig = generateSignature(loginReqId, loginTime, TENANT, loginBody);
+        let accessToken = cachedAccessToken;
+        if (!accessToken || Date.now() > tokenExpiresAt) {
+            const loginReqId = crypto.randomUUID();
+            const loginTime = getFormattedTime();
+            const loginBody = { username: USERNAME, password: hashedPassword };
+            const loginSig = generateSignature(loginReqId, loginTime, TENANT, loginBody);
 
-        let loginRes;
-        try {
-            loginRes = await fetch(`${PAY2PAY_API_URL}/auth-service/api/v1.0/user/login`, {
+            const loginRes = await fetch(`${PAY2PAY_API_URL}/auth-service/api/v1.0/user/login`, {
                 method: 'POST',
-                signal: AbortSignal.timeout(3500),
+                signal: AbortSignal.timeout(8000),
                 headers: {
                     'Content-Type': 'application/json',
                     'p-request-id': loginReqId,
@@ -97,34 +96,22 @@ export default async function handler(req, res) {
                 },
                 body: JSON.stringify(loginBody)
             });
-        } catch (fetchErr) {
-            console.warn('Pay2Pay login fetch timeout/error, switching to sandbox:', fetchErr.message);
-            return res.status(200).json({ 
-                success: true, 
-                isMock: true, 
-                fallback: true,
-                orderId: orderId,
-                amount: amount,
-                message: "Cổng Pay2Pay UAT phản hồi chậm (>3.5s). Tự động kích hoạt Sandbox."
-            });
-        }
 
-        const loginText = await loginRes.text();
-        let loginData = {};
-        try { loginData = loginText ? JSON.parse(loginText) : {}; } catch(e) {}
-        
-        if (loginData.code !== 'SUCCESS') {
-            console.warn('Pay2Pay login rejected, switching to sandbox:', loginData.message);
-            return res.status(200).json({ 
-                success: true, 
-                isMock: true, 
-                fallback: true,
-                orderId: orderId,
-                amount: amount,
-                message: `Đăng nhập Pay2Pay UAT (${loginData.message || 'Chưa mở'}). Đã kích hoạt Sandbox.`
-            });
+            const loginText = await loginRes.text();
+            let loginData = {};
+            try { loginData = loginText ? JSON.parse(loginText) : {}; } catch(e) {}
+            
+            if (loginData.code !== 'SUCCESS') {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Đăng nhập Pay2Pay thất bại (HTTP ${loginRes.status}): ` + (loginData.message || loginText || 'Empty response')
+                });
+            }
+
+            cachedAccessToken = loginData.data?.accessToken;
+            tokenExpiresAt = Date.now() + 60 * 60 * 1000; // Cache 1 giờ để tăng tốc các lần thanh toán tiếp theo
+            accessToken = cachedAccessToken;
         }
-        const accessToken = loginData.data.accessToken;
 
         // ==========================================
         // BƯỚC 2: GỌI API INIT PAYMENT (Hosted Checkout)
@@ -147,44 +134,29 @@ export default async function handler(req, res) {
             paymentFee: 0
         };
 
-        let initRes;
-        try {
-            initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
-                method: 'POST',
-                signal: AbortSignal.timeout(3500),
-                headers: {
-                    'p-request-id': initReqId,
-                    'p-request-time': initTime,
-                    'p-tenant': INIT_TENANT,
-                    'p-signature': initSig,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(initBody)
-            });
-        } catch (fetchErr) {
-            console.warn('Pay2Pay init fetch timeout/error, switching to sandbox:', fetchErr.message);
-            return res.status(200).json({ 
-                success: true, 
-                isMock: true, 
-                fallback: true,
-                orderId: orderId,
-                amount: amount,
-                message: "Tạo thanh toán Pay2Pay UAT timeout. Đã kích hoạt Sandbox."
-            });
-        }
+        const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
+            method: 'POST',
+            signal: AbortSignal.timeout(8000),
+            headers: {
+                'p-request-id': initReqId,
+                'p-request-time': initTime,
+                'p-tenant': INIT_TENANT,
+                'p-signature': initSig,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(initBody)
+        });
 
         const initText = await initRes.text();
         let initData = {};
         try { initData = initText ? JSON.parse(initText) : {}; } catch(e) {}
         
         if (initRes.status !== 200 || initData.code !== 'SUCCESS') {
-            return res.status(200).json({
-                success: true,
-                isMock: true,
-                fallback: true,
-                orderId: orderId,
-                amount: amount,
-                message: "Pay2Pay UAT trả lời không thành công. Đã kích hoạt Sandbox."
+            return res.status(initRes.status || 400).json({
+                success: false,
+                error: 'Init Payment Failed',
+                message: initData.message || 'Khởi tạo thanh toán Pay2Pay thất bại',
+                rawData: initData
             });
         }
 
@@ -192,20 +164,15 @@ export default async function handler(req, res) {
 
         return res.status(200).json({ 
             success: true, 
-            isMock: false,
             paymentUrl: targetUrl,
             rawData: initData
         });
 
     } catch (error) {
         console.error('Lỗi tích hợp Pay2Pay API:', error);
-        return res.status(200).json({ 
-            success: true, 
-            isMock: true, 
-            fallback: true,
-            orderId: req.body?.orderId,
-            amount: req.body?.amount,
-            message: 'Đã tự động chuyển đổi sang Sandbox do cổng UAT quá tải.' 
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Lỗi máy chủ nội bộ (Vercel): ' + (error.message || error.toString()) 
         });
     }
 }
