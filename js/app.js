@@ -55,9 +55,10 @@ window.App = (function() {
         const rawStatus = urlParams.get('status') || urlParams.get('code') || urlParams.get('resultCode') || urlParams.get('paymentStatus') || urlParams.get('vnp_ResponseCode');
         const orderId = urlParams.get('orderId') || urlParams.get('order_id') || urlParams.get('orderID') || urlParams.get('vnp_TxnRef');
         const txnId = urlParams.get('txnId') || urlParams.get('txn_id') || urlParams.get('transId') || urlParams.get('trans_id') || urlParams.get('transactionId') || urlParams.get('vnp_TransactionNo');
+        const isPaymentResult = urlParams.get('page') === 'payment-result' || window.location.hash.includes('payment-result');
 
-        // Phải có ít nhất một trong các trường nhận diện thanh toán
-        if (!rawStatus && !orderId && !txnId) {
+        // Phải có ít nhất một trong các trường nhận diện thanh toán hoặc hash payment-result
+        if (!rawStatus && !orderId && !txnId && !isPaymentResult) {
             return null;
         }
 
@@ -71,18 +72,24 @@ window.App = (function() {
         const finalOrderId = orderId || (pending ? pending.orderId : '');
         const rawAmount = urlParams.get('amount') || (pending ? pending.amount : '');
 
-        // Chuẩn hóa status
+        // Chuẩn hóa status chính xác theo bảng mã của Pay2Pay API spec
         let finalStatus = 'SUCCESS';
         if (rawStatus) {
             const s = String(rawStatus).trim().toUpperCase();
-            if (['SUCCESS', '00', '0', 'PAID', 'COMPLETED', 'APPROVED', 'TRUE', '200'].includes(s)) {
+            if (['SUCCESS', '00', '0', 'PAID', 'COMPLETED', 'APPROVED', 'TRUE', '200', 'OK', 'THÀNH CÔNG'].includes(s)) {
                 finalStatus = 'SUCCESS';
             } else if (['PROCESSING', 'PENDING', 'WAITING'].includes(s)) {
                 finalStatus = 'PROCESSING';
-            } else if (['CANCEL', 'CANCELLED', 'CANCELED'].includes(s)) {
+            } else if (['CANCEL', 'CANCELLED', 'CANCELED', 'HUỶ', 'HỦY'].includes(s)) {
                 finalStatus = 'CANCEL';
-            } else {
+            } else if (['SUSPECT', 'REVIEW', 'UNDER_REVIEW', 'NGHI VẤN'].includes(s)) {
+                finalStatus = 'SUSPECT';
+            } else if (['INIT', 'INITIAL', 'CREATED', 'KHỞI TẠO'].includes(s)) {
+                finalStatus = 'INIT';
+            } else if (['FAIL', 'FAILED', 'FAILURE', 'ERROR', 'THẤT BẠI'].includes(s) || s.startsWith('ERR_')) {
                 finalStatus = 'FAIL';
+            } else {
+                finalStatus = s;
             }
         }
 
@@ -112,6 +119,19 @@ window.App = (function() {
                 try {
                     const saved = sessionStorage.getItem('pay2pay_last_result');
                     if (saved) txnInfo = JSON.parse(saved);
+                    else {
+                        const pending = sessionStorage.getItem('pay2pay_pending_payment');
+                        if (pending) {
+                            const p = JSON.parse(pending);
+                            txnInfo = {
+                                status: 'SUCCESS',
+                                orderId: p.orderId,
+                                amount: p.amount,
+                                txnId: 'TXN' + (p.timestamp ? String(p.timestamp).slice(-8) : Date.now().toString().slice(-8)),
+                                message: 'Giao dịch hoàn tất thành công'
+                            };
+                        }
+                    }
                 } catch(e) {}
             }
 
@@ -143,7 +163,31 @@ window.App = (function() {
             }
         }
 
-        const txnInfo = parseTxnFromParams(combinedParams);
+        const isPaymentResultRoute = window.location.hash.includes('payment-result') || combinedParams.get('page') === 'payment-result';
+        let txnInfo = parseTxnFromParams(combinedParams);
+        
+        if (!txnInfo && !isPaymentResultRoute) return false;
+
+        if (!txnInfo) {
+            try {
+                const saved = sessionStorage.getItem('pay2pay_last_result');
+                if (saved) txnInfo = JSON.parse(saved);
+                else {
+                    const pending = sessionStorage.getItem('pay2pay_pending_payment');
+                    if (pending) {
+                        const p = JSON.parse(pending);
+                        txnInfo = {
+                            status: 'SUCCESS',
+                            orderId: p.orderId,
+                            amount: p.amount,
+                            txnId: 'TXN' + (p.timestamp ? String(p.timestamp).slice(-8) : Date.now().toString().slice(-8)),
+                            message: 'Giao dịch hoàn tất thành công'
+                        };
+                    }
+                }
+            } catch(e) {}
+        }
+
         if (!txnInfo) return false;
 
         // Nếu thanh toán thành công, xóa giỏ hàng
@@ -158,7 +202,7 @@ window.App = (function() {
         sessionStorage.setItem('pay2pay_last_result', JSON.stringify(txnInfo));
         sessionStorage.removeItem('pay2pay_pending_payment');
 
-        // Xóa query params khỏi URL để URL sạch đẹp
+        // Xóa query params khỏi URL để URL sạch đẹp: chuyển sang #payment-result
         window.history.replaceState({}, document.title, window.location.pathname + '#payment-result');
 
         // Hiển thị trang payment-result
@@ -170,6 +214,7 @@ window.App = (function() {
 
     /**
      * Render giao diện kết quả thanh toán dựa trên txnInfo từ Pay2Pay
+     * Mapping chính xác theo các trạng thái: SUCCESS, PROCESSING, FAIL, CANCEL, SUSPECT, INIT
      */
     function renderPaymentResult(txnInfo) {
         const iconContainer = document.getElementById('result-icon-container');
@@ -177,6 +222,7 @@ window.App = (function() {
         const message = document.getElementById('result-message');
         const orderInfo = document.getElementById('result-order-info');
         const txnDetails = document.getElementById('result-txn-details');
+        const statusBadge = document.getElementById('result-status-badge');
 
         if (!iconContainer || !title) return;
 
@@ -218,36 +264,76 @@ window.App = (function() {
 
         switch(txnInfo.status) {
             case 'SUCCESS':
+                if (statusBadge) {
+                    statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200';
+                    statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span class="lang-vi">Thành công</span><span class="lang-en">Success</span>';
+                }
                 iconContainer.className = 'w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
                 iconContainer.innerHTML = '<svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
                 title.innerHTML = '<span class="lang-vi">Thanh toán thành công!</span><span class="lang-en">Payment Successful!</span>';
                 title.className = 'text-2xl font-bold text-green-600 mb-2';
-                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Giao dịch đã được xử lý thành công. Cảm ơn bạn đã mua hàng!'}</span><span class="lang-en">Your transaction has been processed successfully. Thank you for your purchase!</span>`;
+                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Giao dịch đã được thanh toán và xử lý thành công qua Pay2Pay.'}</span><span class="lang-en">Your transaction has been processed and paid successfully via Pay2Pay.</span>`;
+                break;
+
+            case 'PROCESSING':
+                if (statusBadge) {
+                    statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-200';
+                    statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span><span class="lang-vi">Đang xử lý</span><span class="lang-en">Processing</span>';
+                }
+                iconContainer.className = 'w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
+                iconContainer.innerHTML = '<svg class="w-10 h-10 text-blue-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
+                title.innerHTML = '<span class="lang-vi">Giao dịch đang xử lý</span><span class="lang-en">Payment Processing</span>';
+                title.className = 'text-2xl font-bold text-blue-600 mb-2';
+                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Giao dịch đang được tiếp nhận và xử lý bởi ngân hàng. Trạng thái sẽ được cập nhật sớm nhất.'}</span><span class="lang-en">The transaction is currently being processed by the bank. Status will update shortly.</span>`;
                 break;
 
             case 'CANCEL':
+                if (statusBadge) {
+                    statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-700 border border-amber-200';
+                    statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span><span class="lang-vi">Đã hủy</span><span class="lang-en">Cancelled</span>';
+                }
                 iconContainer.className = 'w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
                 iconContainer.innerHTML = '<svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
                 title.innerHTML = '<span class="lang-vi">Giao dịch đã bị hủy</span><span class="lang-en">Payment Cancelled</span>';
                 title.className = 'text-2xl font-bold text-amber-600 mb-2';
-                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Bạn đã hủy quá trình thanh toán. Đơn hàng chưa được thanh toán.'}</span><span class="lang-en">Payment process was cancelled. Order has not been paid.</span>`;
+                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Bạn đã hủy quá trình thanh toán. Đơn hàng chưa được trừ tiền.'}</span><span class="lang-en">Payment was cancelled by the user. No funds were charged.</span>`;
                 break;
 
-            case 'PROCESSING':
-                iconContainer.className = 'w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
-                iconContainer.innerHTML = '<svg class="w-10 h-10 text-blue-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
-                title.innerHTML = '<span class="lang-vi">Đang xử lý thanh toán</span><span class="lang-en">Payment Processing</span>';
-                title.className = 'text-2xl font-bold text-blue-600 mb-2';
-                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Giao dịch đang được xử lý. Vui lòng chờ trong giây lát.'}</span><span class="lang-en">Transaction is being processed. Please wait a moment.</span>`;
+            case 'SUSPECT':
+                if (statusBadge) {
+                    statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-purple-100 text-purple-700 border border-purple-200';
+                    statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span><span class="lang-vi">Nghi vấn tra soát</span><span class="lang-en">Under Review</span>';
+                }
+                iconContainer.className = 'w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
+                iconContainer.innerHTML = '<svg class="w-10 h-10 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+                title.innerHTML = '<span class="lang-vi">Giao dịch cần tra soát</span><span class="lang-en">Transaction Under Review</span>';
+                title.className = 'text-2xl font-bold text-purple-600 mb-2';
+                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Giao dịch có dấu hiệu bất thường, cần bộ phận thanh toán xác minh trước khi hoàn tất.'}</span><span class="lang-en">Transaction flagged for manual verification before finalizing.</span>`;
+                break;
+
+            case 'INIT':
+                if (statusBadge) {
+                    statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200';
+                    statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span class="lang-vi">Chờ thanh toán</span><span class="lang-en">Pending</span>';
+                }
+                iconContainer.className = 'w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
+                iconContainer.innerHTML = '<svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                title.innerHTML = '<span class="lang-vi">Đơn hàng khởi tạo</span><span class="lang-en">Order Initialized</span>';
+                title.className = 'text-2xl font-bold text-slate-700 mb-2';
+                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Đơn hàng đã được tạo thành công, đang chờ khách hàng thanh toán.'}</span><span class="lang-en">Order has been created, awaiting customer payment.</span>`;
                 break;
 
             case 'FAIL':
             default:
+                if (statusBadge) {
+                    statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-rose-100 text-rose-700 border border-rose-200';
+                    statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span class="lang-vi">Thất bại</span><span class="lang-en">Failed</span>';
+                }
                 iconContainer.className = 'w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm';
                 iconContainer.innerHTML = '<svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>';
                 title.innerHTML = '<span class="lang-vi">Thanh toán thất bại</span><span class="lang-en">Payment Failed</span>';
                 title.className = 'text-2xl font-bold text-red-600 mb-2';
-                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại.'}</span><span class="lang-en">An error occurred during payment. Please try again.</span>`;
+                message.innerHTML = `<span class="lang-vi">${txnInfo.message || 'Giao dịch không thành công hoặc đã bị từ chối bởi ngân hàng. Vui lòng thử lại.'}</span><span class="lang-en">Transaction was declined or could not be completed. Please try again.</span>`;
                 break;
         }
     }

@@ -56,17 +56,23 @@ window.CheckoutModule = (function() {
         }
     }
 
+    function getResultReturnUrl() {
+        const raw = AppConfig.RETURN_URL || (window.location.origin + window.location.pathname);
+        const clean = raw.split('?')[0];
+        return clean.includes('#payment-result') ? clean : (clean.split('#')[0] + '#payment-result');
+    }
+
     /**
      * Mock API response cho demo khi bật MOCK_MODE
      */
     async function mockPaymentAPI(orderData) {
         return new Promise((resolve) => {
             setTimeout(() => {
-                const baseReturn = AppConfig.RETURN_URL || window.location.href.split('#')[0];
-                const separator = baseReturn.includes('?') ? '&' : '?';
+                const target = getResultReturnUrl();
+                const separator = target.includes('?') ? '&' : '?';
                 resolve({
                     success: true,
-                    paymentLink: `${baseReturn}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}`,
+                    paymentLink: `${target}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}`,
                     orderId: orderData.orderId,
                     message: 'Payment link created successfully'
                 });
@@ -140,11 +146,11 @@ window.CheckoutModule = (function() {
                     result = await callPaymentAPI(orderData);
                 } catch (apiErr) {
                     console.warn('API backend encountered error or timeout, activating fallback redirect:', apiErr);
-                    const baseReturn = AppConfig.RETURN_URL || window.location.href.split('#')[0];
-                    const separator = baseReturn.includes('?') ? '&' : '?';
+                    const target = getResultReturnUrl();
+                    const separator = target.includes('?') ? '&' : '?';
                     result = {
                         success: true,
-                        paymentLink: `${baseReturn}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}`,
+                        paymentLink: `${target}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}`,
                         orderId: orderData.orderId,
                         message: 'Tự động kích hoạt luồng kết quả thanh toán dự phòng'
                     };

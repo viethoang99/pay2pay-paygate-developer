@@ -7,6 +7,14 @@ function getFormattedTime() {
     return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}`;
 }
 
+function formatReturnUrl(url) {
+    const defaultUrl = 'https://viethoang99.github.io/pay2pay-paygate-developer/#payment-result';
+    if (!url) return defaultUrl;
+    const clean = url.split('?')[0];
+    if (clean.includes('#payment-result')) return clean;
+    return clean.split('#')[0] + '#payment-result';
+}
+
 let cachedAccessToken = null;
 let tokenExpiresAt = 0;
 
@@ -18,6 +26,7 @@ export default async function handler(req, res) {
 
     try {
         const { orderId, amount, description, returnUrl } = req.body;
+        const targetReturnUrl = formatReturnUrl(returnUrl);
 
         // 1. LẤY THÔNG TIN TỪ KÉT SẮT CỦA VERCEL (Environment Variables)
         const PAY2PAY_API_URL = process.env.PAY2PAY_API_URL || 'https://uat-api.pay2pay.vn';
@@ -30,12 +39,11 @@ export default async function handler(req, res) {
         
         // Nếu chưa cài đặt biến môi trường, trả về link callback mô phỏng thành công trên trang hiện tại
         if (!PRIVATE_KEY || !USERNAME || !PASSWORD) {
-            const fallbackReturn = returnUrl || 'https://viethoang99.github.io/pay2pay-paygate-developer/';
-            const separator = fallbackReturn.includes('?') ? '&' : '?';
+            const sep = targetReturnUrl.includes('?') ? '&' : '?';
             return res.status(200).json({ 
                 success: true, 
                 isMock: true,
-                paymentUrl: `${fallbackReturn}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`,
+                paymentUrl: `${targetReturnUrl}${sep}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`,
                 message: "Đang chạy chế độ demo do chưa cấu hình Environment Variables trên Vercel."
             });
         }
@@ -133,7 +141,9 @@ export default async function handler(req, res) {
                 paymentMethod: "",
                 description: `Thanhtoanchodonhang${cleanOrderId}`,
                 lang: "vi",
-                returnUrl: returnUrl,
+                returnUrl: targetReturnUrl,
+                return_url: targetReturnUrl,
+                redirect_url: targetReturnUrl,
                 paymentFee: 0
             };
 
@@ -176,26 +186,25 @@ export default async function handler(req, res) {
         // TỰ ĐỘNG DỰ PHÒNG (FALLBACK):
         // Khi cổng UAT Pay2Pay bị timeout / Cloudflare chặn / phản hồi chậm, tự động chuyển tiếp
         // về returnUrl để người dùng luôn trải nghiệm được kết quả thanh toán & xuất hóa đơn hoàn chỉnh
-        const fallbackReturn = returnUrl || 'https://viethoang99.github.io/pay2pay-paygate-developer/';
-        const separator = fallbackReturn.includes('?') ? '&' : '?';
+        const separator = targetReturnUrl.includes('?') ? '&' : '?';
         return res.status(200).json({ 
             success: true, 
             isFallback: true,
             message: "Cổng UAT Pay2Pay phản hồi chậm, tự động hoàn tất luồng thanh toán demo.",
-            paymentUrl: `${fallbackReturn}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`
+            paymentUrl: `${targetReturnUrl}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`
         });
 
     } catch (error) {
         console.error('Lỗi tích hợp Pay2Pay API:', error);
-        const fallbackReturn = (req.body && req.body.returnUrl) || 'https://viethoang99.github.io/pay2pay-paygate-developer/';
-        const separator = fallbackReturn.includes('?') ? '&' : '?';
         const orderId = (req.body && req.body.orderId) || ('ORD-' + Date.now());
         const amount = (req.body && req.body.amount) || '0';
+        const targetReturnUrl = formatReturnUrl(req.body && req.body.returnUrl);
+        const separator = targetReturnUrl.includes('?') ? '&' : '?';
 
         return res.status(200).json({ 
             success: true, 
             isFallback: true,
-            paymentUrl: `${fallbackReturn}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`
+            paymentUrl: `${targetReturnUrl}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`
         });
     }
 }

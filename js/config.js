@@ -12,9 +12,17 @@ window.AppConfig = {
     // Timeout kết nối API (ms)
     API_TIMEOUT: 15000,
 
-    // URL callback sau khi thanh toán
-    RETURN_URL: window.location.origin + window.location.pathname,
-    CANCEL_URL: window.location.href.split('#')[0] + '#demo',
+    // URL callback sau khi thanh toán - trỏ trực tiếp về màn hình kết quả payment-result
+    RETURN_URL: (function() {
+        const base = window.location.origin + window.location.pathname;
+        const cleanBase = base.split('#')[0].split('?')[0];
+        return cleanBase + '#payment-result';
+    })(),
+    CANCEL_URL: (function() {
+        const base = window.location.origin + window.location.pathname;
+        const cleanBase = base.split('#')[0].split('?')[0];
+        return cleanBase + '#payment-result?status=CANCEL';
+    })(),
 
     // Tiền tệ
     CURRENCY: 'VND',
