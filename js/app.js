@@ -182,6 +182,11 @@ window.App = (function() {
         // Initialize cart
         CartModule.init();
 
+        // Initialize Code Sandbox
+        if (window.CodeSandboxModule) {
+            CodeSandboxModule.init();
+        }
+
         // ƯU TIÊN: Kiểm tra callback từ Pay2Pay (có ?status= trong URL không)
         const isCallback = checkPaymentCallback();
 
