@@ -35,7 +35,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ 
                 success: true, 
                 isMock: true,
-                paymentUrl: `${fallbackReturn}${separator}status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`,
+                paymentUrl: `${fallbackReturn}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`,
                 message: "Đang chạy chế độ demo do chưa cấu hình Environment Variables trên Vercel."
             });
         }

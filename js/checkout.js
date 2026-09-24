@@ -62,9 +62,11 @@ window.CheckoutModule = (function() {
     async function mockPaymentAPI(orderData) {
         return new Promise((resolve) => {
             setTimeout(() => {
+                const baseReturn = AppConfig.RETURN_URL || window.location.href.split('#')[0];
+                const separator = baseReturn.includes('?') ? '&' : '?';
                 resolve({
                     success: true,
-                    paymentLink: (AppConfig.RETURN_URL || window.location.href.split('#')[0]) + `?status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}`,
+                    paymentLink: `${baseReturn}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}`,
                     orderId: orderData.orderId,
                     message: 'Payment link created successfully'
                 });
@@ -110,6 +112,15 @@ window.CheckoutModule = (function() {
             }
         };
 
+        // Lưu trước thông tin pending order vào sessionStorage để đảm bảo khi redirect về
+        // kể cả gateway trả về ít tham số thì trang kết quả vẫn hiển thị đầy đủ số tiền & đơn hàng
+        sessionStorage.setItem('pay2pay_pending_payment', JSON.stringify({
+            orderId: orderData.orderId,
+            amount: orderData.amount,
+            items: orderData.items,
+            timestamp: Date.now()
+        }));
+
         // Show loading overlay
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) {
@@ -138,6 +149,8 @@ window.CheckoutModule = (function() {
 
         } catch (error) {
             console.error('Payment Error:', error);
+            // Xóa pending order nếu khởi tạo thất bại
+            sessionStorage.removeItem('pay2pay_pending_payment');
             showToast(`Lỗi: ${error.message}`, 'error');
         } finally {
             if (loadingOverlay) {
