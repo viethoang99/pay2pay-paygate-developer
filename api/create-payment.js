@@ -231,6 +231,9 @@ export default async function handler(req, res) {
                     paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
                     if (paymentUrl) break;
                 }
+            } catch (stratErr) {
+                attemptedStrategies.push({ name: strat.name, error: stratErr.message });
+            }
         }
 
         // BƯỚC 2.2: NẾU HOSTED PAYMENT PAGE CHƯA NHẬN, GỌI API INITIALIZE CỦA MERCHANT
