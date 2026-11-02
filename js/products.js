@@ -1,77 +1,108 @@
 /**
  * Products Module
- * Quản lý dữ liệu sản phẩm và render UI
+ * Quản lý dữ liệu sản phẩm mẫu và render UI theo chuẩn baoyu-design
  */
 window.ProductsModule = (function() {
     const products = [
         {
             id: 'sp001',
-            name: 'Tai nghe Bluetooth Pro',
+            nameVi: 'Tai nghe Bluetooth Pro',
+            nameEn: 'Bluetooth Headphones Pro',
             price: 890000,
             image: '🎧',
-            description: 'Tai nghe không dây chống ồn, pin 30 giờ',
-            category: 'Phụ kiện'
+            descVi: 'Tai nghe không dây chống ồn chủ động, pin 30 giờ',
+            descEn: 'Active noise cancellation wireless headphones, 30h battery',
+            catVi: 'Phụ kiện',
+            catEn: 'Accessories'
         },
         {
             id: 'sp002',
-            name: 'Bàn phím cơ RGB',
+            nameVi: 'Bàn phím cơ RGB',
+            nameEn: 'Mechanical RGB Keyboard',
             price: 1290000,
             image: '⌨️',
-            description: 'Switch Cherry MX Blue, đèn RGB 16 triệu màu',
-            category: 'Phụ kiện'
+            descVi: 'Switch cơ học quang học, đèn LED RGB 16.8 triệu màu',
+            descEn: 'Optical mechanical switches, 16.8M color RGB backlight',
+            catVi: 'Phụ kiện',
+            catEn: 'Accessories'
         },
         {
             id: 'sp003',
-            name: 'Chuột gaming không dây',
+            nameVi: 'Chuột gaming không dây',
+            nameEn: 'Wireless Gaming Mouse',
             price: 650000,
             image: '🖱️',
-            description: 'Sensor 25000 DPI, pin sạc nhanh 70 giờ',
-            category: 'Phụ kiện'
+            descVi: 'Cảm biến 25.000 DPI siêu nhạy, sạc Type-C pin 70 giờ',
+            descEn: 'High-precision 25,000 DPI sensor, 70h rechargeable battery',
+            catVi: 'Phụ kiện',
+            catEn: 'Accessories'
         },
         {
             id: 'sp004',
-            name: 'Ốp lưng iPhone 15',
+            nameVi: 'Ốp lưng iPhone 15 Pro',
+            nameEn: 'iPhone 15 Pro Case',
             price: 250000,
             image: '📱',
-            description: 'Chất liệu silicon cao cấp, chống sốc MIL-STD',
-            category: 'Phụ kiện'
+            descVi: 'Chất liệu silicon kháng khuẩn cao cấp, chống va đập',
+            descEn: 'Premium antimicrobial silicone, military-grade shockproof',
+            catVi: 'Phụ kiện',
+            catEn: 'Accessories'
         },
         {
             id: 'sp005',
-            name: 'Sạc nhanh 65W GaN',
+            nameVi: 'Củ sạc nhanh 65W GaN',
+            nameEn: '65W GaN Fast Charger',
             price: 490000,
             image: '🔌',
-            description: 'Công nghệ GaN III, 3 cổng USB-C + USB-A',
-            category: 'Phụ kiện'
+            descVi: 'Công nghệ GaN III tỏa nhiệt thấp, 2 Type-C + 1 USB-A',
+            descEn: 'GaN III technology, 2 USB-C + 1 USB-A multi-port',
+            catVi: 'Phụ kiện',
+            catEn: 'Accessories'
         },
         {
             id: 'sp006',
-            name: 'Webcam 4K HDR',
+            nameVi: 'Webcam 4K Ultra HDR',
+            nameEn: '4K Ultra HDR Webcam',
             price: 1890000,
             image: '📷',
-            description: 'Độ phân giải 4K, tự động lấy nét, mic kép',
-            category: 'Thiết bị'
+            descVi: 'Độ phân giải 4K 60fps, tự động bắt nét khuôn mặt & mic kép',
+            descEn: '4K 60fps resolution, auto face tracking & dual noise-cancelling mics',
+            catVi: 'Thiết bị',
+            catEn: 'Devices'
         },
         {
             id: 'sp007',
-            name: 'Đèn bàn LED thông minh',
+            nameVi: 'Đèn bàn LED thông minh',
+            nameEn: 'Smart LED Desk Lamp',
             price: 750000,
             image: '💡',
-            description: 'Điều chỉnh nhiệt độ màu, điều khiển qua app',
-            category: 'Thiết bị'
+            descVi: 'Bảo vệ thị lực, tùy chỉnh nhiệt độ màu 2700K - 6500K',
+            descEn: 'Eye-friendly flicker-free, adjustable 2700K-6500K color temp',
+            catVi: 'Thiết bị',
+            catEn: 'Devices'
         },
         {
             id: 'sp008',
-            name: 'Hub USB-C 7-in-1',
+            nameVi: 'Bộ chia Hub USB-C 7-in-1',
+            nameEn: '7-in-1 USB-C Hub Adapter',
             price: 590000,
             image: '🔗',
-            description: 'HDMI 4K, USB 3.0, SD/TF, PD 100W',
-            category: 'Phụ kiện'
+            descVi: 'Xuất HDMI 4K 60Hz, sạc PD 100W, khe thẻ SD và USB 3.0',
+            descEn: '4K 60Hz HDMI, 100W PD pass-through, SD card & USB 3.0 ports',
+            catVi: 'Phụ kiện',
+            catEn: 'Accessories'
         }
     ];
 
     function getById(id) {
-        return products.find(p => p.id === id);
+        const p = products.find(item => item.id === id);
+        if (!p) return null;
+        return {
+            ...p,
+            name: p.nameVi, // backward compatibility
+            description: p.descVi,
+            category: p.catVi
+        };
     }
 
     function render() {
@@ -79,19 +110,44 @@ window.ProductsModule = (function() {
         if (!grid) return;
 
         grid.innerHTML = products.map(product => `
-            <div class="product-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                    <span class="text-7xl">${product.image}</span>
+            <div class="product-card group bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-primary-300 transition-all duration-200 flex flex-col overflow-hidden">
+                <!-- Visual Container -->
+                <div class="h-36 sm:h-40 bg-gradient-to-b from-slate-50 to-slate-100/70 border-b border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:from-primary-50/40 group-hover:to-slate-50 transition-colors">
+                    <span class="text-6xl sm:text-7xl transform group-hover:scale-110 transition-transform duration-200 select-none">${product.image}</span>
+                    <span class="absolute top-3 left-3 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-white/90 backdrop-blur-xs text-primary-700 border border-primary-200/60 shadow-2xs">
+                        <span class="lang-vi">${product.catVi}</span>
+                        <span class="lang-en">${product.catEn}</span>
+                    </span>
                 </div>
-                <div class="p-5">
-                    <span class="text-xs font-medium text-primary-600 bg-primary-50 px-2 py-1 rounded-full">${product.category}</span>
-                    <h3 class="text-lg font-semibold text-gray-900 mt-2 mb-1">${product.name}</h3>
-                    <p class="text-sm text-gray-500 mb-4">${product.description}</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-primary-600">${formatCurrency(product.price)}</span>
+                
+                <!-- Content Area -->
+                <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-snug group-hover:text-primary-600 transition-colors">
+                            <span class="lang-vi">${product.nameVi}</span>
+                            <span class="lang-en">${product.nameEn}</span>
+                        </h3>
+                        <p class="mt-1 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                            <span class="lang-vi">${product.descVi}</span>
+                            <span class="lang-en">${product.descEn}</span>
+                        </p>
+                    </div>
+
+                    <!-- Bottom Price & CTA -->
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-medium block">
+                                <span class="lang-vi">Đơn giá</span><span class="lang-en">Price</span>
+                            </span>
+                            <span class="text-sm sm:text-base font-extrabold text-primary-600 font-mono tracking-tight">
+                                ${formatCurrency(product.price)}
+                            </span>
+                        </div>
                         <button onclick="CartModule.addItem('${product.id}')" 
-                                class="add-to-cart-btn px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-                            + Thêm
+                                class="add-to-cart-btn inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold rounded-xl shadow-xs hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 transition-all flex-shrink-0 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span class="lang-vi">Thêm</span>
+                            <span class="lang-en">Add</span>
                         </button>
                     </div>
                 </div>

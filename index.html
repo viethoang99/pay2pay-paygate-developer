@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayGate - Cổng Thanh Toán Thông Minh</title>
+    <title>Pay2Pay Developer - Cổng Thanh Toán Trực Tuyến</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+                    },
                     colors: {
-                        primary: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81' },
+                        primary: { 50:'#eef2ff', 100:'#e0e7ff', 200:'#c7d2fe', 300:'#a5b4fc', 400:'#818cf8', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca', 800:'#3730a3', 900:'#312e81' },
                     }
                 }
             }
@@ -18,187 +22,127 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
     <link rel="stylesheet" href="css/styles.css">
-    <style>
-        /* Custom syntax highlight style to match design */
-        pre[class*="language-"], code[class*="language-"] {
-            text-shadow: none !important;
-            font-size: 0.875rem !important;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-            background-color: transparent !important;
-            color: #334155 !important;
-        }
-        .code-window {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            background-color: #ffffff;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            margin-bottom: 1.5rem;
-        }
-        .code-window-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.6rem 1rem;
-            border-bottom: 1px solid #e2e8f0;
-            background-color: #f8fafc;
-        }
-        .code-window-body {
-            overflow-x: auto;
-        }
-        .code-window-body pre {
-            margin: 0 !important;
-            padding: 1.25rem !important;
-            border: none !important;
-            background: transparent !important;
-        }
-        /* Color overrides */
-        .token.property { color: #2563eb !important; }
-        .token.string { color: #059669 !important; }
-        .token.number, .token.boolean { color: #ea580c !important; }
-        .token.punctuation, .token.operator { color: #94a3b8 !important; }
-
-        /* Prevent layout shifts from scrollbar */
-        html {
-            overflow-y: scroll;
-            scrollbar-gutter: stable;
-        }
-
-        /* i18n Global Rules */
-        html[lang="vi"] .lang-en { display: none !important; }
-        html[lang="en"] .lang-vi { display: none !important; }
-
-        /* Language Toggle Thumb animation (exact pixel positioning) */
-        html[lang="vi"] #lang-toggle .thumb { transform: translateX(0); }
-        html[lang="en"] #lang-toggle .thumb { transform: translateX(28px); }
-
-        /* Developer Grid Pattern (SePay style) */
-        .dev-grid-bg {
-            background-image: linear-gradient(to right, rgba(99, 102, 241, 0.06) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
-            background-size: 24px 24px;
-        }
-
-        /* Sandbox Terminal Line Alignment */
-        #sandbox-code-block, #sandbox-line-numbers div {
-            font-size: 12px !important;
-            line-height: 20px !important;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-        }
-    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-primary-100 selection:text-primary-800">
 
-    <!-- HEADER -->
-    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <!-- HEADER (Glassmorphism & Fixed Responsive Layout) -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <!-- Left: Logo & Navigation Grouped to prevent center-drift shift -->
-                <div class="flex items-center space-x-8">
+                <!-- Left: Logo & Desktop Navigation -->
+                <div class="flex items-center space-x-6 lg:space-x-8">
                     <!-- Logo -->
-                    <a href="#home" class="flex items-center flex-shrink-0">
+                    <a href="#home" class="flex items-center flex-shrink-0 transition-opacity hover:opacity-90">
                         <img src="assets/images/pay2pay-logo.png" alt="Pay2Pay" class="h-9 w-auto">
                     </a>
-                    <!-- Navigation (Fixed widths per item so switching language causes 0px layout shift) -->
+                    <!-- Navigation (Fixed-width items to prevent 0px layout shift during i18n toggle) -->
                     <nav class="hidden md:flex items-center space-x-1">
-                        <a href="#home" data-page="home" class="nav-link w-24 text-center py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-colors flex items-center justify-center">
+                        <a href="#home" data-page="home" class="nav-link w-24 text-center py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50/70 transition-all flex items-center justify-center">
                             <span class="lang-vi">Trang chủ</span><span class="lang-en">Home</span>
                         </a>
-                        <a href="#docs" data-page="docs" class="nav-link w-24 text-center py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-colors flex items-center justify-center">
+                        <a href="#docs" data-page="docs" class="nav-link w-24 text-center py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50/70 transition-all flex items-center justify-center">
                             <span class="lang-vi">Tài liệu</span><span class="lang-en">Docs</span>
                         </a>
-                        <a href="#demo" data-page="demo" class="nav-link w-24 text-center py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-colors flex items-center justify-center">
+                        <a href="#demo" data-page="demo" class="nav-link w-24 text-center py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50/70 transition-all flex items-center justify-center">
                             <span class="lang-vi">Demo</span><span class="lang-en">Demo</span>
                         </a>
                     </nav>
                 </div>
 
-                <!-- Actions -->
-                <div class="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
-                    <!-- Language Switcher (Toggle style) -->
-                    <button id="lang-toggle" class="relative inline-flex items-center h-7 w-14 rounded-full bg-primary-100 hover:bg-primary-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-inner border border-primary-200 flex-shrink-0" aria-label="Toggle language">
-                        <span class="absolute left-2 text-[10px] font-bold text-primary-700 select-none pointer-events-none">VI</span>
-                        <span class="absolute right-2 text-[10px] font-bold text-primary-700 select-none pointer-events-none">EN</span>
-                        <span class="thumb absolute top-[3px] left-[3px] w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-300 ease-in-out flex items-center justify-center border border-gray-100 overflow-hidden pointer-events-none">
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+                    <!-- Language Toggle Switcher -->
+                    <button id="lang-toggle" class="relative inline-flex items-center h-7 w-14 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/40 shadow-inner border border-slate-200/80 flex-shrink-0 cursor-pointer" aria-label="Toggle language">
+                        <span class="absolute left-2 text-[10px] font-extrabold text-slate-600 select-none pointer-events-none">VI</span>
+                        <span class="absolute right-2 text-[10px] font-extrabold text-slate-600 select-none pointer-events-none">EN</span>
+                        <span class="thumb absolute top-[3px] left-[3px] w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ease-out flex items-center justify-center border border-slate-100 overflow-hidden pointer-events-none">
                             <img class="lang-vi w-full h-full object-cover" src="https://flagcdn.com/w20/vn.png" alt="VN">
                             <img class="lang-en w-full h-full object-cover" src="https://flagcdn.com/w20/gb.png" alt="EN">
                         </span>
                     </button>
-                    <!-- Cart icon -->
-                    <a href="#demo" data-page="demo" class="relative p-2 text-gray-600 hover:text-primary-600 transition-colors" title="Giỏ hàng">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
-                        <span id="cart-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+
+                    <!-- Cart Icon Button -->
+                    <a href="#demo" data-page="demo" class="relative p-2 rounded-xl text-slate-600 hover:text-primary-600 hover:bg-slate-100 transition-colors flex items-center justify-center" title="Giỏ hàng">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                        <span id="cart-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-xs hidden">0</span>
                     </a>
-                    <!-- Mobile menu button -->
-                    <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-600">
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl text-slate-600 hover:text-primary-600 hover:bg-slate-100 transition-colors focus:outline-none" aria-label="Menu">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
                 </div>
             </div>
         </div>
-        <!-- Mobile nav (hidden by default) -->
-        <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 bg-white">
-            <div class="px-4 py-3 space-y-1">
-                <a href="#home" data-page="home" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
-                    <span class="lang-vi">Trang chủ</span><span class="lang-en">Home</span>
-                </a>
-                <a href="#docs" data-page="docs" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
-                    <span class="lang-vi">Tài liệu</span><span class="lang-en">Docs</span>
-                </a>
-                <a href="#demo" data-page="demo" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
-                    <span class="lang-vi">Demo</span><span class="lang-en">Demo</span>
-                </a>
-                <a href="#cart" data-page="cart" class="nav-link block px-4 py-2 rounded-lg text-sm font-medium text-gray-600">
-                    <span class="lang-vi">Giỏ hàng</span><span class="lang-en">Cart</span>
-                </a>
-            </div>
+
+        <!-- Mobile Navigation Drawer Dropdown -->
+        <div id="mobile-menu" class="md:hidden hidden border-t border-slate-200/80 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2 shadow-lg">
+            <a href="#home" data-page="home" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </span>
+                <span class="lang-vi">Trang chủ</span><span class="lang-en">Home</span>
+            </a>
+            <a href="#docs" data-page="docs" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </span>
+                <span class="lang-vi">Tài liệu API</span><span class="lang-en">API Docs</span>
+            </a>
+            <a href="#demo" data-page="demo" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                </span>
+                <span class="lang-vi">Demo Cửa hàng &amp; Thanh toán</span><span class="lang-en">Store &amp; Payment Demo</span>
+            </a>
         </div>
     </header>
 
     <!-- ==================== PAGE: HOME (SePay Developer Style) ==================== -->
     <div id="page-home" class="page">
         <!-- 1. HERO SECTION WITH TECH GRID BACKGROUND -->
-        <section class="relative bg-white border-b border-gray-100 overflow-hidden dev-grid-bg">
+        <section class="relative bg-white border-b border-slate-100 overflow-hidden dev-grid-bg">
             <!-- Subtle Radial Gradient Glow -->
-            <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-primary-100/70 via-primary-50/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-primary-200/50 via-indigo-100/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 lg:pt-16 pb-12 sm:pb-16 text-center">
+            <div class="relative mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 lg:pt-16 pb-12 sm:pb-16 text-center">
                 <!-- Pill Notification Badge -->
                 <div class="mb-5 flex justify-center">
-                    <a href="#docs" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium border border-primary-200 bg-primary-50/90 text-primary-700 hover:bg-primary-100 hover:border-primary-300 transition-all shadow-xs">
-                        <span class="w-1.5 h-1.5 rounded-full bg-primary-600 animate-pulse"></span>
+                    <a href="#docs" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-primary-200/90 bg-primary-50/90 text-primary-700 hover:bg-primary-100/90 hover:border-primary-300 transition-all shadow-2xs group">
+                        <span class="w-2 h-2 rounded-full bg-primary-600 animate-pulse"></span>
                         <span class="lang-vi">Cập nhật mới · Pay2Pay API v2.0 &amp; Webhooks</span>
                         <span class="lang-en">New Release · Pay2Pay API v2.0 &amp; Webhooks</span>
-                        <svg class="w-3.5 h-3.5 text-primary-500 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="w-3.5 h-3.5 text-primary-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
 
-                <!-- Main Hero Headline -->
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 leading-[1.2]">
-                    <span class="text-primary-600">
+                <!-- Main Hero Headline (Balanced wrapping, zero orphaned words) -->
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.25]">
+                    <span class="bg-gradient-to-r from-primary-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
                         <span class="lang-vi">API Cổng Thanh Toán</span>
                         <span class="lang-en">Payment Gateway API</span>
-                    </span><br>
-                    <span>
-                        <span class="lang-vi"><span class="text-primary-600">Tự động</span> hóa thanh toán</span>
-                        <span class="lang-en"><span class="text-primary-600">Automate</span> your payments</span>
+                    </span><br class="hidden sm:inline">
+                    <span class="block mt-1 sm:mt-0">
+                        <span class="lang-vi"><span class="whitespace-nowrap"><span class="text-primary-600">Tự động</span> hóa</span> thanh toán</span>
+                        <span class="lang-en"><span class="whitespace-nowrap"><span class="text-primary-600">Automate</span> your</span> payments</span>
                     </span>
                 </h1>
 
                 <!-- Subtitle Description -->
-                <p class="mt-4 mx-auto max-w-3xl text-base sm:text-lg text-gray-600 leading-relaxed">
+                <p class="mt-4 mx-auto max-w-2xl text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
                     <span class="lang-vi">Tự động xác nhận thanh toán, đối soát giao dịch thời gian thực, quét mã VietQR Napas247, thẻ quốc tế và hoàn tiền. Kết nối 40+ ngân hàng. Tích hợp trong 5 phút.</span>
                     <span class="lang-en">Automate payment confirmation, real-time transaction reconciliation, VietQR Napas247, international cards, and refunds. Connect 40+ banks. Integrate in 5 minutes.</span>
                 </p>
 
-                <!-- Action CTA Buttons -->
-                <div class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-3.5">
-                    <a href="#docs" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg ring-2 ring-primary-500/20">
+                <!-- Action CTA Buttons (Full width on mobile, inline on desktop) -->
+                <div class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-3 w-full max-w-md mx-auto sm:max-w-none">
+                    <a href="#docs" class="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 active:scale-[0.98] text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         <span class="lang-vi">Bắt đầu với Webhook &amp; API</span>
                         <span class="lang-en">Get Started with Webhook &amp; API</span>
                     </a>
-                    <a href="#demo" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white hover:bg-gray-50 text-gray-800 text-sm font-semibold border border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-xs">
-                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    <a href="#demo" class="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-sm font-semibold border border-slate-200 hover:border-slate-300 transition-all shadow-2xs">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                         <span class="lang-vi">Trải nghiệm Demo Cửa hàng</span>
                         <span class="lang-en">Live Store Demo</span>
                     </a>
@@ -491,12 +435,12 @@
                     </p>
                 </div>
 
-                <!-- 2-Column Code Sandbox Container -->
-                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] gap-5 items-start">
+                <!-- 2-Column Code Sandbox Container (Responsive Desktop & Mobile) -->
+                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,270px)_minmax(0,1fr)] gap-5 items-start">
                     
-                    <!-- Left: API Navigation List -->
-                    <div class="flex flex-col gap-1.5 p-2 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                        <button type="button" class="sandbox-api-btn w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all flex items-center justify-between bg-primary-50 border border-primary-400 text-primary-700 font-semibold" data-api="webhook">
+                    <!-- Left: API Navigation List (Horizontal scroll on mobile, vertical stack on tablet/desktop) -->
+                    <div class="flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 gap-1.5 p-2 rounded-2xl bg-slate-800/60 border border-slate-700/60">
+                        <button type="button" class="sandbox-api-btn flex-shrink-0 lg:flex-shrink w-auto lg:w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-3 bg-primary-50 border border-primary-400 text-primary-700 font-semibold cursor-pointer shadow-xs" data-api="webhook">
                             <div class="flex items-center gap-2.5 min-w-0">
                                 <span class="w-2 h-2 rounded-full bg-violet-500"></span>
                                 <span class="truncate">Webhook Giao dịch (IPN)</span>
@@ -504,7 +448,7 @@
                             <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 font-mono">POST</span>
                         </button>
 
-                        <button type="button" class="sandbox-api-btn w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all flex items-center justify-between bg-white border border-gray-200 text-gray-700 hover:bg-slate-700 hover:text-white" data-api="init">
+                        <button type="button" class="sandbox-api-btn flex-shrink-0 lg:flex-shrink w-auto lg:w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-3 bg-white border border-slate-200 text-slate-700 hover:bg-slate-700 hover:text-white cursor-pointer" data-api="init">
                             <div class="flex items-center gap-2.5 min-w-0">
                                 <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                                 <span class="truncate">Khởi tạo thanh toán (INIT)</span>
@@ -512,7 +456,7 @@
                             <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-mono">POST</span>
                         </button>
 
-                        <button type="button" class="sandbox-api-btn w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all flex items-center justify-between bg-white border border-gray-200 text-gray-700 hover:bg-slate-700 hover:text-white" data-api="check">
+                        <button type="button" class="sandbox-api-btn flex-shrink-0 lg:flex-shrink w-auto lg:w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-3 bg-white border border-slate-200 text-slate-700 hover:bg-slate-700 hover:text-white cursor-pointer" data-api="check">
                             <div class="flex items-center gap-2.5 min-w-0">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                 <span class="truncate">Kiểm tra trạng thái đơn</span>
@@ -520,7 +464,7 @@
                             <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 font-mono">POST</span>
                         </button>
 
-                        <button type="button" class="sandbox-api-btn w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all flex items-center justify-between bg-white border border-gray-200 text-gray-700 hover:bg-slate-700 hover:text-white" data-api="rsa">
+                        <button type="button" class="sandbox-api-btn flex-shrink-0 lg:flex-shrink w-auto lg:w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-3 bg-white border border-slate-200 text-slate-700 hover:bg-slate-700 hover:text-white cursor-pointer" data-api="rsa">
                             <div class="flex items-center gap-2.5 min-w-0">
                                 <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                 <span class="truncate">Tạo chữ ký số RSA-2048</span>
@@ -528,7 +472,7 @@
                             <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-mono">SHA256</span>
                         </button>
 
-                        <button type="button" class="sandbox-api-btn w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all flex items-center justify-between bg-white border border-gray-200 text-gray-700 hover:bg-slate-700 hover:text-white" data-api="refund">
+                        <button type="button" class="sandbox-api-btn flex-shrink-0 lg:flex-shrink w-auto lg:w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-3 bg-white border border-slate-200 text-slate-700 hover:bg-slate-700 hover:text-white cursor-pointer" data-api="refund">
                             <div class="flex items-center gap-2.5 min-w-0">
                                 <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                                 <span class="truncate">Hoàn tiền giao dịch</span>
@@ -537,39 +481,47 @@
                         </button>
                     </div>
 
-                    <!-- Right: Code Terminal Window -->
-                    <div class="flex flex-col bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
-                        <!-- Terminal Top Header -->
-                        <div class="px-4 py-3 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-900/60">
-                            <div>
-                                <h4 class="text-xs font-bold text-white tracking-wide flex items-center gap-2">
-                                    <span id="sandbox-title-vi" class="lang-vi">Nhận Webhook thông báo giao dịch (IPN)</span>
-                                    <span id="sandbox-title-en" class="lang-en">Receive Transaction Webhook (IPN)</span>
-                                </h4>
-                                <p class="text-[11px] text-slate-400 mt-0.5">
-                                    <span id="sandbox-desc-vi" class="lang-vi">Endpoint của bạn nhận HTTP POST từ Pay2Pay khi có giao dịch thành công. Phản hồi 200 OK với success=true.</span>
-                                    <span id="sandbox-desc-en" class="lang-en">Your endpoint receives HTTP POST from Pay2Pay upon successful payment. Respond with 200 OK and success=true.</span>
-                                </p>
+                    <!-- Right: Code Terminal Window (macOS style) -->
+                    <div class="flex flex-col bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+                        <!-- macOS Style Header -->
+                        <div class="px-4 py-3 border-b border-slate-800/90 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 bg-slate-900/70">
+                            <div class="flex items-center gap-3">
+                                <!-- macOS Window Dots -->
+                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                    <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block shadow-2xs"></span>
+                                    <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block shadow-2xs"></span>
+                                    <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block shadow-2xs"></span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-white tracking-wide truncate">
+                                        <span id="sandbox-title-vi" class="lang-vi">Nhận Webhook thông báo giao dịch (IPN)</span>
+                                        <span id="sandbox-title-en" class="lang-en">Receive Transaction Webhook (IPN)</span>
+                                    </h4>
+                                    <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                                        <span id="sandbox-desc-vi" class="lang-vi">Endpoint của bạn nhận HTTP POST từ Pay2Pay khi có giao dịch thành công. Phản hồi 200 OK với success=true.</span>
+                                        <span id="sandbox-desc-en" class="lang-en">Your endpoint receives HTTP POST from Pay2Pay upon successful payment. Respond with 200 OK and success=true.</span>
+                                    </p>
+                                </div>
                             </div>
                             <a href="#docs" class="text-[11.5px] text-primary-400 hover:text-primary-300 font-medium inline-flex items-center gap-1 self-start sm:self-center flex-shrink-0 transition-colors">
-                                <span class="lang-vi">Xem tài liệu đầy đủ</span>
+                                <span class="lang-vi">Xem tài liệu</span>
                                 <span class="lang-en">Full API docs</span>
                                 <span>&rarr;</span>
                             </a>
                         </div>
 
                         <!-- Language Switcher Bar & Copy Button -->
-                        <div class="px-3 py-2 border-b border-slate-800/80 bg-slate-900/40 flex items-center justify-between">
+                        <div class="px-3.5 py-2 border-b border-slate-800/80 bg-slate-900/40 flex items-center justify-between gap-2">
                             <!-- Language Tabs -->
-                            <div class="flex items-center gap-1">
-                                <button type="button" class="sandbox-lang-btn px-3 py-1 rounded-md text-xs font-mono transition-all bg-primary-600 text-white shadow-sm font-semibold" data-lang="curl">cURL</button>
-                                <button type="button" class="sandbox-lang-btn px-3 py-1 rounded-md text-xs font-mono text-gray-300 hover:text-white transition-all" data-lang="node">Node.js</button>
-                                <button type="button" class="sandbox-lang-btn px-3 py-1 rounded-md text-xs font-mono text-gray-300 hover:text-white transition-all" data-lang="php">PHP</button>
-                                <button type="button" class="sandbox-lang-btn px-3 py-1 rounded-md text-xs font-mono text-gray-300 hover:text-white transition-all" data-lang="python">Python</button>
+                            <div class="flex items-center gap-1 overflow-x-auto">
+                                <button type="button" class="sandbox-lang-btn px-3 py-1 rounded-lg text-xs font-mono transition-all bg-primary-600 text-white shadow-xs font-semibold cursor-pointer" data-lang="curl">cURL</button>
+                                <button type="button" class="sandbox-lang-btn px-3 py-1 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer" data-lang="node">Node.js</button>
+                                <button type="button" class="sandbox-lang-btn px-3 py-1 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer" data-lang="php">PHP</button>
+                                <button type="button" class="sandbox-lang-btn px-3 py-1 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer" data-lang="python">Python</button>
                             </div>
 
                             <!-- Copy Code Button -->
-                            <button id="sandbox-copy-btn" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                            <button id="sandbox-copy-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer flex-shrink-0">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                 <span id="sandbox-copy-text-vi" class="lang-vi">Sao chép</span>
                                 <span id="sandbox-copy-text-en" class="lang-en">Copy</span>
@@ -577,9 +529,9 @@
                         </div>
 
                         <!-- Code Content with Line Numbers -->
-                        <div class="relative flex overflow-x-auto max-h-[380px] font-mono text-xs">
+                        <div class="relative flex overflow-x-auto max-h-[380px] font-mono text-xs terminal-scroll">
                             <!-- Line numbers -->
-                            <div id="sandbox-line-numbers" class="sticky left-0 select-none py-3.5 pl-3 pr-2 bg-slate-950 border-r border-slate-800 text-slate-600 font-mono text-[11px] leading-5 text-right w-10 flex-shrink-0">
+                            <div id="sandbox-line-numbers" class="sticky left-0 select-none py-3.5 pl-3.5 pr-2 bg-slate-950 border-r border-slate-800/80 text-slate-600 font-mono text-[11px] leading-relaxed text-right w-11 flex-shrink-0">
                                 <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
                             </div>
                             <!-- Highlighted Code Element -->
@@ -784,61 +736,76 @@
     <div id="page-docs" class="page hidden bg-white min-h-screen border-t border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
-                <!-- Sidebar -->
-                <aside class="lg:w-72 flex-shrink-0">
+                <!-- Mobile Docs Quick Navigation Bar (lg:hidden) -->
+                <div class="lg:hidden p-3 bg-slate-50/90 rounded-2xl border border-slate-200/80 shadow-2xs">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">
+                        <span class="lang-vi">Mục lục tài liệu</span><span class="lang-en">Documentation Topics</span>
+                    </div>
+                    <div class="flex gap-2 overflow-x-auto pb-1">
+                        <button onclick="document.querySelector('[data-target=\'intro\']')?.click()" class="mobile-doc-pill px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200/80 whitespace-nowrap shadow-xs cursor-pointer">
+                            <span class="lang-vi">1. Giới thiệu</span><span class="lang-en">1. Introduction</span>
+                        </button>
+                        <button onclick="document.querySelector('[data-target=\'api-redirect\']')?.click()" class="mobile-doc-pill px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-slate-700 border border-slate-200 whitespace-nowrap cursor-pointer">
+                            <span class="lang-vi">2. API tích hợp</span><span class="lang-en">2. Integration API</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sidebar (Desktop sticky) -->
+                <aside class="hidden lg:block lg:w-72 flex-shrink-0">
                     <div class="lg:sticky lg:top-24">
                         <div class="mb-6">
-                            <h2 class="text-xl font-bold text-gray-900 mb-2">
+                            <h2 class="text-xl font-bold text-slate-900 mb-2">
                                 <span class="lang-vi">Mô hình tích hợp</span><span class="lang-en">Integration Model</span>
                             </h2>
-                            <p class="text-sm text-gray-500">
+                            <p class="text-sm text-slate-500">
                                 <span class="lang-vi">Chọn mô hình tích hợp Pay2Pay phù hợp</span><span class="lang-en">Choose suitable Pay2Pay integration</span>
                             </p>
                         </div>
-                        <nav class="space-y-1 border-r border-gray-200 pr-4" id="docs-sidebar">
+                        <nav class="space-y-1 border-r border-slate-200 pr-4" id="docs-sidebar">
                             <!-- Accordion Item 1 (Active) -->
-                            <div class="border-b border-gray-100 py-2 accordion-item active">
+                            <div class="border-b border-slate-100 py-2 accordion-item active">
                                 <button class="w-full flex items-center justify-between text-left py-2 min-h-[44px] text-sm font-bold text-primary-600 accordion-btn">
                                     <span class="lang-vi">Dịch vụ thanh toán Redirectlink</span><span class="lang-en">Redirectlink Payment</span>
                                     <svg class="w-4 h-4 text-primary-600 transform rotate-180 transition-transform duration-200 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="space-y-1 ml-4 border-l-2 border-primary-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-40 opacity-100 mt-2">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-primary-600 doc-link active" data-target="intro">
+                                <div class="space-y-1 ml-4 border-l-2 border-primary-200 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-40 opacity-100 mt-2">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-semibold text-primary-600 doc-link active" data-target="intro">
                                         <span class="lang-vi pointer-events-none">Giới thiệu</span><span class="lang-en pointer-events-none">Introduction</span>
                                     </a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="api-redirect">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-slate-500 hover:text-slate-900 doc-link" data-target="api-redirect">
                                         <span class="lang-vi pointer-events-none">API tích hợp</span><span class="lang-en pointer-events-none">Integration API</span>
                                     </a>
                                 </div>
                             </div>
 
                             <!-- Accordion Item 2 -->
-                            <div class="border-b border-gray-100 py-2 accordion-item">
-                                <button class="w-full flex items-center justify-between text-left py-2 min-h-[44px] text-sm font-medium text-gray-700 hover:text-primary-600 accordion-btn">
+                            <div class="border-b border-slate-100 py-2 accordion-item">
+                                <button class="w-full flex items-center justify-between text-left py-2 min-h-[44px] text-sm font-medium text-slate-700 hover:text-primary-600 accordion-btn">
                                     <span class="lang-vi">Dịch vụ Thu hộ</span><span class="lang-en">Collection Service</span>
-                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="space-y-1 ml-4 border-l-2 border-gray-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 mt-0">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">
+                                <div class="space-y-1 ml-4 border-l-2 border-slate-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 mt-0">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-slate-500 hover:text-slate-900 doc-link" data-target="coming-soon">
                                         <span class="lang-vi pointer-events-none">Giới thiệu</span><span class="lang-en pointer-events-none">Introduction</span>
                                     </a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-slate-500 hover:text-slate-900 doc-link" data-target="coming-soon">
                                         <span class="lang-vi pointer-events-none">API tích hợp</span><span class="lang-en pointer-events-none">Integration API</span>
                                     </a>
                                 </div>
                             </div>
                             
                             <!-- Accordion Item 3 -->
-                            <div class="border-b border-gray-100 py-2 accordion-item">
-                                <button class="w-full flex items-center justify-between text-left py-2 min-h-[44px] text-sm font-medium text-gray-700 hover:text-primary-600 accordion-btn">
+                            <div class="border-b border-slate-100 py-2 accordion-item">
+                                <button class="w-full flex items-center justify-between text-left py-2 min-h-[44px] text-sm font-medium text-slate-700 hover:text-primary-600 accordion-btn">
                                     <span class="lang-vi">Dịch vụ Chi hộ</span><span class="lang-en">Payout Service</span>
-                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
-                                <div class="space-y-1 ml-4 border-l-2 border-primary-100 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 mt-0">
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">
+                                <div class="space-y-1 ml-4 border-l-2 border-primary-200 pl-4 accordion-content overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0 mt-0">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-slate-500 hover:text-slate-900 doc-link" data-target="coming-soon">
                                         <span class="lang-vi pointer-events-none">Giới thiệu</span><span class="lang-en pointer-events-none">Introduction</span>
                                     </a>
-                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-gray-500 hover:text-gray-900 doc-link" data-target="coming-soon">
+                                    <a href="javascript:void(0)" class="block py-2 text-sm font-medium text-slate-500 hover:text-slate-900 doc-link" data-target="coming-soon">
                                         <span class="lang-vi pointer-events-none">API tích hợp</span><span class="lang-en pointer-events-none">Integration API</span>
                                     </a>
                                 </div>
@@ -853,22 +820,22 @@
 
                     <!-- Content Body (Intro) -->
                     <div id="doc-intro" class="doc-section prose max-w-none">
-                        <h1 class="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <h1 class="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <span class="lang-vi">GIỚI THIỆU</span><span class="lang-en">INTRODUCTION</span> 
-                            <span class="text-gray-300 font-normal">#</span>
+                            <span class="text-slate-300 font-normal">#</span>
                         </h1>
-                        <p class="text-gray-600 text-[15px] leading-relaxed mb-4">
+                        <p class="text-slate-600 text-[15px] leading-relaxed mb-4">
                             <span class="lang-vi"><strong>Dịch vụ thanh toán Redirect link</strong> của Pay2Pay là giải pháp thanh toán toàn diện, giúp doanh nghiệp dễ dàng thu tiền trực tuyến trên website. Thay vì phải làm việc rời rạc với từng ngân hàng hay ví điện tử, bạn chỉ cần <strong>tích hợp duy nhất 1 API</strong>.</span>
                             <span class="lang-en">Pay2Pay's <strong>Redirect Link Payment Service</strong> is a comprehensive payment solution that makes it simple for businesses to collect online payments on websites. Instead of working separately with each bank or e-wallet, you only need to <strong>integrate a single API</strong>.</span>
                         </p>
-                        <p class="text-gray-600 text-[15px] leading-relaxed mb-6">
+                        <p class="text-slate-600 text-[15px] leading-relaxed mb-6">
                             <span class="lang-vi">Tại bước thanh toán, hệ thống sẽ chuyển hướng (redirect) khách hàng đến cổng thanh toán an toàn của Pay2Pay. Khách hàng được tuỳ ý lựa chọn phương thức thanh toán phù hợp: Thẻ ATM nội địa, Thẻ quốc tế (Visa/Mastercard/JCB), Chuyển khoản, QR Pay và Trả góp.</span>
                             <span class="lang-en">At the checkout step, the system redirects the customer to Pay2Pay's secure payment gateway. Customers can choose their preferred payment method: Domestic ATM card, International card (Visa/Mastercard/JCB), Bank Transfer, QR Pay, and Installments.</span>
                         </p>
 
 
                         <!-- Integration Diagram -->
-                        <div class="relative max-w-4xl mx-auto pt-8 pb-16">
+                        <div class="relative max-w-4xl mx-auto pt-8 pb-16 overflow-x-auto">
                             <!-- Line connecting steps -->
                             <div class="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -z-10 mt-16 hidden md:block"></div>
                             
@@ -1927,69 +1894,73 @@ function computeSha256HashBase64(inputString) {
                     </div>
                 </div>
 
-                <!-- Right: Cart & Payment Section (Sticky) -->
+                <!-- Right: Cart & Payment Section (Sticky on desktop) -->
                 <div class="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
                         <!-- Cart Header -->
-                        <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white">
-                            <div class="flex items-center space-x-2">
-                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
-                                <h2 class="font-bold text-gray-900 text-lg">
-                                    <span class="lang-vi">Giỏ hàng</span>
-                                    <span class="lang-en">Shopping Cart</span>
+                        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                                </span>
+                                <h2 class="font-bold text-slate-900 text-base sm:text-lg">
+                                    <span class="lang-vi">Giỏ hàng thanh toán</span>
+                                    <span class="lang-en">Order Cart</span>
                                 </h2>
                             </div>
-                            <span id="cart-item-count" class="bg-primary-100 text-primary-700 text-xs font-semibold px-2.5 py-1 rounded-full">0</span>
+                            <span id="cart-item-count" class="bg-primary-50 border border-primary-200/60 text-primary-700 text-xs font-bold px-2.5 py-1 rounded-full shadow-2xs">0 món</span>
                         </div>
 
                         <!-- Empty cart state -->
                         <div id="empty-cart" class="text-center py-12 px-6">
-                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                            <div class="w-16 h-16 bg-slate-100/80 rounded-2xl flex items-center justify-center mx-auto mb-3.5 text-slate-400">
+                                <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                             </div>
-                            <h3 class="font-semibold text-gray-700 mb-1">
-                                <span class="lang-vi">Giỏ hàng trống</span>
-                                <span class="lang-en">Cart is empty</span>
+                            <h3 class="font-bold text-slate-700 text-sm mb-1">
+                                <span class="lang-vi">Giỏ hàng của bạn đang trống</span>
+                                <span class="lang-en">Your cart is empty</span>
                             </h3>
-                            <p class="text-xs text-gray-400">
-                                <span class="lang-vi">Bấm nút "+ Thêm" ở sản phẩm bên trái để bắt đầu thanh toán thử nghiệm</span>
-                                <span class="lang-en">Click "+ Add" on any product on the left to start testing</span>
+                            <p class="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
+                                <span class="lang-vi">Nhấn nút "+ Thêm" ở danh sách sản phẩm để tiến hành thử nghiệm thanh toán</span>
+                                <span class="lang-en">Click "+ Add" on any product on the left to start payment test</span>
                             </p>
                         </div>
 
                         <!-- Cart with items -->
                         <div id="cart-with-items" class="hidden">
                             <!-- Items scroll list -->
-                            <div id="cart-items" class="divide-y divide-gray-100 max-h-[360px] overflow-y-auto">
+                            <div id="cart-items" class="divide-y divide-slate-100 max-h-[360px] overflow-y-auto">
                                 <!-- Cart items rendered by cart.js -->
                             </div>
 
                             <!-- Cart summary & checkout button -->
-                            <div class="p-5 bg-gray-50 border-t border-gray-100 space-y-4">
-                                <div class="space-y-2 text-sm">
-                                    <div class="flex justify-between text-gray-500">
+                            <div class="p-4 sm:p-5 bg-slate-50/80 border-t border-slate-100 space-y-4">
+                                <div class="space-y-2 text-xs sm:text-sm">
+                                    <div class="flex justify-between text-slate-500">
                                         <span><span class="lang-vi">Tạm tính</span><span class="lang-en">Subtotal</span></span>
-                                        <span id="cart-subtotal" class="font-medium text-gray-800">0 ₫</span>
+                                        <span id="cart-subtotal" class="font-semibold text-slate-800 font-mono">0 ₫</span>
                                     </div>
-                                    <div class="flex justify-between text-gray-500">
+                                    <div class="flex justify-between text-slate-500">
                                         <span><span class="lang-vi">Phí tích hợp cổng</span><span class="lang-en">Gateway Fee</span></span>
-                                        <span class="text-emerald-600 font-medium"><span class="lang-vi">Miễn phí (Demo)</span><span class="lang-en">Free (Demo)</span></span>
+                                        <span class="text-emerald-600 font-semibold"><span class="lang-vi">Miễn phí (Demo)</span><span class="lang-en">Free (Demo)</span></span>
                                     </div>
-                                    <div class="border-t border-gray-200 pt-2 flex justify-between items-center">
-                                        <span class="text-base font-bold text-gray-900"><span class="lang-vi">Tổng thanh toán</span><span class="lang-en">Total Amount</span></span>
-                                        <span id="cart-total-amount" class="text-xl font-extrabold text-primary-600">0 ₫</span>
+                                    <div class="border-t border-slate-200/80 pt-2.5 flex justify-between items-center">
+                                        <span class="text-sm sm:text-base font-bold text-slate-900"><span class="lang-vi">Tổng thanh toán</span><span class="lang-en">Total Amount</span></span>
+                                        <span id="cart-total-amount" class="text-lg sm:text-xl font-extrabold text-primary-600 font-mono tracking-tight">0 ₫</span>
                                     </div>
                                 </div>
 
-                                <button id="checkout-btn" class="w-full py-3.5 px-4 bg-[#5B4AE4] border-2 border-[#5B4AE4] text-white font-bold rounded-xl hover:bg-[#4A3BD3] transition-all shadow-md hover:shadow-lg flex items-center justify-center space-x-2.5 active:scale-[0.98]">
-                                    <span><span class="lang-vi">Thanh toán</span><span class="lang-en">Checkout Now</span></span>
+                                <button id="checkout-btn" class="w-full py-3.5 px-4 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 active:scale-[0.98] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 cursor-pointer">
+                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2zm0-10h2v8h-2z"/></svg>
+                                    <span><span class="lang-vi">Thanh toán qua Pay2Pay</span><span class="lang-en">Pay with Pay2Pay</span></span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                 </button>
 
-                                <div class="flex items-center justify-center space-x-1.5 text-xs text-gray-400">
-                                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                <div class="flex items-center justify-center space-x-1.5 text-[11px] text-slate-400 text-center">
+                                    <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                     <span>
-                                        <span class="lang-vi">Tự động chuyển tiếp đến Cổng thanh toán</span>
-                                        <span class="lang-en">Automatically redirects to Payment Gateway</span>
+                                        <span class="lang-vi">Chuyển hướng trực tiếp đến Cổng thanh toán bảo mật</span>
+                                        <span class="lang-en">Redirects securely to Pay2Pay checkout page</span>
                                     </span>
                                 </div>
                             </div>
@@ -1998,80 +1969,103 @@ function computeSha256HashBase64(inputString) {
                 </div>
 
             </div>
+
+            <!-- Mobile Floating Cart Bar (Fixed Bottom on mobile when cart has items) -->
+            <div id="mobile-cart-bar" class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-xl px-4 py-3 hidden items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="relative p-2 bg-primary-50 rounded-xl text-primary-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                        <span id="mobile-cart-bar-count" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-slate-400 font-medium">
+                            <span class="lang-vi">Tổng thanh toán</span><span class="lang-en">Total</span>
+                        </div>
+                        <div id="mobile-cart-bar-total" class="text-base font-extrabold text-slate-900 font-mono">0 ₫</div>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('checkout-btn')?.click()" class="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer">
+                    <span><span class="lang-vi">Thanh toán</span><span class="lang-en">Checkout</span></span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- ==================== PAGE: PAYMENT RESULT ==================== -->
     <div id="page-payment-result" class="page hidden">
-        <div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
-            <div class="w-full max-w-md">
-                <!-- Card chính -->
-                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                    <!-- Icon header -->
-                    <div class="pt-10 pb-6 px-8 text-center">
-                        <div id="result-icon-container" class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm">
-                            <svg class="w-10 h-10 text-gray-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <div class="min-h-[80vh] flex items-center justify-center px-4 py-10 sm:py-16">
+            <div class="w-full max-w-lg">
+                <!-- Digital Receipt Card -->
+                <div class="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden relative">
+                    <!-- Status Icon Header -->
+                    <div class="pt-10 pb-6 px-6 sm:px-8 text-center bg-gradient-to-b from-slate-50/70 to-white">
+                        <div id="result-icon-container" class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-200/60">
+                            <svg class="w-10 h-10 text-slate-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         </div>
-                        <h1 id="result-title" class="text-2xl font-bold text-gray-900 mb-2">Đang kiểm tra...</h1>
-                        <p id="result-message" class="text-gray-500 text-sm leading-relaxed">Vui lòng chờ trong lúc chúng tôi đồng bộ với cổng thanh toán.</p>
+                        <h1 id="result-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">Đang kiểm tra...</h1>
+                        <p id="result-message" class="text-slate-500 text-xs sm:text-sm max-w-sm mx-auto leading-relaxed">Vui lòng chờ trong lúc chúng tôi đồng bộ trạng thái với cổng thanh toán.</p>
                     </div>
 
-                    <!-- Thông tin đơn hàng -->
-                    <div id="result-order-info" class="hidden mx-8 mb-5 py-4 px-5 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border border-gray-100 text-center">
-                        <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">
-                            <span class="lang-vi">Mã đơn hàng</span><span class="lang-en">Order ID</span>
-                        </p>
-                        <p id="result-order-id" class="text-base font-mono font-bold text-gray-800 tracking-wide">---</p>
+                    <!-- Order ID Banner -->
+                    <div id="result-order-info" class="hidden mx-6 sm:mx-8 mb-4 py-3.5 px-4 bg-slate-50 rounded-xl border border-slate-200/80 text-center flex items-center justify-between">
+                        <div class="text-left">
+                            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                                <span class="lang-vi">Mã đơn hàng</span><span class="lang-en">Order ID</span>
+                            </p>
+                            <p id="result-order-id" class="text-sm sm:text-base font-mono font-bold text-slate-800 tracking-wide">---</p>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-500 font-medium font-mono">Pay2Pay</span>
                     </div>
 
-                    <!-- Chi tiết giao dịch -->
-                    <div id="result-txn-details" class="hidden mx-8 mb-8">
-                        <div class="rounded-xl border border-gray-100 overflow-hidden">
-                            <div class="flex justify-between items-center px-5 py-3.5 bg-white">
-                                <span class="text-sm text-gray-400">
+                    <!-- Detailed Breakdown -->
+                    <div id="result-txn-details" class="hidden mx-6 sm:mx-8 mb-6">
+                        <div class="rounded-xl border border-slate-200/80 overflow-hidden divide-y divide-slate-100 bg-white shadow-2xs">
+                            <div class="flex justify-between items-center px-4 sm:px-5 py-3.5">
+                                <span class="text-xs sm:text-sm text-slate-500">
                                     <span class="lang-vi">Trạng thái đơn hàng</span><span class="lang-en">Order Status</span>
                                 </span>
                                 <span id="result-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full">---</span>
                             </div>
-                            <div class="border-t border-gray-50"></div>
-                            <div class="flex justify-between items-center px-5 py-3.5 bg-white">
-                                <span class="text-sm text-gray-400">
-                                    <span class="lang-vi">Mã giao dịch</span><span class="lang-en">Transaction ID</span>
+                            <div class="flex justify-between items-center px-4 sm:px-5 py-3.5">
+                                <span class="text-xs sm:text-sm text-slate-500">
+                                    <span class="lang-vi">Mã giao dịch (Txn ID)</span><span class="lang-en">Transaction ID</span>
                                 </span>
-                                <span id="result-txn-id" class="text-sm font-mono font-semibold text-gray-700">---</span>
+                                <span id="result-txn-id" class="text-xs sm:text-sm font-mono font-bold text-slate-700">---</span>
                             </div>
-                            <div class="border-t border-gray-50"></div>
-                            <div class="flex justify-between items-center px-5 py-3.5 bg-white">
-                                <span class="text-sm text-gray-400">
-                                    <span class="lang-vi">Số tiền</span><span class="lang-en">Amount</span>
+                            <div class="flex justify-between items-center px-4 sm:px-5 py-3.5">
+                                <span class="text-xs sm:text-sm text-slate-500">
+                                    <span class="lang-vi">Số tiền thanh toán</span><span class="lang-en">Amount</span>
                                 </span>
-                                <span id="result-amount" class="text-sm font-bold text-gray-800">---</span>
+                                <span id="result-amount" class="text-sm sm:text-base font-extrabold text-slate-900 font-mono">---</span>
                             </div>
-                            <div class="border-t border-gray-50"></div>
-                            <div class="flex justify-between items-center px-5 py-3.5 bg-white">
-                                <span class="text-sm text-gray-400">
-                                    <span class="lang-vi">Ngày giao dịch</span><span class="lang-en">Date</span>
+                            <div class="flex justify-between items-center px-4 sm:px-5 py-3.5">
+                                <span class="text-xs sm:text-sm text-slate-500">
+                                    <span class="lang-vi">Thời gian giao dịch</span><span class="lang-en">Date &amp; Time</span>
                                 </span>
-                                <span id="result-txn-date" class="text-sm font-medium text-gray-700">---</span>
+                                <span id="result-txn-date" class="text-xs sm:text-sm font-medium text-slate-600 font-mono">---</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Buttons -->
-                    <div class="px-8 pb-8 flex gap-3">
-                        <a href="#demo" class="flex-1 text-center py-2.5 bg-[#5B4AE4] text-white text-sm font-medium rounded-lg hover:bg-[#4A39D3] transition-colors">
+                    <!-- Action Buttons (Responsive Column on mobile, Row on tablet+) -->
+                    <div class="px-6 sm:px-8 pb-8 flex flex-col sm:flex-row gap-3">
+                        <a href="#demo" class="flex-1 text-center py-3 px-4 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 active:scale-[0.98] text-white text-sm font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                             <span class="lang-vi">Tiếp tục mua hàng</span><span class="lang-en">Continue Shopping</span>
                         </a>
-                        <a href="#home" class="flex-1 text-center py-2.5 text-gray-500 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                        <a href="#home" class="flex-1 text-center py-3 px-4 text-slate-600 text-sm font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                             <span class="lang-vi">Về trang chủ</span><span class="lang-en">Back to Home</span>
                         </a>
                     </div>
                 </div>
 
-                <!-- Powered by -->
-                <p class="text-center text-xs text-gray-400 mt-6">
-                    <span class="lang-vi">Được xử lý bởi Pay2Pay Payment Gateway</span>
-                    <span class="lang-en">Powered by Pay2Pay Payment Gateway</span>
+                <!-- Footer branding -->
+                <p class="text-center text-xs text-slate-400 mt-6 flex items-center justify-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span class="lang-vi">Được bảo mật &amp; xử lý bởi Pay2Pay Payment Gateway</span>
+                    <span class="lang-en">Secured &amp; processed by Pay2Pay Payment Gateway</span>
                 </p>
             </div>
         </div>

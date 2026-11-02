@@ -1,6 +1,6 @@
 /**
  * Cart Module
- * Quản lý giỏ hàng với localStorage
+ * Quản lý giỏ hàng với localStorage & trải nghiệm responsive theo chuẩn baoyu-design
  */
 window.CartModule = (function() {
     const STORAGE_KEY = 'paygate-cart';
@@ -29,7 +29,9 @@ window.CartModule = (function() {
         }
         save();
         render();
-        showToast('Đã thêm vào giỏ hàng!', 'success');
+        
+        const isEn = document.documentElement.getAttribute('lang') === 'en';
+        showToast(isEn ? 'Added to cart successfully!' : 'Đã thêm sản phẩm vào giỏ hàng!', 'success');
     }
 
     function removeItem(productId) {
@@ -81,6 +83,9 @@ window.CartModule = (function() {
         const cartItemCount = document.getElementById('cart-item-count');
         const emptyCart = document.getElementById('empty-cart');
         const cartWithItems = document.getElementById('cart-with-items');
+        const mobileCartBar = document.getElementById('mobile-cart-bar');
+        const mobileCartBarTotal = document.getElementById('mobile-cart-bar-total');
+        const mobileCartBarCount = document.getElementById('mobile-cart-bar-count');
 
         if (!cartItems) return;
 
@@ -89,7 +94,20 @@ window.CartModule = (function() {
         const count = getCount();
 
         if (cartItemCount) {
-            cartItemCount.textContent = `${count} món`;
+            cartItemCount.innerHTML = `<span class="lang-vi">${count} món</span><span class="lang-en">${count} items</span>`;
+        }
+
+        // Mobile floating checkout bar handling
+        if (mobileCartBar) {
+            if (count > 0 && window.location.hash.includes('demo')) {
+                mobileCartBar.classList.remove('hidden');
+                mobileCartBar.classList.add('flex');
+                if (mobileCartBarTotal) mobileCartBarTotal.textContent = formatCurrency(total);
+                if (mobileCartBarCount) mobileCartBarCount.textContent = count;
+            } else {
+                mobileCartBar.classList.add('hidden');
+                mobileCartBar.classList.remove('flex');
+            }
         }
 
         if (enrichedItems.length === 0) {
@@ -102,26 +120,38 @@ window.CartModule = (function() {
         cartWithItems.classList.remove('hidden');
 
         cartItems.innerHTML = enrichedItems.map(item => `
-            <div class="p-3 sm:p-4 flex items-center gap-3">
-                <div class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0 text-2xl border border-gray-100">
+            <div class="p-3.5 sm:p-4 flex items-center gap-3 hover:bg-slate-50/70 transition-colors">
+                <!-- Thumbnail -->
+                <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl border border-slate-200/80 shadow-2xs">
                     ${item.product.image}
                 </div>
+                
+                <!-- Details -->
                 <div class="flex-1 min-w-0">
-                    <h4 class="font-medium text-gray-900 text-sm truncate" title="${item.product.name}">${item.product.name}</h4>
-                    <p class="text-xs text-gray-500">${formatCurrency(item.product.price)}</p>
+                    <h4 class="font-semibold text-slate-900 text-xs sm:text-sm truncate">
+                        <span class="lang-vi">${item.product.nameVi || item.product.name}</span>
+                        <span class="lang-en">${item.product.nameEn || item.product.name}</span>
+                    </h4>
+                    <p class="text-[11px] text-slate-400 font-mono mt-0.5">${formatCurrency(item.product.price)}</p>
                 </div>
-                <div class="flex items-center space-x-1 flex-shrink-0">
+
+                <!-- Quantity Stepper -->
+                <div class="flex items-center space-x-1 flex-shrink-0 bg-slate-100/70 p-1 rounded-lg border border-slate-200/60">
                     <button onclick="CartModule.updateQuantity('${item.productId}', ${item.quantity - 1})" 
-                            class="qty-btn" title="Giảm">−</button>
-                    <span class="w-6 text-center text-xs font-semibold text-gray-800">${item.quantity}</span>
+                            class="qty-btn h-6 w-6 text-xs rounded border-none bg-white shadow-2xs hover:bg-slate-100" title="Giảm">−</button>
+                    <span class="w-5 text-center text-xs font-bold text-slate-800 font-mono">${item.quantity}</span>
                     <button onclick="CartModule.updateQuantity('${item.productId}', ${item.quantity + 1})" 
-                            class="qty-btn" title="Tăng">+</button>
+                            class="qty-btn h-6 w-6 text-xs rounded border-none bg-white shadow-2xs hover:bg-slate-100" title="Tăng">+</button>
                 </div>
-                <div class="text-right flex-shrink-0 min-w-[70px]">
-                    <p class="text-xs font-bold text-gray-900">${formatCurrency(item.product.price * item.quantity)}</p>
+
+                <!-- Line Total -->
+                <div class="text-right flex-shrink-0 min-w-[65px]">
+                    <p class="text-xs font-bold text-primary-600 font-mono">${formatCurrency(item.product.price * item.quantity)}</p>
                 </div>
+
+                <!-- Delete Action -->
                 <button onclick="CartModule.removeItem('${item.productId}')" 
-                        class="text-gray-400 hover:text-red-500 transition-colors p-1 flex-shrink-0" title="Xóa">
+                        class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg p-1.5 transition-colors flex-shrink-0" title="Xóa">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </button>
             </div>
@@ -143,6 +173,22 @@ window.CartModule = (function() {
         } else {
             badge.classList.add('hidden');
         }
+        
+        // Also sync mobile floating bar
+        const mobileCartBar = document.getElementById('mobile-cart-bar');
+        const mobileCartBarTotal = document.getElementById('mobile-cart-bar-total');
+        const mobileCartBarCount = document.getElementById('mobile-cart-bar-count');
+        if (mobileCartBar) {
+            if (count > 0 && window.location.hash.includes('demo')) {
+                mobileCartBar.classList.remove('hidden');
+                mobileCartBar.classList.add('flex');
+                if (mobileCartBarTotal) mobileCartBarTotal.textContent = formatCurrency(getTotal());
+                if (mobileCartBarCount) mobileCartBarCount.textContent = count;
+            } else {
+                mobileCartBar.classList.add('hidden');
+                mobileCartBar.classList.remove('flex');
+            }
+        }
     }
 
     function init() {
@@ -163,29 +209,3 @@ window.CartModule = (function() {
         init
     };
 })();
-
-/**
- * Toast Notification Helper
- */
-window.showToast = function(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-
-    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
-    const icon = type === 'success' 
-        ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
-        : type === 'error'
-        ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'
-        : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-
-    const toast = document.createElement('div');
-    toast.className = `toast-enter flex items-center space-x-3 ${bgColor} text-white px-5 py-3 rounded-xl shadow-lg`;
-    toast.innerHTML = `${icon}<span class="text-sm font-medium">${message}</span>`;
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.remove('toast-enter');
-        toast.classList.add('toast-exit');
-        setTimeout(() => toast.remove(), 300);
-    }, 2500);
-};
