@@ -201,89 +201,120 @@ export default async function handler(req, res) {
 
         const kingOrderId = cleanOrderId.toLowerCase().startsWith('king') ? cleanOrderId : `King${cleanOrderId}`;
 
-        // Cấu hình chuẩn theo bảng tài liệu V.3 (Number amount, lang VN)
-        const bodyV3Table = {
+        // 1. Schema tối giản chuẩn camelCase
+        const bodyMinimalCamel = {
             merchantId: MERCHANT_ID,
-            amount: Number(amount),
             orderId: kingOrderId,
+            amount: Number(amount),
             currency: "VND",
-            paymentMethod: "",
-            description: `Thanhtoandonhang${cleanOrderId}`,
-            lang: "VN",
-            returnUrl: targetReturnUrl,
-            paymentFee: 0
+            description: `Thanhtoan${cleanOrderId}`,
+            returnUrl: targetReturnUrl
         };
 
-        // Cấu hình chuẩn theo ví dụ curl trong tài liệu (String amount, lang vi)
-        const bodyV3Curl = {
-            merchantId: MERCHANT_ID,
-            amount: String(amount),
+        // 2. Schema tối giản chuẩn snake_case (theo đúng bảng tài liệu V.3)
+        const bodyMinimalSnake = {
+            merchant_id: MERCHANT_ID,
             orderId: kingOrderId,
+            amount: Number(amount),
             currency: "VND",
-            paymentMethod: "",
-            description: `Thanhtoandonhang${cleanOrderId}`,
+            description: `Thanhtoan${cleanOrderId}`,
+            return_url: targetReturnUrl
+        };
+
+        // 3. Schema camelCase kèm lang vi
+        const bodyCamelLangVi = {
+            merchantId: MERCHANT_ID,
+            orderId: kingOrderId,
+            amount: Number(amount),
+            currency: "VND",
+            description: `Thanhtoan${cleanOrderId}`,
             lang: "vi",
-            returnUrl: targetReturnUrl,
-            paymentFee: 0
+            returnUrl: targetReturnUrl
+        };
+
+        // 4. Schema camelCase kèm lang VN
+        const bodyCamelLangVN = {
+            merchantId: MERCHANT_ID,
+            orderId: kingOrderId,
+            amount: Number(amount),
+            currency: "VND",
+            description: `Thanhtoan${cleanOrderId}`,
+            lang: "VN",
+            returnUrl: targetReturnUrl
+        };
+
+        // 5. Schema snake_case đầy đủ theo bảng V.3
+        const bodySnakeFull = {
+            merchant_id: MERCHANT_ID,
+            orderId: kingOrderId,
+            amount: Number(amount),
+            currency: "VND",
+            method: "QRBANK",
+            description: `Thanhtoan${cleanOrderId}`,
+            lang: "VN",
+            return_url: targetReturnUrl
         };
 
         const signNoAuth = (tenant, b) => buildSignature(initReqId, initTime, tenant, b);
-        const signWithAuth = (tenant, b) => {
-            const payload = `${authHeader}${initReqId}${initTime}${tenant}${JSON.stringify(b)}`;
-            const sign = crypto.createSign('SHA256');
-            sign.update(payload);
-            sign.end();
-            return sign.sign(PRIVATE_KEY, 'base64');
-        };
 
         const priorityStrategies = [
-            // 1. PAYMENT-SITE với bodyV3Table (Number amount, lang VN) - chuẩn đặc tả bảng API
+            // 1. MERCHANT-WEB với bodyMinimalCamel
             {
-                name: 'PAYMENT-SITE auth-header lang-VN Number-amount',
-                tenant: 'PAYMENT-SITE',
-                body: bodyV3Table,
-                useAuth: true,
-                sig: signNoAuth('PAYMENT-SITE', bodyV3Table),
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 2. PAYMENT-SITE với bodyV3Curl (String amount, lang vi) - chuẩn ví dụ cURL
-            {
-                name: 'PAYMENT-SITE auth-header lang-vi String-amount',
-                tenant: 'PAYMENT-SITE',
-                body: bodyV3Curl,
-                useAuth: true,
-                sig: signNoAuth('PAYMENT-SITE', bodyV3Curl),
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 3. KING01 tenant với bodyV3Table
-            {
-                name: 'KING01 auth-header lang-VN Number-amount',
-                tenant: 'KING01',
-                body: bodyV3Table,
-                useAuth: true,
-                sig: signNoAuth('KING01', bodyV3Table),
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 4. MERCHANT-WEB tenant với bodyV3Table
-            {
-                name: 'MERCHANT-WEB auth-header lang-VN Number-amount',
+                name: 'MERCHANT-WEB minimal-camel Number-amount',
                 tenant: TENANT,
-                body: bodyV3Table,
+                body: bodyMinimalCamel,
                 useAuth: true,
-                sig: signNoAuth(TENANT, bodyV3Table),
+                sig: signNoAuth(TENANT, bodyMinimalCamel),
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 5. PAYMENT-SITE auth-in-sig với bodyV3Table
+            // 2. MERCHANT-WEB với bodyMinimalSnake
             {
-                name: 'PAYMENT-SITE auth-in-sig lang-VN',
-                tenant: 'PAYMENT-SITE',
-                body: bodyV3Table,
+                name: 'MERCHANT-WEB minimal-snake Number-amount',
+                tenant: TENANT,
+                body: bodyMinimalSnake,
                 useAuth: true,
-                sig: signWithAuth('PAYMENT-SITE', bodyV3Table),
+                sig: signNoAuth(TENANT, bodyMinimalSnake),
+                reqId: initReqId,
+                reqTime: initTime
+            },
+            // 3. PAYMENT-SITE với bodyMinimalCamel
+            {
+                name: 'PAYMENT-SITE minimal-camel Number-amount',
+                tenant: 'PAYMENT-SITE',
+                body: bodyMinimalCamel,
+                useAuth: true,
+                sig: signNoAuth('PAYMENT-SITE', bodyMinimalCamel),
+                reqId: initReqId,
+                reqTime: initTime
+            },
+            // 4. MERCHANT-WEB với bodyCamelLangVi
+            {
+                name: 'MERCHANT-WEB camel-lang-vi',
+                tenant: TENANT,
+                body: bodyCamelLangVi,
+                useAuth: true,
+                sig: signNoAuth(TENANT, bodyCamelLangVi),
+                reqId: initReqId,
+                reqTime: initTime
+            },
+            // 5. MERCHANT-WEB với bodySnakeFull
+            {
+                name: 'MERCHANT-WEB snake-full-table',
+                tenant: TENANT,
+                body: bodySnakeFull,
+                useAuth: true,
+                sig: signNoAuth(TENANT, bodySnakeFull),
+                reqId: initReqId,
+                reqTime: initTime
+            },
+            // 6. PAYMENT-SITE với bodyCamelLangVi
+            {
+                name: 'PAYMENT-SITE camel-lang-vi',
+                tenant: 'PAYMENT-SITE',
+                body: bodyCamelLangVi,
+                useAuth: true,
+                sig: signNoAuth('PAYMENT-SITE', bodyCamelLangVi),
                 reqId: initReqId,
                 reqTime: initTime
             }
