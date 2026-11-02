@@ -231,8 +231,64 @@ export default async function handler(req, res) {
                     paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
                     if (paymentUrl) break;
                 }
-            } catch (stratErr) {
-                attemptedStrategies.push({ name: strat.name, error: stratErr.message });
+        }
+
+        // BƯỚC 2.2: NẾU HOSTED PAYMENT PAGE CHƯA NHẬN, GỌI API INITIALIZE CỦA MERCHANT
+        if (!paymentUrl && accessToken) {
+            try {
+                const mchReqId = crypto.randomUUID();
+                const mchTime = getFormattedTime();
+                const mchTenant = 'KING01';
+                const mchBody = {
+                    currency: "VND",
+                    issuerId: "PAYGATE",
+                    command: "PAY",
+                    paymentMethod: "QRBANK",
+                    merchantData: {
+                        orderId: orderId,
+                        orderDesc: description || `Thanhtoanchodonhang${cleanOrderId}`,
+                        amount: Number(amount),
+                        returnUrl: targetReturnUrl
+                    }
+                };
+
+                const authHeader = `Bearer ${accessToken}`;
+                const mchPayloadToSign = `${authHeader}${mchReqId}${mchTime}${mchTenant}${JSON.stringify(mchBody)}`;
+                const signMch = crypto.createSign('SHA256');
+                signMch.update(mchPayloadToSign);
+                signMch.end();
+                const mchSig = signMch.sign(PRIVATE_KEY, 'base64');
+
+                const mchRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/mch/api/v1.0/initialize`, {
+                    method: 'POST',
+                    signal: AbortSignal.timeout(6000),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept': 'application/json, text/plain, */*',
+                        'Authorization': authHeader,
+                        'p-request-id': mchReqId,
+                        'p-request-time': mchTime,
+                        'p-tenant': mchTenant,
+                        'p-signature': mchSig
+                    },
+                    body: JSON.stringify(mchBody)
+                });
+
+                const mchText = await mchRes.text();
+                let mchData = {};
+                try { mchData = mchText ? JSON.parse(mchText) : {}; } catch(e) {}
+                attemptedStrategies.push({ name: 'MCH initialize QRBANK', status: mchRes.status, code: mchData.code });
+
+                if (mchRes.ok && mchData.code === 'SUCCESS') {
+                    const txnId = mchData.data?.txnId;
+                    if (txnId) {
+                        paymentUrl = `https://uat-checkout.pay2pay.vn/v2/${txnId}`;
+                    }
+                    initData = mchData;
+                }
+            } catch (mchErr) {
+                attemptedStrategies.push({ name: 'MCH initialize', error: mchErr.message });
             }
         }
 
