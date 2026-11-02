@@ -159,11 +159,36 @@ export default async function handler(req, res) {
             return sign.sign(PRIVATE_KEY, 'base64');
         };
 
-        let paymentUrl = null;
-        let initRes = null;
-        let initText = '';
-        let initData = {};
-        let attemptedStrategies = [];
+        // Diagnostic: Thử gọi API Inquiry (V.5) để kiểm tra định dạng chữ ký và headers
+        let inquiryTest = null;
+        try {
+            const inqReqId = crypto.randomUUID();
+            const inqTime = getFormattedTime();
+            const inqBody = { orderId: "King000000029" };
+            const inqPayload = `${inqReqId}${inqTime}${TENANT}${JSON.stringify(inqBody)}`;
+            const sign = crypto.createSign('SHA256');
+            sign.update(inqPayload);
+            sign.end();
+            const inqSig = sign.sign(PRIVATE_KEY, 'base64');
+
+            const inqRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/mch/api/v2.0/inquiry`, {
+                method: 'POST',
+                signal: AbortSignal.timeout(4000),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'p-tenant': TENANT,
+                    'p-request-id': inqReqId,
+                    'p-request-time': inqTime,
+                    'p-signature': inqSig,
+                    'Authorization': authHeader
+                },
+                body: JSON.stringify(inqBody)
+            });
+            const inqText = await inqRes.text();
+            inquiryTest = { status: inqRes.status, body: inqText };
+        } catch(inqErr) {
+            inquiryTest = { error: inqErr.message };
+        }
 
         // Helper tạo URL Redirect chính thức theo chuẩn Pay2Pay Collection Redirect Service v1.2
         const createOfficialPay2PayRedirectUrl = (ordId, amt, desc) => {
@@ -320,6 +345,12 @@ export default async function handler(req, res) {
             }
         ];
 
+        let paymentUrl = null;
+        let initRes = null;
+        let initText = '';
+        let initData = {};
+        let attemptedStrategies = [];
+
         for (const strat of priorityStrategies) {
             if (paymentUrl) break;
             try {
@@ -393,6 +424,7 @@ export default async function handler(req, res) {
             debug: {
                 loginStatus: lastLoginStatus,
                 loginSuccess: !!accessToken,
+                inquiryTest: inquiryTest,
                 attemptedStrategies: attemptedStrategies
             }
         });
