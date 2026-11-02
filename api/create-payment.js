@@ -293,7 +293,7 @@ export default async function handler(req, res) {
                     status: initRes.status, 
                     code: initData.code || null,
                     message: initData.message || null,
-                    preview: initText ? initText.substring(0, 150) : ''
+                    body: initText || '(empty response body)'
                 });
 
                 if (initRes.ok && initData.code === 'SUCCESS') {
