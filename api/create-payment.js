@@ -160,85 +160,6 @@ export default async function handler(req, res) {
             return sign.sign(PRIVATE_KEY, 'base64');
         };
 
-        const bodyVariations = [
-            {
-                tag: 'snake_case_VN',
-                body: {
-                    merchant_id: MERCHANT_ID,
-                    orderId: orderId,
-                    amount: Number(amount),
-                    currency: "VND",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "VN",
-                    return_url: targetReturnUrl
-                }
-            },
-            {
-                tag: 'snake_case_vi',
-                body: {
-                    merchant_id: MERCHANT_ID,
-                    orderId: orderId,
-                    amount: Number(amount),
-                    currency: "VND",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "vi",
-                    return_url: targetReturnUrl
-                }
-            },
-            {
-                tag: 'camelCase_VN',
-                body: {
-                    merchantId: MERCHANT_ID,
-                    orderId: orderId,
-                    amount: Number(amount),
-                    currency: "VND",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "VN",
-                    returnUrl: targetReturnUrl
-                }
-            },
-            {
-                tag: 'camelCase_vi',
-                body: {
-                    merchantId: MERCHANT_ID,
-                    orderId: orderId,
-                    amount: Number(amount),
-                    currency: "VND",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "vi",
-                    returnUrl: targetReturnUrl
-                }
-            },
-            {
-                tag: 'dual_keys_vi',
-                body: {
-                    merchantId: MERCHANT_ID,
-                    merchant_id: MERCHANT_ID,
-                    orderId: orderId,
-                    amount: Number(amount),
-                    currency: "VND",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "vi",
-                    returnUrl: targetReturnUrl,
-                    return_url: targetReturnUrl
-                }
-            },
-            {
-                tag: 'with_fee_string_amount',
-                body: {
-                    merchantId: MERCHANT_ID,
-                    amount: String(amount),
-                    orderId: orderId,
-                    currency: "VND",
-                    paymentMethod: "",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "vi",
-                    returnUrl: targetReturnUrl,
-                    paymentFee: 0
-                }
-            }
-        ];
-
         let paymentUrl = null;
         let initRes = null;
         let initText = '';
@@ -279,61 +200,97 @@ export default async function handler(req, res) {
             return `https://uat-checkout.pay2pay.vn/?${searchParams.toString()}`;
         };
 
-        // Thử nghiệm các tenant của Pay2Pay: PAYMENT-SITE, MERCHANT-WEB, KING01
-        const tenants = ['PAYMENT-SITE', TENANT, 'KING01'];
+        // Các cấu hình tiềm năng nhất của Pay2Pay init API
+        const priorityStrategies = [
+            {
+                name: 'PAYMENT-SITE no-auth with-fee',
+                tenant: 'PAYMENT-SITE',
+                body: {
+                    merchantId: MERCHANT_ID,
+                    amount: String(amount),
+                    orderId: orderId,
+                    currency: "VND",
+                    paymentMethod: "",
+                    description: `Thanhtoandonhang${cleanOrderId}`,
+                    lang: "vi",
+                    returnUrl: targetReturnUrl,
+                    paymentFee: 0
+                },
+                useAuth: false
+            },
+            {
+                name: 'KING01 with-auth snake_case',
+                tenant: 'KING01',
+                body: {
+                    merchant_id: MERCHANT_ID,
+                    orderId: orderId,
+                    amount: Number(amount),
+                    currency: "VND",
+                    description: `Thanhtoandonhang${cleanOrderId}`,
+                    lang: "vi",
+                    return_url: targetReturnUrl
+                },
+                useAuth: true
+            },
+            {
+                name: 'MERCHANT-WEB with-auth camelCase',
+                tenant: TENANT,
+                body: {
+                    merchantId: MERCHANT_ID,
+                    orderId: orderId,
+                    amount: Number(amount),
+                    currency: "VND",
+                    description: `Thanhtoandonhang${cleanOrderId}`,
+                    lang: "vi",
+                    returnUrl: targetReturnUrl
+                },
+                useAuth: true
+            }
+        ];
 
-        for (const tenantName of tenants) {
+        for (const strat of priorityStrategies) {
             if (paymentUrl) break;
-            for (const v of bodyVariations) {
-                if (paymentUrl) break;
-                // Thử cả 2 chế độ: có Authorization header và không có Authorization header
-                const authModes = tenantName === 'PAYMENT-SITE' ? [false, true] : [true, false];
-                for (const useAuth of authModes) {
-                    if (paymentUrl) break;
-                    const stratName = `${tenantName} (${useAuth ? 'with-auth' : 'no-auth'}) - ${v.tag}`;
-                    try {
-                        const sig = buildSignature(initReqId, initTime, tenantName, v.body);
-                        const reqHeaders = {
-                            'Content-Type': 'application/json',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                            'Accept': 'application/json, text/plain, */*',
-                            'p-tenant': tenantName,
-                            'p-request-id': initReqId,
-                            'p-request-time': initTime,
-                            'p-signature': sig
-                        };
-                        if (useAuth && accessToken) {
-                            reqHeaders['Authorization'] = authHeader;
-                        }
+            try {
+                const sig = buildSignature(initReqId, initTime, strat.tenant, strat.body);
+                const reqHeaders = {
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'application/json, text/plain, */*',
+                    'p-tenant': strat.tenant,
+                    'p-request-id': initReqId,
+                    'p-request-time': initTime,
+                    'p-signature': sig
+                };
+                if (strat.useAuth && accessToken) {
+                    reqHeaders['Authorization'] = authHeader;
+                }
 
-                        initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
-                            method: 'POST',
-                            signal: AbortSignal.timeout(4000),
-                            headers: reqHeaders,
-                            body: JSON.stringify(v.body)
-                        });
+                initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
+                    method: 'POST',
+                    signal: AbortSignal.timeout(1500),
+                    headers: reqHeaders,
+                    body: JSON.stringify(strat.body)
+                });
 
-                        initText = await initRes.text();
-                        try { initData = initText ? JSON.parse(initText) : {}; } catch(e) { initData = {}; }
+                initText = await initRes.text();
+                try { initData = initText ? JSON.parse(initText) : {}; } catch(e) { initData = {}; }
 
-                        attemptedStrategies.push({ 
-                            name: stratName, 
-                            status: initRes.status, 
-                            code: initData.code || null,
-                            message: initData.message || null
-                        });
+                attemptedStrategies.push({ 
+                    name: strat.name, 
+                    status: initRes.status, 
+                    code: initData.code || null,
+                    message: initData.message || null
+                });
 
-                        if (initRes.ok && (initData.code === 'SUCCESS' || initData.data?.paymentUrl || initData.data?.payment_url)) {
-                            paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
-                            if (paymentUrl) {
-                                console.log(`[Pay2Pay Init] Chiến lược ${stratName} thành công! URL:`, paymentUrl);
-                                break;
-                            }
-                        }
-                    } catch (stratErr) {
-                        attemptedStrategies.push({ name: stratName, error: stratErr.message });
+                if (initRes.ok && (initData.code === 'SUCCESS' || initData.data?.paymentUrl || initData.data?.payment_url)) {
+                    paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
+                    if (paymentUrl) {
+                        console.log(`[Pay2Pay Init] Chiến lược ${strat.name} thành công! URL:`, paymentUrl);
+                        break;
                     }
                 }
+            } catch (stratErr) {
+                attemptedStrategies.push({ name: strat.name, error: stratErr.message });
             }
         }
 
