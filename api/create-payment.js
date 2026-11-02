@@ -98,6 +98,9 @@ export default async function handler(req, res) {
         // BƯỚC 1: LẤY HOẶC TÁI SỬ DỤNG ACCESS TOKEN (API V.1 LOGIN)
         // ========================================================
         let accessToken = cachedAccessToken;
+        let lastLoginStatus = accessToken ? 200 : null;
+        let lastLoginText = accessToken ? 'Using cached token' : null;
+
         if (!accessToken || Date.now() > tokenExpiresAt) {
             try {
                 const loginReqId = crypto.randomUUID();
@@ -120,9 +123,10 @@ export default async function handler(req, res) {
                     body: JSON.stringify(loginBody)
                 });
 
-                const loginText = await loginRes.text();
+                lastLoginStatus = loginRes.status;
+                lastLoginText = await loginRes.text();
                 let loginData = {};
-                try { loginData = loginText ? JSON.parse(loginText) : {}; } catch(e) {}
+                try { loginData = lastLoginText ? JSON.parse(lastLoginText) : {}; } catch(e) {}
                 
                 if (loginRes.ok && loginData.code === 'SUCCESS' && loginData.data?.accessToken) {
                     cachedAccessToken = loginData.data.accessToken;
@@ -131,9 +135,10 @@ export default async function handler(req, res) {
                     accessToken = cachedAccessToken;
                     console.log('[Pay2Pay] Lấy Access Token thành công');
                 } else {
-                    console.warn('[Pay2Pay Login Thất bại]', loginRes.status, loginText);
+                    console.warn('[Pay2Pay Login Thất bại]', loginRes.status, lastLoginText);
                 }
             } catch (loginErr) {
+                lastLoginText = 'Login Err: ' + loginErr.message;
                 console.warn('[Pay2Pay Login Timeout/Error]:', loginErr.message);
             }
         }
@@ -208,7 +213,13 @@ export default async function handler(req, res) {
             success: false, 
             message: initData.message || 'Cổng thanh toán Pay2Pay từ chối khởi tạo giao dịch.',
             code: initData.code || `HTTP_${initRes.status}`,
-            data: initData
+            data: initData,
+            debug: {
+                loginStatus: lastLoginStatus,
+                loginText: lastLoginText,
+                initStatus: initRes.status,
+                initText: initText
+            }
         });
 
     } catch (error) {
