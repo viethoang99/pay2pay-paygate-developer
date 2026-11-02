@@ -224,6 +224,7 @@ export default async function handler(req, res) {
             return `https://uat-checkout.pay2pay.vn/?${searchParams.toString()}`;
         };
 
+        const signNoAuth = (tenant, b) => buildSignature(initReqId, initTime, tenant, b);
         const now = Date.now();
         const priorityStrategies = [
             // 1. Chuẩn mẫu PDF với returnUrl đã đăng ký trên Merchant Profile (webhook.site)
