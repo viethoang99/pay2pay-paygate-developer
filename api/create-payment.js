@@ -143,193 +143,26 @@ export default async function handler(req, res) {
         }
 
         // ========================================================
-        // BƯỚC 2: GỌI API INIT PAYMENT (API Hosted Checkout /paymentpage/api/v1.0/init)
+        // BƯỚC 2: GỌI API INIT PAYMENT THEO CHUẨN PAY2PAY REDIRECT 2.0
         // ========================================================
-        const initReqId = crypto.randomUUID();
-        const initTime = getFormattedTime();
-        const cleanOrderId = String(orderId).replace(/[^a-zA-Z0-9]/g, '');
         const authHeader = accessToken ? `Bearer ${accessToken}` : '';
+        const cleanOrderId = String(orderId).replace(/[^a-zA-Z0-9_-]/g, '');
+        const cleanDesc = (description || `Thanhtoandonhang${cleanOrderId}`)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .replace(/[^a-zA-Z0-9]/g, '')
+            .trim();
 
-        // Theo đặc tả Pay2Pay: Chỉ ký các tham số header bắt đầu bằng "p-" và body
-        const buildSignature = (rId, rTime, tenant, bodyObj) => {
-            const payload = `${rId}${rTime}${tenant}${JSON.stringify(bodyObj)}`;
+        // Hàm tạo chữ ký theo chuẩn Pay2Pay (hỗ trợ cả có và không có authHeader)
+        const buildSignature = (authH, rId, rTime, tenant, bodyObj) => {
+            const prefix = authH ? `${authH}` : '';
+            const payload = `${prefix}${rId}${rTime}${tenant}${JSON.stringify(bodyObj)}`;
             const sign = crypto.createSign('SHA256');
             sign.update(payload);
             sign.end();
             return sign.sign(PRIVATE_KEY, 'base64');
         };
-
-        // Diagnostic: Thử gọi API Inquiry (V.5) để kiểm tra định dạng chữ ký và headers
-        let inquiryTest = null;
-        try {
-            const inqReqId = crypto.randomUUID();
-            const inqTime = getFormattedTime();
-            const inqBody = { orderId: "King000000029" };
-            const inqPayload = `${inqReqId}${inqTime}${TENANT}${JSON.stringify(inqBody)}`;
-            const sign = crypto.createSign('SHA256');
-            sign.update(inqPayload);
-            sign.end();
-            const inqSig = sign.sign(PRIVATE_KEY, 'base64');
-
-            const inqRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/mch/api/v2.0/inquiry`, {
-                method: 'POST',
-                signal: AbortSignal.timeout(4000),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'p-tenant': TENANT,
-                    'p-request-id': inqReqId,
-                    'p-request-time': inqTime,
-                    'p-signature': inqSig,
-                    'Authorization': authHeader
-                },
-                body: JSON.stringify(inqBody)
-            });
-            const inqText = await inqRes.text();
-            inquiryTest = { status: inqRes.status, body: inqText };
-        } catch(inqErr) {
-            inquiryTest = { error: inqErr.message };
-        }
-
-        // Helper tạo URL Redirect chính thức theo chuẩn Pay2Pay Collection Redirect Service v1.2
-        const createOfficialPay2PayRedirectUrl = (ordId, amt, desc) => {
-            const timestamp = Math.floor(Date.now() / 1000).toString();
-            const cleanOrderId = String(ordId).replace(/[^a-zA-Z0-9_-]/g, '');
-            const cleanDesc = (desc || `Thanh toan don hang ${cleanOrderId}`)
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/đ/g, 'd').replace(/Đ/g, 'D')
-                .replace(/[^a-zA-Z0-9 ]/g, '')
-                .trim();
-
-            const params = {
-                content: cleanDesc,
-                currency: 'VND',
-                language: 'vi',
-                merchant_id: MERCHANT_ID,
-                order_code: cleanOrderId,
-                timestamp: timestamp,
-                total_amount: String(amt)
-            };
-
-            const sortedKeys = Object.keys(params).sort();
-            const concatString = sortedKeys.map(k => params[k]).join('') + (process.env.PAY2PAY_MERCHANT_KEY || 'aaa');
-            const signature = crypto.createHash('sha256').update(concatString).digest('base64');
-
-            const searchParams = new URLSearchParams();
-            for (const k of sortedKeys) {
-                searchParams.append(k, params[k]);
-            }
-            searchParams.append('signature', signature);
-
-            return `https://uat-checkout.pay2pay.vn/?${searchParams.toString()}`;
-        };
-
-        const signNoAuth = (tenant, b) => buildSignature(initReqId, initTime, tenant, b);
-        const now = Date.now();
-        const priorityStrategies = [
-            // 1. Chuẩn mẫu PDF với returnUrl đã đăng ký trên Merchant Profile (webhook.site)
-            {
-                name: 'registered_success_url_whitelisted',
-                tenant: TENANT,
-                body: {
-                    merchantId: MERCHANT_ID,
-                    amount: String(amount),
-                    orderId: `King${now}01`,
-                    currency: "VND",
-                    paymentMethod: "",
-                    description: "Thanhtoandonhang",
-                    lang: "vi",
-                    returnUrl: "https://webhook.site/b5df6252-86f4-43d8-88b9-d52514bbed2f",
-                    paymentFee: 0
-                },
-                useAuth: true,
-                sig: null,
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 2. Chuẩn mẫu PDF với returnUrl của app hiện tại (https://pay2pay-paygate-developer.vercel.app/)
-            {
-                name: 'app_return_url_pdf_schema',
-                tenant: TENANT,
-                body: {
-                    merchantId: MERCHANT_ID,
-                    amount: String(amount),
-                    orderId: `King${now}02`,
-                    currency: "VND",
-                    paymentMethod: "",
-                    description: "Thanhtoandonhang",
-                    lang: "vi",
-                    returnUrl: targetReturnUrl,
-                    paymentFee: 0
-                },
-                useAuth: true,
-                sig: null,
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 3. Chuẩn mẫu PDF nhưng không truyền returnUrl (theo Mục IV.3: redirect_url là Không bắt buộc)
-            {
-                name: 'no_return_url_optional',
-                tenant: TENANT,
-                body: {
-                    merchantId: MERCHANT_ID,
-                    amount: String(amount),
-                    orderId: `King${now}03`,
-                    currency: "VND",
-                    paymentMethod: "",
-                    description: "Thanhtoandonhang",
-                    lang: "vi",
-                    paymentFee: 0
-                },
-                useAuth: true,
-                sig: null,
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 4. Chuẩn bảng V.3 với snake_case và returnUrl webhook.site
-            {
-                name: 'snake_case_whitelisted_return_url',
-                tenant: TENANT,
-                body: {
-                    merchant_id: MERCHANT_ID,
-                    amount: Number(amount),
-                    orderId: `King${now}04`,
-                    currency: "VND",
-                    description: "Thanhtoandonhang",
-                    lang: "VN",
-                    return_url: "https://webhook.site/b5df6252-86f4-43d8-88b9-d52514bbed2f"
-                },
-                useAuth: true,
-                sig: null,
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 5. Chuẩn mẫu PDF với domain 24h.com.vn (từ file hướng dẫn Pay2Pay)
-            {
-                name: 'return_url_24h_com_vn',
-                tenant: TENANT,
-                body: {
-                    merchantId: MERCHANT_ID,
-                    amount: String(amount),
-                    orderId: `King${now}05`,
-                    currency: "VND",
-                    paymentMethod: "",
-                    description: "Thanhtoandonhang",
-                    lang: "vi",
-                    returnUrl: "https://24h.com.vn",
-                    paymentFee: 0
-                },
-                useAuth: true,
-                sig: null,
-                reqId: initReqId,
-                reqTime: initTime
-            }
-        ];
-
-        // Tạo chữ ký RSA tự động cho từng body tương ứng
-        priorityStrategies.forEach(s => {
-            s.sig = signNoAuth(s.tenant, s.body);
-        });
 
         let paymentUrl = null;
         let initRes = null;
@@ -337,25 +170,75 @@ export default async function handler(req, res) {
         let initData = {};
         let attemptedStrategies = [];
 
-        for (const strat of priorityStrategies) {
+        // --------------------------------------------------------
+        // PHẦN 2.1: GỌI API Hosted Checkout (/pgw-transaction-service/paymentpage/api/v1.0/init)
+        // Theo Mục V.3 của Tài liệu tích hợp dịch vụ thanh toán redirect (API) V2.0 – 2026
+        // --------------------------------------------------------
+        const paymentpageStrategies = [
+            // Chiến lược A: Theo ví dụ cURL trong tài liệu V.3 (p-tenant: PAYMENT-SITE)
+            {
+                name: 'paymentpage_payment_site',
+                endpoint: `${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`,
+                tenant: 'PAYMENT-SITE',
+                useAuth: false,
+                body: {
+                    merchantId: MERCHANT_ID,
+                    amount: String(amount),
+                    orderId: orderId,
+                    currency: "VND",
+                    paymentMethod: "",
+                    description: cleanDesc,
+                    lang: "vi",
+                    returnUrl: targetReturnUrl,
+                    paymentFee: 0
+                }
+            },
+            // Chiến lược B: Theo bảng thông số V.3 (p-tenant: MERCHANT-WEB, kèm Authorization và chữ ký auth)
+            {
+                name: 'paymentpage_merchant_web_auth',
+                endpoint: `${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`,
+                tenant: TENANT,
+                useAuth: true,
+                body: {
+                    merchantId: MERCHANT_ID,
+                    merchant_id: MERCHANT_ID,
+                    amount: String(amount),
+                    orderId: orderId,
+                    currency: "VND",
+                    paymentMethod: "",
+                    description: cleanDesc,
+                    lang: "vi",
+                    returnUrl: targetReturnUrl,
+                    return_url: targetReturnUrl,
+                    paymentFee: 0
+                }
+            }
+        ];
+
+        for (const strat of paymentpageStrategies) {
             if (paymentUrl) break;
             try {
+                const reqId = crypto.randomUUID();
+                const reqTime = getFormattedTime();
+                const authH = strat.useAuth ? authHeader : '';
+                const sig = buildSignature(authH, reqId, reqTime, strat.tenant, strat.body);
+
                 const reqHeaders = {
                     'Content-Type': 'application/json',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Accept': 'application/json, text/plain, */*',
                     'p-tenant': strat.tenant,
-                    'p-request-id': strat.reqId,
-                    'p-request-time': strat.reqTime,
-                    'p-signature': strat.sig
+                    'p-request-id': reqId,
+                    'p-request-time': reqTime,
+                    'p-signature': sig
                 };
                 if (strat.useAuth && accessToken) {
                     reqHeaders['Authorization'] = authHeader;
                 }
 
-                initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
+                initRes = await fetch(strat.endpoint, {
                     method: 'POST',
-                    signal: AbortSignal.timeout(3500),
+                    signal: AbortSignal.timeout(4000),
                     headers: reqHeaders,
                     body: JSON.stringify(strat.body)
                 });
@@ -363,35 +246,97 @@ export default async function handler(req, res) {
                 initText = await initRes.text();
                 try { initData = initText ? JSON.parse(initText) : {}; } catch(e) { initData = {}; }
 
-                const resHeaders = {};
-                for (const [k, v] of initRes.headers.entries()) {
-                    resHeaders[k] = v;
-                }
-
                 attemptedStrategies.push({ 
                     name: strat.name, 
                     status: initRes.status, 
                     code: initData.code || null,
-                    message: initData.message || null,
-                    raw: initText,
-                    resHeaders: resHeaders
+                    message: initData.message || null
                 });
 
                 if (initRes.ok && (initData.code === 'SUCCESS' || initData.data?.paymentUrl || initData.data?.payment_url)) {
                     paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
                     if (paymentUrl) {
-                        console.log(`[Pay2Pay Redirect 2.0 Init] Chiến lược ${strat.name} thành công! URL:`, paymentUrl);
+                        console.log(`[Pay2Pay PaymentPage Init] Thành công với ${strat.name}! URL:`, paymentUrl);
                         break;
                     }
                 }
-            } catch (stratErr) {
-                attemptedStrategies.push({ name: strat.name, error: stratErr.message });
+            } catch (err) {
+                attemptedStrategies.push({ name: strat.name, error: err.message });
             }
         }
 
-        // NẾU CỔNG PAY2PAY TRẢ VỀ LINK THANH TOÁN THÀNH CÔNG -> TRẢ VỀ CHO FRONTEND REDIRECT
+        // --------------------------------------------------------
+        // PHẦN 2.2: NẾU PAYMENTPAGE CHƯA TRẢ VỀ URL, GỌI API MCH INITIALIZE V1.0
+        // Khởi tạo giao dịch qua cổng Pay2Pay và nhận txnId -> URL Redirect 2.0 (uat-checkout.pay2pay.vn/v2/{txnId})
+        // --------------------------------------------------------
+        if (!paymentUrl && accessToken) {
+            const mchTenants = ['KING01', TENANT];
+            for (const tenantCandidate of mchTenants) {
+                if (paymentUrl) break;
+                try {
+                    const mchReqId = crypto.randomUUID();
+                    const mchTime = getFormattedTime();
+                    const mchBody = {
+                        currency: "VND",
+                        issuerId: "PAYGATE",
+                        command: "PAY",
+                        paymentMethod: "QRBANK",
+                        merchantData: {
+                            orderId: orderId,
+                            orderDesc: cleanDesc,
+                            amount: Number(amount),
+                            returnUrl: targetReturnUrl
+                        }
+                    };
+
+                    const sigMch = buildSignature(authHeader, mchReqId, mchTime, tenantCandidate, mchBody);
+
+                    const mchRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/mch/api/v1.0/initialize`, {
+                        method: 'POST',
+                        signal: AbortSignal.timeout(6000),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'Accept': 'application/json, text/plain, */*',
+                            'Authorization': authHeader,
+                            'p-request-id': mchReqId,
+                            'p-request-time': mchTime,
+                            'p-tenant': tenantCandidate,
+                            'p-signature': sigMch
+                        },
+                        body: JSON.stringify(mchBody)
+                    });
+
+                    const mchText = await mchRes.text();
+                    let mchData = {};
+                    try { mchData = mchText ? JSON.parse(mchText) : {}; } catch(e) {}
+
+                    attemptedStrategies.push({ 
+                        name: `MCH initialize (${tenantCandidate})`, 
+                        status: mchRes.status, 
+                        code: mchData.code || null,
+                        message: mchData.message || null
+                    });
+
+                    if (mchRes.ok && mchData.code === 'SUCCESS') {
+                        const txnId = mchData.data?.txnId;
+                        if (txnId) {
+                            paymentUrl = `https://uat-checkout.pay2pay.vn/v2/${txnId}`;
+                            console.log(`[Pay2Pay Redirect 2.0 via MCH] Thành công với txnId: ${txnId}, URL: ${paymentUrl}`);
+                            break;
+                        }
+                    }
+                } catch (mchErr) {
+                    attemptedStrategies.push({ name: `MCH initialize (${tenantCandidate})`, error: mchErr.message });
+                }
+            }
+        }
+
+        // ========================================================
+        // BƯỚC 3: TRẢ VỀ KẾT QUẢ CHO TRÌNH DUYỆT ĐIỀU HƯỚNG SANG PAY2PAY
+        // ========================================================
         if (paymentUrl) {
-            console.log('[Pay2Pay Init Thành công] paymentUrl:', paymentUrl);
+            console.log('[Pay2Pay Checkout 2.0 Thành công] Sẵn sàng điều hướng:', paymentUrl);
             return res.status(200).json({ 
                 success: true, 
                 paymentUrl: paymentUrl,
@@ -400,8 +345,8 @@ export default async function handler(req, res) {
             });
         }
 
-        // NẾU KHÔNG THÀNH CÔNG: Ghi log chi tiết và trả về phản hồi chính xác
-        console.error('[Pay2Pay Redirect 2.0 Init Thất bại]:', initRes ? initRes.status : 'None', initText);
+        // NẾU TẤT CẢ ENDPOINT KHÔNG THÀNH CÔNG: Ghi log chi tiết và trả về phản hồi
+        console.error('[Pay2Pay Redirect 2.0 Init Thất bại]:', attemptedStrategies);
         return res.status(200).json({ 
             success: false, 
             message: initData.message || 'Cổng thanh toán Pay2Pay Redirect 2.0 từ chối khởi tạo giao dịch.',
@@ -410,7 +355,6 @@ export default async function handler(req, res) {
             debug: {
                 loginStatus: lastLoginStatus,
                 loginSuccess: !!accessToken,
-                inquiryTest: inquiryTest,
                 attemptedStrategies: attemptedStrategies
             }
         });
