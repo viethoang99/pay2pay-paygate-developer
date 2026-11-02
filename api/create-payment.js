@@ -224,126 +224,111 @@ export default async function handler(req, res) {
             return `https://uat-checkout.pay2pay.vn/?${searchParams.toString()}`;
         };
 
-        const kingOrderId = cleanOrderId.toLowerCase().startsWith('king') ? cleanOrderId : `King${cleanOrderId}`;
-
-        // 1. Schema tối giản chuẩn camelCase
-        const bodyMinimalCamel = {
-            merchantId: MERCHANT_ID,
-            orderId: kingOrderId,
-            amount: Number(amount),
-            currency: "VND",
-            description: `Thanhtoan${cleanOrderId}`,
-            returnUrl: targetReturnUrl
-        };
-
-        // 2. Schema tối giản chuẩn snake_case (theo đúng bảng tài liệu V.3)
-        const bodyMinimalSnake = {
-            merchant_id: MERCHANT_ID,
-            orderId: kingOrderId,
-            amount: Number(amount),
-            currency: "VND",
-            description: `Thanhtoan${cleanOrderId}`,
-            return_url: targetReturnUrl
-        };
-
-        // 3. Schema camelCase kèm lang vi
-        const bodyCamelLangVi = {
-            merchantId: MERCHANT_ID,
-            orderId: kingOrderId,
-            amount: Number(amount),
-            currency: "VND",
-            description: `Thanhtoan${cleanOrderId}`,
-            lang: "vi",
-            returnUrl: targetReturnUrl
-        };
-
-        // 4. Schema camelCase kèm lang VN
-        const bodyCamelLangVN = {
-            merchantId: MERCHANT_ID,
-            orderId: kingOrderId,
-            amount: Number(amount),
-            currency: "VND",
-            description: `Thanhtoan${cleanOrderId}`,
-            lang: "VN",
-            returnUrl: targetReturnUrl
-        };
-
-        // 5. Schema snake_case đầy đủ theo bảng V.3
-        const bodySnakeFull = {
-            merchant_id: MERCHANT_ID,
-            orderId: kingOrderId,
-            amount: Number(amount),
-            currency: "VND",
-            method: "QRBANK",
-            description: `Thanhtoan${cleanOrderId}`,
-            lang: "VN",
-            return_url: targetReturnUrl
-        };
-
-        const signNoAuth = (tenant, b) => buildSignature(initReqId, initTime, tenant, b);
-
+        const now = Date.now();
         const priorityStrategies = [
-            // 1. MERCHANT-WEB với bodyMinimalCamel
+            // 1. Chuẩn mẫu PDF với returnUrl đã đăng ký trên Merchant Profile (webhook.site)
             {
-                name: 'MERCHANT-WEB minimal-camel Number-amount',
+                name: 'registered_success_url_whitelisted',
                 tenant: TENANT,
-                body: bodyMinimalCamel,
+                body: {
+                    merchantId: MERCHANT_ID,
+                    amount: String(amount),
+                    orderId: `King${now}01`,
+                    currency: "VND",
+                    paymentMethod: "",
+                    description: "Thanhtoandonhang",
+                    lang: "vi",
+                    returnUrl: "https://webhook.site/b5df6252-86f4-43d8-88b9-d52514bbed2f",
+                    paymentFee: 0
+                },
                 useAuth: true,
-                sig: signNoAuth(TENANT, bodyMinimalCamel),
+                sig: null,
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 2. MERCHANT-WEB với bodyMinimalSnake
+            // 2. Chuẩn mẫu PDF với returnUrl của app hiện tại (https://pay2pay-paygate-developer.vercel.app/)
             {
-                name: 'MERCHANT-WEB minimal-snake Number-amount',
+                name: 'app_return_url_pdf_schema',
                 tenant: TENANT,
-                body: bodyMinimalSnake,
+                body: {
+                    merchantId: MERCHANT_ID,
+                    amount: String(amount),
+                    orderId: `King${now}02`,
+                    currency: "VND",
+                    paymentMethod: "",
+                    description: "Thanhtoandonhang",
+                    lang: "vi",
+                    returnUrl: targetReturnUrl,
+                    paymentFee: 0
+                },
                 useAuth: true,
-                sig: signNoAuth(TENANT, bodyMinimalSnake),
+                sig: null,
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 3. PAYMENT-SITE với bodyMinimalCamel
+            // 3. Chuẩn mẫu PDF nhưng không truyền returnUrl (theo Mục IV.3: redirect_url là Không bắt buộc)
             {
-                name: 'PAYMENT-SITE minimal-camel Number-amount',
-                tenant: 'PAYMENT-SITE',
-                body: bodyMinimalCamel,
-                useAuth: true,
-                sig: signNoAuth('PAYMENT-SITE', bodyMinimalCamel),
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 4. MERCHANT-WEB với bodyCamelLangVi
-            {
-                name: 'MERCHANT-WEB camel-lang-vi',
+                name: 'no_return_url_optional',
                 tenant: TENANT,
-                body: bodyCamelLangVi,
+                body: {
+                    merchantId: MERCHANT_ID,
+                    amount: String(amount),
+                    orderId: `King${now}03`,
+                    currency: "VND",
+                    paymentMethod: "",
+                    description: "Thanhtoandonhang",
+                    lang: "vi",
+                    paymentFee: 0
+                },
                 useAuth: true,
-                sig: signNoAuth(TENANT, bodyCamelLangVi),
+                sig: null,
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 5. MERCHANT-WEB với bodySnakeFull
+            // 4. Chuẩn bảng V.3 với snake_case và returnUrl webhook.site
             {
-                name: 'MERCHANT-WEB snake-full-table',
+                name: 'snake_case_whitelisted_return_url',
                 tenant: TENANT,
-                body: bodySnakeFull,
+                body: {
+                    merchant_id: MERCHANT_ID,
+                    amount: Number(amount),
+                    orderId: `King${now}04`,
+                    currency: "VND",
+                    description: "Thanhtoandonhang",
+                    lang: "VN",
+                    return_url: "https://webhook.site/b5df6252-86f4-43d8-88b9-d52514bbed2f"
+                },
                 useAuth: true,
-                sig: signNoAuth(TENANT, bodySnakeFull),
+                sig: null,
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 6. PAYMENT-SITE với bodyCamelLangVi
+            // 5. Chuẩn mẫu PDF với domain 24h.com.vn (từ file hướng dẫn Pay2Pay)
             {
-                name: 'PAYMENT-SITE camel-lang-vi',
-                tenant: 'PAYMENT-SITE',
-                body: bodyCamelLangVi,
+                name: 'return_url_24h_com_vn',
+                tenant: TENANT,
+                body: {
+                    merchantId: MERCHANT_ID,
+                    amount: String(amount),
+                    orderId: `King${now}05`,
+                    currency: "VND",
+                    paymentMethod: "",
+                    description: "Thanhtoandonhang",
+                    lang: "vi",
+                    returnUrl: "https://24h.com.vn",
+                    paymentFee: 0
+                },
                 useAuth: true,
-                sig: signNoAuth('PAYMENT-SITE', bodyCamelLangVi),
+                sig: null,
                 reqId: initReqId,
                 reqTime: initTime
             }
         ];
+
+        // Tạo chữ ký RSA tự động cho từng body tương ứng
+        priorityStrategies.forEach(s => {
+            s.sig = signNoAuth(s.tenant, s.body);
+        });
 
         let paymentUrl = null;
         let initRes = null;
