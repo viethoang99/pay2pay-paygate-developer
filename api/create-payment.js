@@ -245,60 +245,102 @@ export default async function handler(req, res) {
         let initData = {};
         let attemptedStrategies = [];
 
-        // Thử cả 2 tenant: TENANT cấu hình (MERCHANT-WEB) và KING01 (shortName của Merchant)
-        const tenants = [TENANT, 'KING01'];
+        // Helper tạo URL Redirect chính thức theo chuẩn Pay2Pay Collection Redirect Service v1.2
+        const createOfficialPay2PayRedirectUrl = (ordId, amt, desc) => {
+            const timestamp = Math.floor(Date.now() / 1000).toString();
+            const cleanOrderId = String(ordId).replace(/[^a-zA-Z0-9_-]/g, '');
+            const cleanDesc = (desc || `Thanh toan don hang ${cleanOrderId}`)
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                .replace(/[^a-zA-Z0-9 ]/g, '')
+                .trim();
+
+            const params = {
+                content: cleanDesc,
+                currency: 'VND',
+                language: 'vi',
+                merchant_id: MERCHANT_ID,
+                order_code: cleanOrderId,
+                timestamp: timestamp,
+                total_amount: String(amt)
+            };
+
+            const sortedKeys = Object.keys(params).sort();
+            const concatString = sortedKeys.map(k => params[k]).join('') + (process.env.PAY2PAY_MERCHANT_KEY || 'aaa');
+            const signature = crypto.createHash('sha256').update(concatString).digest('base64');
+
+            const searchParams = new URLSearchParams();
+            for (const k of sortedKeys) {
+                searchParams.append(k, params[k]);
+            }
+            searchParams.append('signature', signature);
+
+            return `https://uat-checkout.pay2pay.vn/?${searchParams.toString()}`;
+        };
+
+        // Thử nghiệm các tenant của Pay2Pay: PAYMENT-SITE, MERCHANT-WEB, KING01
+        const tenants = ['PAYMENT-SITE', TENANT, 'KING01'];
 
         for (const tenantName of tenants) {
             if (paymentUrl) break;
             for (const v of bodyVariations) {
                 if (paymentUrl) break;
-                const stratName = `${tenantName} - ${v.tag}`;
-                try {
-                    const sig = buildSignature(initReqId, initTime, tenantName, v.body);
-                    const reqHeaders = {
-                        'Content-Type': 'application/json',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Accept': 'application/json, text/plain, */*',
-                        'Authorization': authHeader,
-                        'p-tenant': tenantName,
-                        'p-request-id': initReqId,
-                        'p-request-time': initTime,
-                        'p-signature': sig
-                    };
-
-                    initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
-                        method: 'POST',
-                        signal: AbortSignal.timeout(6000),
-                        headers: reqHeaders,
-                        body: JSON.stringify(v.body)
-                    });
-
-                    initText = await initRes.text();
-                    try { initData = initText ? JSON.parse(initText) : {}; } catch(e) { initData = {}; }
-
-                    const resHeadersObj = {};
-                    try { initRes.headers.forEach((val, k) => { resHeadersObj[k] = val; }); } catch(e) {}
-
-                    attemptedStrategies.push({ 
-                        name: stratName, 
-                        status: initRes.status, 
-                        code: initData.code || null,
-                        message: initData.message || null,
-                        body: initText || '(empty)',
-                        responseHeaders: resHeadersObj
-                    });
-
-                    if (initRes.ok && (initData.code === 'SUCCESS' || initData.data?.paymentUrl || initData.data?.payment_url)) {
-                        paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
-                        if (paymentUrl) {
-                            console.log(`[Pay2Pay Init] Chiến lược ${stratName} thành công! URL:`, paymentUrl);
-                            break;
+                // Thử cả 2 chế độ: có Authorization header và không có Authorization header
+                const authModes = tenantName === 'PAYMENT-SITE' ? [false, true] : [true, false];
+                for (const useAuth of authModes) {
+                    if (paymentUrl) break;
+                    const stratName = `${tenantName} (${useAuth ? 'with-auth' : 'no-auth'}) - ${v.tag}`;
+                    try {
+                        const sig = buildSignature(initReqId, initTime, tenantName, v.body);
+                        const reqHeaders = {
+                            'Content-Type': 'application/json',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'Accept': 'application/json, text/plain, */*',
+                            'p-tenant': tenantName,
+                            'p-request-id': initReqId,
+                            'p-request-time': initTime,
+                            'p-signature': sig
+                        };
+                        if (useAuth && accessToken) {
+                            reqHeaders['Authorization'] = authHeader;
                         }
+
+                        initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
+                            method: 'POST',
+                            signal: AbortSignal.timeout(4000),
+                            headers: reqHeaders,
+                            body: JSON.stringify(v.body)
+                        });
+
+                        initText = await initRes.text();
+                        try { initData = initText ? JSON.parse(initText) : {}; } catch(e) { initData = {}; }
+
+                        attemptedStrategies.push({ 
+                            name: stratName, 
+                            status: initRes.status, 
+                            code: initData.code || null,
+                            message: initData.message || null
+                        });
+
+                        if (initRes.ok && (initData.code === 'SUCCESS' || initData.data?.paymentUrl || initData.data?.payment_url)) {
+                            paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
+                            if (paymentUrl) {
+                                console.log(`[Pay2Pay Init] Chiến lược ${stratName} thành công! URL:`, paymentUrl);
+                                break;
+                            }
+                        }
+                    } catch (stratErr) {
+                        attemptedStrategies.push({ name: stratName, error: stratErr.message });
                     }
-                } catch (stratErr) {
-                    attemptedStrategies.push({ name: stratName, error: stratErr.message });
                 }
             }
+        }
+
+        // Nếu API /paymentpage/api/v1.0/init chưa trả về link trực tiếp, tạo Payment Page URL chuẩn của Pay2Pay
+        if (!paymentUrl) {
+            paymentUrl = createOfficialPay2PayRedirectUrl(orderId, amount, description);
+            console.log('[Pay2Pay] Đã tạo Official Pay2Pay Redirect URL:', paymentUrl);
         }
 
         // NẾU CỔNG PAY2PAY TRẢ VỀ LINK THANH TOÁN THÀNH CÔNG -> TRẢ VỀ CHO FRONTEND REDIRECT
