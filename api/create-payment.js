@@ -8,11 +8,10 @@ function getFormattedTime() {
 }
 
 function formatReturnUrl(url) {
-    const defaultUrl = 'https://viethoang99.github.io/pay2pay-paygate-developer/#payment-result';
-    if (!url) return defaultUrl;
-    const clean = url.split('?')[0];
-    if (clean.includes('#payment-result')) return clean;
-    return clean.split('#')[0] + '#payment-result';
+    // Luôn sử dụng URL chuẩn không chứa dấu thăng '#' vì các validator URL của backend (Spring Boot) sẽ báo lỗi 400
+    if (!url) return 'https://pay2pay-paygate-developer.vercel.app/';
+    const clean = url.split('?')[0].split('#')[0];
+    return clean || 'https://pay2pay-paygate-developer.vercel.app/';
 }
 
 let cachedAccessToken = null;
@@ -200,39 +199,32 @@ export default async function handler(req, res) {
             return `https://uat-checkout.pay2pay.vn/?${searchParams.toString()}`;
         };
 
-        // Danh sách các cấu hình Redirect 2.0 theo đặc tả tài liệu Pay2Pay V2.0
-        const bodyV2 = {
-            merchantId: MERCHANT_ID,
-            amount: String(amount),
-            orderId: cleanOrderId,
-            currency: "VND",
-            paymentMethod: "",
-            description: `Thanhtoandonhang${cleanOrderId}`,
-            lang: "vi",
-            returnUrl: targetReturnUrl,
-            paymentFee: 0
-        };
+        const kingOrderId = cleanOrderId.toLowerCase().startsWith('king') ? cleanOrderId : `King${cleanOrderId}`;
 
-        const bodyV2Number = {
+        // Cấu hình chuẩn theo bảng tài liệu V.3 (Number amount, lang VN)
+        const bodyV3Table = {
             merchantId: MERCHANT_ID,
             amount: Number(amount),
-            orderId: cleanOrderId,
+            orderId: kingOrderId,
             currency: "VND",
             paymentMethod: "",
-            description: `Thanhtoandonhang${cleanOrderId}`,
-            lang: "vi",
-            returnUrl: targetReturnUrl,
-            paymentFee: 0
-        };
-
-        const bodyV2Snake = {
-            merchant_id: MERCHANT_ID,
-            amount: Number(amount),
-            orderId: cleanOrderId,
-            currency: "VND",
             description: `Thanhtoandonhang${cleanOrderId}`,
             lang: "VN",
-            return_url: targetReturnUrl
+            returnUrl: targetReturnUrl,
+            paymentFee: 0
+        };
+
+        // Cấu hình chuẩn theo ví dụ curl trong tài liệu (String amount, lang vi)
+        const bodyV3Curl = {
+            merchantId: MERCHANT_ID,
+            amount: String(amount),
+            orderId: kingOrderId,
+            currency: "VND",
+            paymentMethod: "",
+            description: `Thanhtoandonhang${cleanOrderId}`,
+            lang: "vi",
+            returnUrl: targetReturnUrl,
+            paymentFee: 0
         };
 
         const signNoAuth = (tenant, b) => buildSignature(initReqId, initTime, tenant, b);
@@ -245,75 +237,55 @@ export default async function handler(req, res) {
         };
 
         const priorityStrategies = [
-            // 1. PAYMENT-SITE RSA signature no-auth (chuẩn theo ví dụ PDF V2.0 mục V.3)
+            // 1. PAYMENT-SITE với bodyV3Table (Number amount, lang VN) - chuẩn đặc tả bảng API
             {
-                name: 'PAYMENT-SITE RSA no-auth string-amount',
+                name: 'PAYMENT-SITE auth-header lang-VN Number-amount',
                 tenant: 'PAYMENT-SITE',
-                body: bodyV2,
-                useAuth: false,
-                sig: signNoAuth('PAYMENT-SITE', bodyV2),
+                body: bodyV3Table,
+                useAuth: true,
+                sig: signNoAuth('PAYMENT-SITE', bodyV3Table),
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 2. PAYMENT-SITE RSA signature with Bearer auth header
+            // 2. PAYMENT-SITE với bodyV3Curl (String amount, lang vi) - chuẩn ví dụ cURL
             {
-                name: 'PAYMENT-SITE RSA with-auth-header',
+                name: 'PAYMENT-SITE auth-header lang-vi String-amount',
                 tenant: 'PAYMENT-SITE',
-                body: bodyV2,
+                body: bodyV3Curl,
                 useAuth: true,
-                sig: signNoAuth('PAYMENT-SITE', bodyV2),
+                sig: signNoAuth('PAYMENT-SITE', bodyV3Curl),
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 3. PAYMENT-SITE RSA signature with Bearer IN payload
+            // 3. KING01 tenant với bodyV3Table
             {
-                name: 'PAYMENT-SITE RSA auth-in-sig',
-                tenant: 'PAYMENT-SITE',
-                body: bodyV2,
-                useAuth: true,
-                sig: signWithAuth('PAYMENT-SITE', bodyV2),
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 4. MERCHANT-WEB RSA signature with Bearer (theo bảng đặc tả V.3)
-            {
-                name: 'MERCHANT-WEB RSA with-auth string-amount',
-                tenant: TENANT,
-                body: bodyV2,
-                useAuth: true,
-                sig: signNoAuth(TENANT, bodyV2),
-                reqId: initReqId,
-                reqTime: initTime
-            },
-            // 5. KING01 (shortName) RSA signature with Bearer
-            {
-                name: 'KING01 RSA with-auth string-amount',
+                name: 'KING01 auth-header lang-VN Number-amount',
                 tenant: 'KING01',
-                body: bodyV2,
+                body: bodyV3Table,
                 useAuth: true,
-                sig: signNoAuth('KING01', bodyV2),
+                sig: signNoAuth('KING01', bodyV3Table),
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 6. MERCHANT-WEB snake_case Number amount (chuẩn bảng API)
+            // 4. MERCHANT-WEB tenant với bodyV3Table
             {
-                name: 'MERCHANT-WEB snake_case Number-amount',
+                name: 'MERCHANT-WEB auth-header lang-VN Number-amount',
                 tenant: TENANT,
-                body: bodyV2Snake,
+                body: bodyV3Table,
                 useAuth: true,
-                sig: signNoAuth(TENANT, bodyV2Snake),
+                sig: signNoAuth(TENANT, bodyV3Table),
                 reqId: initReqId,
                 reqTime: initTime
             },
-            // 7. PAYMENT-SITE UAT bypass (d5b0e905 / 123123)
+            // 5. PAYMENT-SITE auth-in-sig với bodyV3Table
             {
-                name: 'PAYMENT-SITE bypass 123123',
+                name: 'PAYMENT-SITE auth-in-sig lang-VN',
                 tenant: 'PAYMENT-SITE',
-                body: bodyV2,
-                useAuth: false,
-                sig: '123123',
-                reqId: 'd5b0e905-18a1-446c-bc41-c3667681594a',
-                reqTime: '123123'
+                body: bodyV3Table,
+                useAuth: true,
+                sig: signWithAuth('PAYMENT-SITE', bodyV3Table),
+                reqId: initReqId,
+                reqTime: initTime
             }
         ];
 
@@ -343,12 +315,18 @@ export default async function handler(req, res) {
                 initText = await initRes.text();
                 try { initData = initText ? JSON.parse(initText) : {}; } catch(e) { initData = {}; }
 
+                const resHeaders = {};
+                for (const [k, v] of initRes.headers.entries()) {
+                    resHeaders[k] = v;
+                }
+
                 attemptedStrategies.push({ 
                     name: strat.name, 
                     status: initRes.status, 
                     code: initData.code || null,
                     message: initData.message || null,
-                    raw: initText ? initText.substring(0, 200) : ''
+                    raw: initText,
+                    resHeaders: resHeaders
                 });
 
                 if (initRes.ok && (initData.code === 'SUCCESS' || initData.data?.paymentUrl || initData.data?.payment_url)) {
