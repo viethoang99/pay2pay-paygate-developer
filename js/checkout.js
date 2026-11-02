@@ -1,43 +1,85 @@
 /**
  * Checkout Module - Pay2Pay Gateway
- * Xử lý thanh toán: gọi API backend và trực tiếp chuyển hướng theo URL từ BE trả về
+ * Xử lý thanh toán: gọi API backend và trực tiếp chuyển hướng người dùng tới Cổng Pay2Pay
  */
 window.CheckoutModule = (function() {
 
     /**
-     * Gọi API nội bộ trên Vercel (Serverless Function) 
-     * để lấy payment link thật từ Backend
+     * Gọi API backend (Serverless Function) 
+     * để khởi tạo giao dịch và nhận link thanh toán từ Cổng Pay2Pay
      */
     async function callPaymentAPI(orderData) {
+        let apiUrl = AppConfig.API_URL || '/api/create-payment';
+        let response = null;
+
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), (AppConfig.API_TIMEOUT || 15000));
+        const timeoutId = setTimeout(() => controller.abort(), (AppConfig.API_TIMEOUT || 12000));
 
         try {
-            const response = await fetch(AppConfig.API_URL || '/api/create-payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(orderData),
-                signal: controller.signal
-            });
+            try {
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderData),
+                    signal: controller.signal
+                });
+            } catch (networkErr) {
+                // Nếu gọi URL cục bộ thất bại (ví dụ chạy static trên GitHub Pages hoặc localhost), thử Fallback URL
+                if (AppConfig.BACKEND_FALLBACK_URL && apiUrl !== AppConfig.BACKEND_FALLBACK_URL) {
+                    console.warn(`[Checkout] URL ${apiUrl} lỗi kết nối, chuyển sang fallback ${AppConfig.BACKEND_FALLBACK_URL}`);
+                    apiUrl = AppConfig.BACKEND_FALLBACK_URL;
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(orderData),
+                        signal: controller.signal
+                    });
+                } else {
+                    throw networkErr;
+                }
+            }
 
             clearTimeout(timeoutId);
 
+            // Nếu endpoint trả về 404 (chạy trên server tĩnh không có backend runtime), gọi fallback Vercel
+            if (response && response.status === 404 && AppConfig.BACKEND_FALLBACK_URL && apiUrl !== AppConfig.BACKEND_FALLBACK_URL) {
+                console.warn(`[Checkout] Endpoint 404, thử kết nối qua ${AppConfig.BACKEND_FALLBACK_URL}`);
+                apiUrl = AppConfig.BACKEND_FALLBACK_URL;
+                const fbController = new AbortController();
+                const fbTimeoutId = setTimeout(() => fbController.abort(), 10000);
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderData),
+                    signal: fbController.signal
+                });
+                clearTimeout(fbTimeoutId);
+            }
+
+            if (!response) {
+                throw new Error('Không nhận được phản hồi từ máy chủ thanh toán.');
+            }
+
             const contentType = response.headers.get('content-type') || '';
             if (!contentType.includes('application/json')) {
-                throw new Error(`API phản hồi không hợp lệ (HTTP ${response.status})`);
+                throw new Error(`Máy chủ phản hồi định dạng không hợp lệ (HTTP ${response.status})`);
             }
 
             const result = await response.json();
             
             if (!response.ok || !result.success) {
-                throw new Error(result.error || result.message || `Lỗi API (HTTP ${response.status})`);
+                throw new Error(result.message || result.error || `Lỗi cổng thanh toán (HTTP ${response.status})`);
             }
 
             const paymentLink = result.paymentUrl || (result.data && (result.data.paymentLink || result.data.paymentUrl));
             if (!paymentLink) {
-                throw new Error(result.message || 'Không nhận được liên kết thanh toán từ máy chủ');
+                throw new Error(result.message || 'Không nhận được liên kết thanh toán từ cổng Pay2Pay');
             }
 
             return {
@@ -63,7 +105,7 @@ window.CheckoutModule = (function() {
     }
 
     /**
-     * Mock API response cho demo khi bật MOCK_MODE
+     * Mock API response cho demo khi người dùng chủ động bật MOCK_MODE = true
      */
     async function mockPaymentAPI(orderData) {
         return new Promise((resolve) => {
@@ -72,7 +114,7 @@ window.CheckoutModule = (function() {
                 const separator = target.includes('?') ? '&' : '?';
                 resolve({
                     success: true,
-                    paymentLink: `${target}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}`,
+                    paymentLink: `${target}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}&txnId=TXN${Date.now()}&message=Giao+dich+thanh+cong`,
                     orderId: orderData.orderId,
                     message: 'Payment link created successfully'
                 });
@@ -81,12 +123,12 @@ window.CheckoutModule = (function() {
     }
 
     /**
-     * Xử lý thanh toán chính: gọi API BE và redirect
+     * Xử lý thanh toán chính: gửi dữ liệu lên BE và điều hướng trực tiếp sang Pay2Pay
      */
     async function processPayment() {
         const cartItems = CartModule.getItems();
         if (cartItems.length === 0) {
-            showToast('Giỏ hàng trống!', 'error');
+            showToast('Giỏ hàng trống! Vui lòng chọn sản phẩm trước.', 'error');
             return;
         }
 
@@ -103,14 +145,14 @@ window.CheckoutModule = (function() {
             cancelUrl: AppConfig.CANCEL_URL,
             merchantId: AppConfig.MERCHANT_ID,
             items: cartItems.map(item => ({
-                name: item.product.name,
+                name: item.product.nameVi || item.product.name,
                 quantity: item.quantity,
                 price: item.product.price,
                 totalPrice: item.product.price * item.quantity,
             })),
             customerInfo: {
                 name: 'Khách hàng Demo',
-                email: 'demo@example.com',
+                email: 'demo@pay2pay.vn',
             },
             metadata: {
                 source: 'pay2pay-developer-portal',
@@ -118,8 +160,7 @@ window.CheckoutModule = (function() {
             }
         };
 
-        // Lưu trước thông tin pending order vào sessionStorage để đảm bảo khi redirect về
-        // kể cả gateway trả về ít tham số thì trang kết quả vẫn hiển thị đầy đủ số tiền & đơn hàng
+        // Lưu thông tin pending order vào sessionStorage
         sessionStorage.setItem('pay2pay_pending_payment', JSON.stringify({
             orderId: orderData.orderId,
             amount: orderData.amount,
@@ -127,7 +168,7 @@ window.CheckoutModule = (function() {
             timestamp: Date.now()
         }));
 
-        // Show loading overlay
+        // Hiển thị loading overlay
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) {
             loadingOverlay.classList.remove('hidden');
@@ -138,38 +179,25 @@ window.CheckoutModule = (function() {
             let result;
 
             if (AppConfig.MOCK_MODE) {
-                // Chế độ demo - dùng mock API
+                // Chế độ giả lập (khi người dùng chủ động cấu hình MOCK_MODE = true)
                 result = await mockPaymentAPI(orderData);
             } else {
-                // Chế độ production - gọi API BE thật
-                try {
-                    result = await callPaymentAPI(orderData);
-                } catch (apiErr) {
-                    console.warn('API backend encountered error or timeout, activating fallback redirect:', apiErr);
-                    const target = getResultReturnUrl();
-                    const separator = target.includes('?') ? '&' : '?';
-                    result = {
-                        success: true,
-                        paymentLink: `${target}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderData.orderId}&amount=${orderData.amount}`,
-                        orderId: orderData.orderId,
-                        message: 'Tự động kích hoạt luồng kết quả thanh toán dự phòng'
-                    };
-                }
+                // Chế độ kết nối thật: Gọi Serverless Function backend
+                result = await callPaymentAPI(orderData);
             }
 
-            if (result.success && result.paymentLink) {
-                // Redirect trực tiếp theo link BE trả về
+            if (result && result.success && result.paymentLink) {
+                // Chuyển hướng trực tiếp theo link thanh toán Pay2Pay trả về
+                console.log('[Checkout] Điều hướng tới cổng Pay2Pay:', result.paymentLink);
                 window.location.href = result.paymentLink;
                 return;
             } else {
-                throw new Error(result.message || 'Không nhận được liên kết thanh toán từ máy chủ');
+                throw new Error((result && result.message) || 'Không nhận được liên kết thanh toán từ máy chủ');
             }
 
         } catch (error) {
-            console.error('Payment Error:', error);
-            // Xóa pending order nếu khởi tạo thất bại
-            sessionStorage.removeItem('pay2pay_pending_payment');
-            showToast(`Lỗi: ${error.message}`, 'error');
+            console.error('[Checkout Error]:', error);
+            showToast(`Lỗi kết nối Pay2Pay: ${error.message}`, 'error');
         } finally {
             if (loadingOverlay) {
                 loadingOverlay.classList.add('hidden');
@@ -179,6 +207,7 @@ window.CheckoutModule = (function() {
     }
 
     return {
-        processPayment
+        processPayment,
+        callPaymentAPI
     };
 })();

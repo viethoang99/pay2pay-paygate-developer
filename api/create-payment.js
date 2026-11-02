@@ -19,36 +19,48 @@ let cachedAccessToken = null;
 let tokenExpiresAt = 0;
 
 export default async function handler(req, res) {
-    // Chỉ chấp nhận method POST từ Frontend
+    // 1. CẤU HÌNH CORS CHO PHÉP FRONTEND (GITHUB PAGES, LOCALHOST, VERCEL) GỌI API AN TOÀN
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, p-request-id, p-tenant, p-signature');
+
+    // Xử lý Preflight Request (OPTIONS) từ trình duyệt
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    // Chỉ chấp nhận method POST cho tạo yêu cầu thanh toán
     if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
+        return res.status(405).json({ success: false, message: 'Method Not Allowed' });
     }
 
     try {
-        const { orderId, amount, description, returnUrl } = req.body;
-        const targetReturnUrl = formatReturnUrl(returnUrl);
+        const body = req.body || {};
+        const orderId = body.orderId || ('ORD-' + Date.now().toString(36).toUpperCase());
+        const amount = body.amount || '100000';
+        const description = body.description || `Thanh toán đơn hàng ${orderId}`;
+        const targetReturnUrl = formatReturnUrl(body.returnUrl);
 
-        // 1. LẤY THÔNG TIN TỪ KÉT SẮT CỦA VERCEL (Environment Variables)
+        // 2. LẤY CẤU HÌNH BIẾN MÔI TRƯỜNG TỪ VERCEL
         const PAY2PAY_API_URL = process.env.PAY2PAY_API_URL || 'https://uat-api.pay2pay.vn';
         const USERNAME = process.env.PAY2PAY_USERNAME;
         const PASSWORD = process.env.PAY2PAY_PASSWORD; 
         const TENANT = process.env.PAY2PAY_TENANT || 'MERCHANT-WEB';
         const MERCHANT_ID = process.env.PAY2PAY_MERCHANT_ID || 'PP0000141001';
-        
         let PRIVATE_KEY = process.env.PAY2PAY_PRIVATE_KEY;
         
-        // Nếu chưa cài đặt biến môi trường, trả về link callback mô phỏng thành công trên trang hiện tại
+        // Nếu chưa cài đặt biến môi trường trên Vercel
         if (!PRIVATE_KEY || !USERNAME || !PASSWORD) {
-            const sep = targetReturnUrl.includes('?') ? '&' : '?';
+            console.warn('[Pay2Pay] Thiếu biến môi trường PAY2PAY_PRIVATE_KEY, PAY2PAY_USERNAME hoặc PAY2PAY_PASSWORD');
             return res.status(200).json({ 
-                success: true, 
-                isMock: true,
-                paymentUrl: `${targetReturnUrl}${sep}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`,
-                message: "Đang chạy chế độ demo do chưa cấu hình Environment Variables trên Vercel."
+                success: false, 
+                message: "Hệ thống chưa cấu hình biến môi trường kết nối Pay2Pay trên máy chủ Vercel.",
+                code: "MISSING_ENV_CREDENTIALS"
             });
         }
         
-        // Sửa lỗi format Private Key (rất hay gặp khi paste vào Vercel bị mất xuống dòng)
+        // Chuẩn hóa định dạng RSA Private Key (xử lý newline khi paste trên Vercel)
         PRIVATE_KEY = PRIVATE_KEY.replace(/\\n/g, '\n');
         if (PRIVATE_KEY.split('\n').length <= 2) {
             let keyBody = PRIVATE_KEY.replace(/-----BEGIN (RSA )?PRIVATE KEY-----/, '')
@@ -64,7 +76,7 @@ export default async function handler(req, res) {
             PRIVATE_KEY = `${header}\n${formattedBody}${footer}`;
         }
 
-        // Hàm tạo chữ ký RSA-2048
+        // Hàm tạo chữ ký RSA-2048 SHA256
         const generateSignature = (rId, rTime, tenant, bodyObj) => {
             const payloadToSign = `${rId}${rTime}${tenant}${JSON.stringify(bodyObj)}`;
             const sign = crypto.createSign('SHA256');
@@ -73,7 +85,7 @@ export default async function handler(req, res) {
             return sign.sign(PRIVATE_KEY, 'base64');
         };
 
-        // Mã hóa Password theo chuẩn: base64(hex(sha256(username + password)))
+        // Mã hóa Password theo chuẩn Pay2Pay: base64(hex(sha256(username + rawPassword)))
         const rawPassword = PASSWORD;
         let hashedPassword = rawPassword;
         if (rawPassword.length !== 88) {
@@ -82,9 +94,9 @@ export default async function handler(req, res) {
             hashedPassword = Buffer.from(sha256Hex).toString('base64');
         }
 
-        // ==========================================
-        // BƯỚC 1: LẤY HOẶC TÁI SỬ DỤNG ACCESS TOKEN
-        // ==========================================
+        // ========================================================
+        // BƯỚC 1: LẤY HOẶC TÁI SỬ DỤNG ACCESS TOKEN (API V.1 LOGIN)
+        // ========================================================
         let accessToken = cachedAccessToken;
         if (!accessToken || Date.now() > tokenExpiresAt) {
             try {
@@ -95,7 +107,7 @@ export default async function handler(req, res) {
 
                 const loginRes = await fetch(`${PAY2PAY_API_URL}/auth-service/api/v1.0/user/login`, {
                     method: 'POST',
-                    signal: AbortSignal.timeout(3500),
+                    signal: AbortSignal.timeout(7000),
                     headers: {
                         'Content-Type': 'application/json',
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -112,99 +124,98 @@ export default async function handler(req, res) {
                 let loginData = {};
                 try { loginData = loginText ? JSON.parse(loginText) : {}; } catch(e) {}
                 
-                if (loginData.code === 'SUCCESS') {
-                    cachedAccessToken = loginData.data?.accessToken;
-                    tokenExpiresAt = Date.now() + 60 * 60 * 1000;
+                if (loginRes.ok && loginData.code === 'SUCCESS' && loginData.data?.accessToken) {
+                    cachedAccessToken = loginData.data.accessToken;
+                    const expireSeconds = parseInt(loginData.data.expireIn, 10) || 600;
+                    tokenExpiresAt = Date.now() + Math.max(60, expireSeconds - 60) * 1000;
                     accessToken = cachedAccessToken;
+                    console.log('[Pay2Pay] Lấy Access Token thành công');
+                } else {
+                    console.warn('[Pay2Pay Login Thất bại]', loginRes.status, loginText);
                 }
             } catch (loginErr) {
-                console.warn('Pay2Pay login attempt failed or timed out:', loginErr.message);
+                console.warn('[Pay2Pay Login Timeout/Error]:', loginErr.message);
             }
         }
 
-        // ==========================================
-        // BƯỚC 2: GỌI API INIT PAYMENT (Hosted Checkout)
-        // ==========================================
-        let targetUrl = null;
-        try {
-            const initReqId = "d5b0e905-18a1-446c-bc41-c3667681594a";
-            const initTime = "123123";
-            const initSig = "123123";
-            const INIT_TENANT = 'PAYMENT-SITE'; 
-            
-            const cleanOrderId = orderId.replace(/[^a-zA-Z0-9]/g, '');
-            const initBody = {
-                merchantId: MERCHANT_ID,
-                amount: String(amount),
-                orderId: orderId,
-                currency: "VND",
-                paymentMethod: "",
-                description: `Thanhtoanchodonhang${cleanOrderId}`,
-                lang: "vi",
-                returnUrl: targetReturnUrl,
-                return_url: targetReturnUrl,
-                redirect_url: targetReturnUrl,
-                paymentFee: 0
-            };
+        // ========================================================
+        // BƯỚC 2: GỌI API INIT PAYMENT (API V.3 Hosted Checkout)
+        // ========================================================
+        const initReqId = crypto.randomUUID();
+        const initTime = getFormattedTime();
+        const cleanOrderId = String(orderId).replace(/[^a-zA-Z0-9_-]/g, '');
 
-            const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
-                method: 'POST',
-                signal: AbortSignal.timeout(3500),
-                headers: {
-                    'p-request-id': initReqId,
-                    'p-request-time': initTime,
-                    'p-tenant': INIT_TENANT,
-                    'p-signature': initSig,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept': 'application/json, text/plain, */*'
-                },
-                body: JSON.stringify(initBody)
-            });
+        const initBody = {
+            merchantId: MERCHANT_ID,
+            merchant_id: MERCHANT_ID,
+            amount: String(amount),
+            orderId: orderId,
+            currency: "VND",
+            paymentMethod: "",
+            description: description || `Thanhtoanchodonhang${cleanOrderId}`,
+            lang: "vi",
+            returnUrl: targetReturnUrl,
+            return_url: targetReturnUrl,
+            paymentFee: 0
+        };
 
-            const initText = await initRes.text();
-            let initData = {};
-            try { initData = initText ? JSON.parse(initText) : {}; } catch(e) {}
-            
-            if (initRes.status === 200 && initData.code === 'SUCCESS') {
-                targetUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
-            } else {
-                console.warn('Pay2Pay init responded with non-success:', initData);
-            }
-        } catch (initErr) {
-            console.warn('Pay2Pay init attempt failed or timed out:', initErr.message);
+        const initSig = generateSignature(initReqId, initTime, TENANT, initBody);
+
+        const initHeaders = {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'p-request-id': initReqId,
+            'p-request-time': initTime,
+            'p-tenant': TENANT,
+            'p-signature': initSig
+        };
+
+        if (accessToken) {
+            initHeaders['Authorization'] = `Bearer ${accessToken}`;
         }
 
-        // Nếu Pay2Pay UAT trả về link thanh toán thật thành công, redirect sang Pay2Pay
-        if (targetUrl) {
+        const initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
+            method: 'POST',
+            signal: AbortSignal.timeout(7000),
+            headers: initHeaders,
+            body: JSON.stringify(initBody)
+        });
+
+        const initText = await initRes.text();
+        let initData = {};
+        try { initData = initText ? JSON.parse(initText) : {}; } catch(e) {}
+        
+        let paymentUrl = null;
+        if (initRes.ok && initData.code === 'SUCCESS') {
+            paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
+        }
+
+        // NẾU CỔNG PAY2PAY TRẢ VỀ LINK THANH TOÁN THÀNH CÔNG -> TRẢ VỀ CHO FRONTEND REDIRECT
+        if (paymentUrl) {
+            console.log('[Pay2Pay Init Thành công] paymentUrl:', paymentUrl);
             return res.status(200).json({ 
                 success: true, 
-                paymentUrl: targetUrl 
+                paymentUrl: paymentUrl,
+                orderId: orderId,
+                amount: amount
             });
         }
 
-        // TỰ ĐỘNG DỰ PHÒNG (FALLBACK):
-        // Khi cổng UAT Pay2Pay bị timeout / Cloudflare chặn / phản hồi chậm, tự động chuyển tiếp
-        // về returnUrl để người dùng luôn trải nghiệm được kết quả thanh toán & xuất hóa đơn hoàn chỉnh
-        const separator = targetReturnUrl.includes('?') ? '&' : '?';
+        // NẾU KHÔNG THÀNH CÔNG: Ghi log chi tiết và trả về phản hồi chính xác
+        console.error('[Pay2Pay Init Thất bại]:', initRes.status, initText);
         return res.status(200).json({ 
-            success: true, 
-            isFallback: true,
-            message: "Cổng UAT Pay2Pay phản hồi chậm, tự động hoàn tất luồng thanh toán demo.",
-            paymentUrl: `${targetReturnUrl}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`
+            success: false, 
+            message: initData.message || 'Cổng thanh toán Pay2Pay từ chối khởi tạo giao dịch.',
+            code: initData.code || `HTTP_${initRes.status}`,
+            data: initData
         });
 
     } catch (error) {
-        console.error('Lỗi tích hợp Pay2Pay API:', error);
-        const orderId = (req.body && req.body.orderId) || ('ORD-' + Date.now());
-        const amount = (req.body && req.body.amount) || '0';
-        const targetReturnUrl = formatReturnUrl(req.body && req.body.returnUrl);
-        const separator = targetReturnUrl.includes('?') ? '&' : '?';
-
-        return res.status(200).json({ 
-            success: true, 
-            isFallback: true,
-            paymentUrl: `${targetReturnUrl}${separator}code=SUCCESS&status=SUCCESS&orderId=${orderId}&amount=${amount}&message=Thanh+toan+thanh+cong`
+        console.error('[Lỗi Serverless Pay2Pay]:', error);
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Lỗi máy chủ kết nối API Pay2Pay: ' + (error.message || error.toString())
         });
     }
 }
