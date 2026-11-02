@@ -197,7 +197,7 @@ export default async function handler(req, res) {
                     'p-tenant': TENANT,
                     'p-request-id': initReqId,
                     'p-request-time': initTime,
-                    'p-signature': initSig
+                    'p-signature': generateSignature(initReqId, initTime, TENANT, initBody)
                 },
                 useAuth: true
             }
