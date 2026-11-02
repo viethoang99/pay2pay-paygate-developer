@@ -200,66 +200,134 @@ export default async function handler(req, res) {
             return `https://uat-checkout.pay2pay.vn/?${searchParams.toString()}`;
         };
 
-        // Các cấu hình tiềm năng nhất của Pay2Pay init API
+        // Danh sách các cấu hình Redirect 2.0 theo đặc tả tài liệu Pay2Pay V2.0
+        const bodyV2 = {
+            merchantId: MERCHANT_ID,
+            amount: String(amount),
+            orderId: cleanOrderId,
+            currency: "VND",
+            paymentMethod: "",
+            description: `Thanhtoandonhang${cleanOrderId}`,
+            lang: "vi",
+            returnUrl: targetReturnUrl,
+            paymentFee: 0
+        };
+
+        const bodyV2Number = {
+            merchantId: MERCHANT_ID,
+            amount: Number(amount),
+            orderId: cleanOrderId,
+            currency: "VND",
+            paymentMethod: "",
+            description: `Thanhtoandonhang${cleanOrderId}`,
+            lang: "vi",
+            returnUrl: targetReturnUrl,
+            paymentFee: 0
+        };
+
+        const bodyV2Snake = {
+            merchant_id: MERCHANT_ID,
+            amount: Number(amount),
+            orderId: cleanOrderId,
+            currency: "VND",
+            description: `Thanhtoandonhang${cleanOrderId}`,
+            lang: "VN",
+            return_url: targetReturnUrl
+        };
+
+        const signNoAuth = (tenant, b) => buildSignature(initReqId, initTime, tenant, b);
+        const signWithAuth = (tenant, b) => {
+            const payload = `${authHeader}${initReqId}${initTime}${tenant}${JSON.stringify(b)}`;
+            const sign = crypto.createSign('SHA256');
+            sign.update(payload);
+            sign.end();
+            return sign.sign(PRIVATE_KEY, 'base64');
+        };
+
         const priorityStrategies = [
+            // 1. PAYMENT-SITE RSA signature no-auth (chuẩn theo ví dụ PDF V2.0 mục V.3)
             {
-                name: 'PAYMENT-SITE no-auth with-fee',
+                name: 'PAYMENT-SITE RSA no-auth string-amount',
                 tenant: 'PAYMENT-SITE',
-                body: {
-                    merchantId: MERCHANT_ID,
-                    amount: String(amount),
-                    orderId: orderId,
-                    currency: "VND",
-                    paymentMethod: "",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "vi",
-                    returnUrl: targetReturnUrl,
-                    paymentFee: 0
-                },
-                useAuth: false
+                body: bodyV2,
+                useAuth: false,
+                sig: signNoAuth('PAYMENT-SITE', bodyV2),
+                reqId: initReqId,
+                reqTime: initTime
             },
+            // 2. PAYMENT-SITE RSA signature with Bearer auth header
             {
-                name: 'KING01 with-auth snake_case',
-                tenant: 'KING01',
-                body: {
-                    merchant_id: MERCHANT_ID,
-                    orderId: orderId,
-                    amount: Number(amount),
-                    currency: "VND",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "vi",
-                    return_url: targetReturnUrl
-                },
-                useAuth: true
+                name: 'PAYMENT-SITE RSA with-auth-header',
+                tenant: 'PAYMENT-SITE',
+                body: bodyV2,
+                useAuth: true,
+                sig: signNoAuth('PAYMENT-SITE', bodyV2),
+                reqId: initReqId,
+                reqTime: initTime
             },
+            // 3. PAYMENT-SITE RSA signature with Bearer IN payload
             {
-                name: 'MERCHANT-WEB with-auth camelCase',
+                name: 'PAYMENT-SITE RSA auth-in-sig',
+                tenant: 'PAYMENT-SITE',
+                body: bodyV2,
+                useAuth: true,
+                sig: signWithAuth('PAYMENT-SITE', bodyV2),
+                reqId: initReqId,
+                reqTime: initTime
+            },
+            // 4. MERCHANT-WEB RSA signature with Bearer (theo bảng đặc tả V.3)
+            {
+                name: 'MERCHANT-WEB RSA with-auth string-amount',
                 tenant: TENANT,
-                body: {
-                    merchantId: MERCHANT_ID,
-                    orderId: orderId,
-                    amount: Number(amount),
-                    currency: "VND",
-                    description: `Thanhtoandonhang${cleanOrderId}`,
-                    lang: "vi",
-                    returnUrl: targetReturnUrl
-                },
-                useAuth: true
+                body: bodyV2,
+                useAuth: true,
+                sig: signNoAuth(TENANT, bodyV2),
+                reqId: initReqId,
+                reqTime: initTime
+            },
+            // 5. KING01 (shortName) RSA signature with Bearer
+            {
+                name: 'KING01 RSA with-auth string-amount',
+                tenant: 'KING01',
+                body: bodyV2,
+                useAuth: true,
+                sig: signNoAuth('KING01', bodyV2),
+                reqId: initReqId,
+                reqTime: initTime
+            },
+            // 6. MERCHANT-WEB snake_case Number amount (chuẩn bảng API)
+            {
+                name: 'MERCHANT-WEB snake_case Number-amount',
+                tenant: TENANT,
+                body: bodyV2Snake,
+                useAuth: true,
+                sig: signNoAuth(TENANT, bodyV2Snake),
+                reqId: initReqId,
+                reqTime: initTime
+            },
+            // 7. PAYMENT-SITE UAT bypass (d5b0e905 / 123123)
+            {
+                name: 'PAYMENT-SITE bypass 123123',
+                tenant: 'PAYMENT-SITE',
+                body: bodyV2,
+                useAuth: false,
+                sig: '123123',
+                reqId: 'd5b0e905-18a1-446c-bc41-c3667681594a',
+                reqTime: '123123'
             }
         ];
 
         for (const strat of priorityStrategies) {
             if (paymentUrl) break;
             try {
-                const sig = buildSignature(initReqId, initTime, strat.tenant, strat.body);
                 const reqHeaders = {
                     'Content-Type': 'application/json',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Accept': 'application/json, text/plain, */*',
                     'p-tenant': strat.tenant,
-                    'p-request-id': initReqId,
-                    'p-request-time': initTime,
-                    'p-signature': sig
+                    'p-request-id': strat.reqId,
+                    'p-request-time': strat.reqTime,
+                    'p-signature': strat.sig
                 };
                 if (strat.useAuth && accessToken) {
                     reqHeaders['Authorization'] = authHeader;
@@ -267,7 +335,7 @@ export default async function handler(req, res) {
 
                 initRes = await fetch(`${PAY2PAY_API_URL}/pgw-transaction-service/paymentpage/api/v1.0/init`, {
                     method: 'POST',
-                    signal: AbortSignal.timeout(1500),
+                    signal: AbortSignal.timeout(3500),
                     headers: reqHeaders,
                     body: JSON.stringify(strat.body)
                 });
@@ -279,25 +347,20 @@ export default async function handler(req, res) {
                     name: strat.name, 
                     status: initRes.status, 
                     code: initData.code || null,
-                    message: initData.message || null
+                    message: initData.message || null,
+                    raw: initText ? initText.substring(0, 200) : ''
                 });
 
                 if (initRes.ok && (initData.code === 'SUCCESS' || initData.data?.paymentUrl || initData.data?.payment_url)) {
                     paymentUrl = initData.data?.paymentUrl || initData.data?.payment_url || initData.data?.redirectUrl;
                     if (paymentUrl) {
-                        console.log(`[Pay2Pay Init] Chiến lược ${strat.name} thành công! URL:`, paymentUrl);
+                        console.log(`[Pay2Pay Redirect 2.0 Init] Chiến lược ${strat.name} thành công! URL:`, paymentUrl);
                         break;
                     }
                 }
             } catch (stratErr) {
                 attemptedStrategies.push({ name: strat.name, error: stratErr.message });
             }
-        }
-
-        // Nếu API /paymentpage/api/v1.0/init chưa trả về link trực tiếp, tạo Payment Page URL chuẩn của Pay2Pay
-        if (!paymentUrl) {
-            paymentUrl = createOfficialPay2PayRedirectUrl(orderId, amount, description);
-            console.log('[Pay2Pay] Đã tạo Official Pay2Pay Redirect URL:', paymentUrl);
         }
 
         // NẾU CỔNG PAY2PAY TRẢ VỀ LINK THANH TOÁN THÀNH CÔNG -> TRẢ VỀ CHO FRONTEND REDIRECT
@@ -312,17 +375,15 @@ export default async function handler(req, res) {
         }
 
         // NẾU KHÔNG THÀNH CÔNG: Ghi log chi tiết và trả về phản hồi chính xác
-        console.error('[Pay2Pay Init Thất bại]:', initRes.status, initText);
+        console.error('[Pay2Pay Redirect 2.0 Init Thất bại]:', initRes ? initRes.status : 'None', initText);
         return res.status(200).json({ 
             success: false, 
-            message: initData.message || 'Cổng thanh toán Pay2Pay từ chối khởi tạo giao dịch.',
-            code: initData.code || `HTTP_${initRes.status}`,
+            message: initData.message || 'Cổng thanh toán Pay2Pay Redirect 2.0 từ chối khởi tạo giao dịch.',
+            code: initData.code || (initRes ? `HTTP_${initRes.status}` : 'INIT_FAILED'),
             data: initData,
             debug: {
                 loginStatus: lastLoginStatus,
-                loginText: lastLoginText,
-                initStatus: initRes ? initRes.status : null,
-                initText: initText,
+                loginSuccess: !!accessToken,
                 attemptedStrategies: attemptedStrategies
             }
         });
